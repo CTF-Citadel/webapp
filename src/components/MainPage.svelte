@@ -91,7 +91,7 @@
 
 <main>
   <nav>
-    <h1>Top Hack</h1>
+    <h1>TopHack</h1>
     <div class="nav-icons">
       <i class="fas fa-cog"></i>
       <i class="fas fa-sign-out-alt"></i>
