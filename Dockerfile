@@ -1,9 +1,9 @@
 # from alpine latest
-FROM frolvlad/alpine-glibc:latest
+FROM node:slim
 
 # Add npm
-RUN apk update && \
-    apk add npm curl
+RUN apt update && \
+    apt install curl unzip -y
 
 # Set working directory
 WORKDIR /app
