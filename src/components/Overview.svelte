@@ -106,6 +106,7 @@
     align-items: center;
     padding: 2rem;
     text-align: center;
+    position: relative;
     border-radius: 5px;
   }
 
@@ -120,12 +121,15 @@
     margin: 1rem 0 0;
     transition: all 0.3s ease-in-out;
     font-weight: bold;
-
+    position: relative; /* Add position relative to enable z-index */
+    z-index: 1; /* Set a higher z-index value to appear above the background image */
   }
 
   .box-text {
     color: #ffffff;
     margin-top: 1rem;
+    position: relative; /* Add position relative to enable z-index */
+    z-index: 1; /* Set a higher z-index value to appear above the background image */
   }
 
   .box-content {
@@ -134,6 +138,8 @@
     justify-content: center;
     margin-top: auto;
     margin-bottom: 2rem;
+    position: relative; /* Add position relative to enable z-index */
+    z-index: 1; /* Set a higher z-index value to appear above the background image */
   }
 
   .box button {
@@ -145,6 +151,32 @@
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     border-radius: 5px;
+    position: relative; /* Add position relative to enable z-index */
+    z-index: 1; /* Set a higher z-index value to appear above the background image */
+  }
+
+  .box-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.3s ease-in-out;
+    opacity: 0.2; /* Set the initial opacity */
+    filter: brightness(90%); /* Add initial darkness */
+    z-index: 0; /* Set a lower z-index value to appear behind the content */
+  }
+
+  .box:hover .box-background {
+    transform: scale(1.00);
+    opacity: 0.4; /* Change the opacity on hover */
+    filter: brightness(80%); /* Add more darkness on hover */
+  }
+
+  .box:hover h2 {
+    color: #fff; /* Change the color on hover */
   }
 
   .box button:hover {
@@ -204,9 +236,12 @@
     flex: 1; /* Distribute available space equally */
     margin: 0 0.5rem; /* Add margin between the buttons */
   }
-
-
 </style>
+
+
+
+
+
 <main>
   <nav>
     <h1>Top Hack</h1>
@@ -225,7 +260,17 @@
 
   <div class="box-container">
     <div class="box-wrapper">
+
       <div class="box">
+        <div class="box-background" style="background-image: url('../public/CTF Team/CTF Team.png')"></div>
+        <h2>CTF Teams</h2>
+        <p class="box-text">Overview your Team Points</p>
+        <div class="box-content">
+          <button>Proceed</button>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-background" style="background-image: url('../public/Challenges/challenges2.jpg')"></div>
         <h2>Challenges</h2>
         <p class="box-text">Here you Access the Challenges</p>
         <div class="box-content">
@@ -233,15 +278,9 @@
         </div>
       </div>
       <div class="box">
-        <h2>CTF - Team</h2>
-        <p class="box-text">Overview your Team Points</p>
-        <div class="box-content">
-          <button>Proceed</button>
-        </div>
-      </div>
-      <div class="box">
-        <h2>Self Score</h2>
-        <p class="box-text">View your own Points or redeem Items</p>
+        <div class="box-background" style="background-image: url('../public/Scoreboard/scoreboard.jpg')"></div>
+        <h2>Scoreboard</h2>
+        <p class="box-text">View Self/Team Rank</p>
         <div class="box-content">
           <button>Proceed</button>
         </div>
