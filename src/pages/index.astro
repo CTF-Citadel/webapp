@@ -1,8 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Overview from '../components/Overview.svelte';
+import Dashboard from '../components/Dashboard.svelte';
+import Header from '../components/Header.svelte';
 ---
 
 <Layout title="CTF-Citadel">
-    <Overview client:visible />
+    <Header client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
+        <Dashboard client:visible />
+    </div>
 </Layout>

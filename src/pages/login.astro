@@ -1,7 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import LoginPage from '../components/Login.svelte';
+import Header from '../components/Header.svelte';
 ---
 
 <Layout title="Login">
-    <p>Login</p>
+    <Header client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
+        <LoginPage client:visible />
+    </div>
 </Layout>
