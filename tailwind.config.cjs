@@ -1,8 +1,16 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	darkMode: 'class',
+	mode: "jit",
+	content: [
+        './src/**/*.{html,js,svelte,ts}',
+        './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}',
+        './node_modules/flowbite-svelte-icons/**/*.{html,js,svelte,ts}'
+    ],
 	theme: {
 		extend: {},
 	},
-	plugins: [],
+	plugins: [
+		('flowbite/plugin')
+	],
 }

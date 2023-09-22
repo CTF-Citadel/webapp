@@ -1,8 +1,3 @@
-<head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-</head>
-
 <script>
   let showPopup = false;
   let ipAddress = "";
@@ -25,7 +20,7 @@
   }
 
   function handlePopupSubmit() {
-    if (ipAddressValid = validateIpAddress(ipAddress)) {
+    if ((ipAddressValid = validateIpAddress(ipAddress))) {
       showResults = true;
       startMan(ipAddress); // Call startMan function with the input value
       hidePopupWindow();
@@ -35,6 +30,98 @@
     }
   }
 </script>
+
+<head>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+</head>
+
+<main>
+  <nav>
+    <h1>Top Hack</h1>
+    <div class="nav-icons">
+      <button on:click|stopPropagation={showPopupWindow}>
+        <i class="fas fa-cog" />
+      </button>
+      <button on:click|stopPropagation={showPopupWindow}>
+        <i class="fas fa-exclamation" />
+      </button>
+      <button on:click|stopPropagation={showPopupWindow}>
+        <i class="fas fa-sign-out-alt" />
+      </button>
+    </div>
+  </nav>
+
+  <div class="box-container">
+    <div class="box-wrapper">
+      <div class="box">
+        <div
+          class="box-background"
+          style="background-image: url('../public/CTF Team/CTF Team.png')"
+        />
+        <h2>CTF Teams</h2>
+        <p class="box-text">Overview your Team Points</p>
+        <div class="box-content">
+          <button>Proceed</button>
+        </div>
+      </div>
+      <div class="box">
+        <div
+          class="box-background"
+          style="background-image: url('../public/Challenges/challenges2.jpg')"
+        />
+        <h2>Challenges</h2>
+        <p class="box-text">Here you Access the Challenges</p>
+        <div class="box-content">
+          <button>Proceed</button>
+        </div>
+      </div>
+      <div class="box">
+        <div
+          class="box-background"
+          style="background-image: url('../public/Scoreboard/scoreboard.jpg')"
+        />
+        <h2>Scoreboard</h2>
+        <p class="box-text">View Self/Team Rank</p>
+        <div class="box-content">
+          <button>Proceed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-center items-center space-x-4">
+    {#if showPopup}
+      <div class="popup-container">
+        <div class="popup-content">
+          <input
+            type="text"
+            id="ipAddress"
+            class="popup-input"
+            placeholder="Are you Sure you want to Logout?"
+            bind:value={ipAddress}
+            on:input={handleInputChange}
+          />
+
+          <div class="popup-buttons">
+            <button class="submit-button" on:click={handlePopupSubmit}
+              >Submit</button
+            >
+            <button class="cancel-button" on:click={handlePopupCancel}
+              >Cancel</button
+            >
+          </div>
+        </div>
+      </div>
+    {/if}
+  </div>
+</main>
 
 <style>
   :global(body) {
@@ -84,7 +171,9 @@
     justify-content: center;
     align-items: center;
     margin-top: 0.5rem; /* Adjust the margin-top value to reduce the space */
-    height: calc(100vh - 6.5rem); /* Subtract the total height of the navigation bar from the viewport height */
+    height: calc(
+      100vh - 6.5rem
+    ); /* Subtract the total height of the navigation bar from the viewport height */
   }
 
   .box-wrapper {
@@ -170,7 +259,7 @@
   }
 
   .box:hover .box-background {
-    transform: scale(1.00);
+    transform: scale(1);
     opacity: 0.4; /* Change the opacity on hover */
     filter: brightness(80%); /* Add more darkness on hover */
   }
@@ -237,77 +326,3 @@
     margin: 0 0.5rem; /* Add margin between the buttons */
   }
 </style>
-
-
-
-
-
-<main>
-  <nav>
-    <h1>Top Hack</h1>
-    <div class="nav-icons">
-      <button on:click|stopPropagation={showPopupWindow}>
-        <i class="fas fa-cog"></i>
-      </button>
-      <button on:click|stopPropagation={showPopupWindow}>
-        <i class="fas fa-exclamation"></i>
-      </button>
-      <button on:click|stopPropagation={showPopupWindow}>
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-    </div>
-  </nav>
-
-  <div class="box-container">
-    <div class="box-wrapper">
-
-      <div class="box">
-        <div class="box-background" style="background-image: url('../public/CTF Team/CTF Team.png')"></div>
-        <h2>CTF Teams</h2>
-        <p class="box-text">Overview your Team Points</p>
-        <div class="box-content">
-          <button>Proceed</button>
-        </div>
-      </div>
-      <div class="box">
-        <div class="box-background" style="background-image: url('../public/Challenges/challenges2.jpg')"></div>
-        <h2>Challenges</h2>
-        <p class="box-text">Here you Access the Challenges</p>
-        <div class="box-content">
-          <button>Proceed</button>
-        </div>
-      </div>
-      <div class="box">
-        <div class="box-background" style="background-image: url('../public/Scoreboard/scoreboard.jpg')"></div>
-        <h2>Scoreboard</h2>
-        <p class="box-text">View Self/Team Rank</p>
-        <div class="box-content">
-          <button>Proceed</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="flex justify-center items-center space-x-4">
-
-    {#if showPopup}
-    <div class="popup-container">
-      <div class="popup-content">
-        <input
-          type="text"
-          id="ipAddress"
-          class="popup-input"
-          placeholder="Are you Sure you want to Logout?"
-          bind:value={ipAddress}
-          on:input={handleInputChange}
-        />
-
-        <div class="popup-buttons">
-          <button class="submit-button" on:click={handlePopupSubmit}>Submit</button>
-          <button class="cancel-button" on:click={handlePopupCancel}>Cancel</button>
-        </div>
-      </div>
-    </div>
-    {/if}
-  </div>
-</main>
