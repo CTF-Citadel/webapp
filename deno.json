@@ -1,0 +1,13 @@
+{
+    "imports": {
+        "tailwindcss": "npm:tailwindcss",
+        "cookie": "npm:cookie",
+        "kleur/colors": "npm:kleur/colors",
+        "string-width": "npm:string-width",
+        "mime": "npm:mime",
+        "clsx": "npm:clsx",
+        "html-escaper": "npm:html-escaper",
+        "path-to-regexp": "npm:path-to-regexp",
+        "@astrojs/internal-helpers/path": "npm:@astrojs/internal-helpers/path"
+    }
+}
