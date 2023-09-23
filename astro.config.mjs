@@ -11,7 +11,6 @@ export default defineConfig({
     }
   },
   integrations: [svelte(), tailwind()],
-  publicDir: "./src/public",
   output: "server",
   adapter: deno()
 });
