@@ -1,6 +1,9 @@
 <script lang="ts">
+    import { auth } from "../lib/lucia";
+    import { LuciaError } from "lucia";
     import { Card, Button, Label, Input } from 'flowbite-svelte';
 
+    let errorMessage: string | null = null;
     let showLogin = true;
     let inputs = {
         user: '',
@@ -19,6 +22,98 @@
             email: '',
             password: ''
         };
+    }
+
+    async function onLogin() {
+        const username = inputs.user;
+        const password = inputs.password;
+        // basic check
+        const validUsername =
+            typeof username === "string" &&
+            username.length >= 4 &&
+            username.length <= 31;
+        const validPassword =
+            typeof password === "string" &&
+            password.length >= 6 &&
+            password.length <= 255;
+        if (validUsername && validPassword) {
+            try {
+                // find user by key
+                // and validate password
+                const key = await auth.useKey(
+                    "username",
+                    username.toLowerCase(),
+                    password
+                );
+                const session = await auth.createSession({
+                    userId: key.userId,
+                    attributes: {}
+                });
+                auth.createSessionCookie(session);
+                window.location.replace("/");
+            } catch (e) {
+                if (
+                    e instanceof LuciaError &&
+                    (e.message === "AUTH_INVALID_KEY_ID" ||
+                        e.message === "AUTH_INVALID_PASSWORD")
+                ) {
+                    errorMessage = "Incorrect username or password";
+                } else {
+                    errorMessage = "An unknown error occurred";
+                }
+            }
+        } else {
+            errorMessage = "Invalid input";
+        }
+    }
+
+    async function onSignup() {
+        const email = inputs.email;
+        const username = inputs.user;
+        const password = inputs.password;
+        // basic check
+        const validUsername =
+            typeof username === "string" &&
+            username.length >= 4 &&
+            username.length <= 31;
+        const validPassword =
+            typeof password === "string" &&
+            password.length >= 6 &&
+            password.length <= 255;
+        if (validUsername && validPassword) {
+            try {
+                // @TODO:
+                // ADD EMAIL VERIFY
+                const user = await auth.createUser({
+                    key: {
+                        providerId: "username",
+                        providerUserId: username.toLowerCase(),
+                        password
+                    },
+                    attributes: {
+                        username
+                    }
+                });
+                const session = await auth.createSession({
+                    userId: user.userId,
+                    attributes: {}
+                });
+                auth.createSessionCookie(session);
+                window.location.replace("/");
+            } catch (e) {
+                if (
+                    e instanceof LuciaError &&
+                    (e.message === "AUTH_INVALID_KEY_ID" ||
+                        e.message === "AUTH_INVALID_PASSWORD")
+                ) {
+                    errorMessage = "Incorrect username or password";
+                } else {
+                    errorMessage = "An unknown error occurred";
+                }
+            }
+        } else {
+            errorMessage = "Invalid input";
+        }
     }
 </script>
 
@@ -49,6 +144,8 @@
                 />
             </Label>
             <div class="flex items-start">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <span
                     on:click={() => {}}
                     class="mr-auto text-sm text-primary-700 hover:underline dark:text-primary-500"
@@ -56,8 +153,10 @@
                     Forgot password?
                 </span>
             </div>
-            <Button type="submit" class="w-full">Login to your account</Button>
+            <Button on:click={onSignup} class="w-full">Login to your account</Button>
             <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 Not registered? <span
                     on:click={actionSwitch}
                     class="text-primary-700 hover:underline dark:text-primary-500"
@@ -79,8 +178,10 @@
                 <span>Your password</span>
                 <Input bind:value={inputs.password} type="password" name="password" placeholder="••••••••••" required />
             </Label>
-            <Button type="submit" class="w-full">Create your account</Button>
+            <Button on:click={onLogin} class="w-full">Create your account</Button>
             <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 Already registered? <span
                     on:click={actionSwitch}
                     class="text-primary-700 hover:underline dark:text-primary-500"

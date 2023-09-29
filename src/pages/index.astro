@@ -2,6 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Dashboard from '../components/Dashboard.svelte';
 import Header from '../components/Header.svelte';
+
+const session = await Astro.locals.auth.validate();
+if (!session) return Astro.redirect("/login", 302);
 ---
 
 <Layout title="CTF-Citadel">

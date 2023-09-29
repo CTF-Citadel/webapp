@@ -2,6 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import LoginPage from '../components/Login.svelte';
 import Header from '../components/Header.svelte';
+
+const session = await Astro.locals.auth.validate();
+if (!session) return Astro.redirect("/login", 302);
 ---
 
 <Layout title="Login">
