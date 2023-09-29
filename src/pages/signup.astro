@@ -1,46 +1,65 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import LoginPage from '../components/Login.svelte';
+import SignupPage from '../components/Signup.svelte';
 import Header from '../components/Header.svelte';
-import { isValidEmail } from "../lib/lucia-email";
+import { isValidEmail, sendVerificationLink } from "../lib/lucia-email";
 import { auth } from "../lib/lucia";
 
-let redirect = false;
 let emailInput = "";
 let errorMessage = "None";
 let respStatus = 200;
+let emailSent = false;
 
 if (Astro.request.method === "POST") {
 	const DATA = await Astro.request.json()
 	const email = DATA.email;
+    const username = DATA.username;
 	const password = DATA.password;
 	if (typeof email === "string") {
 		emailInput = email;
 	}
 	const validPassword =
 		typeof password === "string" &&
-		password.length >= 1 &&
+		password.length >= 6 &&
 		password.length <= 255;
 	if (isValidEmail(email) && validPassword) {
 		try {
-			const key = await auth.useKey("email", email.toLowerCase(), password);
+			const user = await auth.createUser({
+				key: {
+					providerId: "email",
+					providerUserId: email.toLowerCase(),
+					password
+				},
+				attributes: {
+                    username,
+                    user_role: String("participant"),
+                    user_team: String(""),
+					email,
+					email_verified: Number(false)
+				}
+			});
 			const session = await auth.createSession({
-				userId: key.userId,
+				userId: user.userId,
 				attributes: {}
 			});
 			Astro.locals.auth.setSession(session);
-            redirect = true;
-		} catch (e) {
+            sendVerificationLink(session.user.email, "123")
+            emailSent = true
+		} catch (e: any) {
             console.log(e);
-            errorMessage = "An error occurred";
+            if (e.code == "ER_DUP_ENTRY") {
+                errorMessage = "User already exists";
+            } else {
+                errorMessage = "An error occurred";
+            }
 		}
 	} else {
-		errorMessage = "Invalid input";
+		errorMessage = "Invalid Input";
 	}
     return new Response(JSON.stringify({
         status: respStatus,
         error: errorMessage,
-        needsRedirect: redirect
+        verifySent: emailSent
     }),{
         status: respStatus
     })
@@ -48,16 +67,14 @@ if (Astro.request.method === "POST") {
 
 const session = await Astro.locals.auth.validate();
 if (session) {
-	if (!session.user.emailVerified) {
-		return Astro.redirect("/verify/email");
-	}
-	return Astro.redirect("/");
+	await auth.invalidateSession(session.sessionId);
+    Astro.locals.auth.setSession(null);
 }
 ---
 
 <Layout title="Login">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
-        <LoginPage client:visible />
+        <SignupPage client:visible />
     </div>
 </Layout>

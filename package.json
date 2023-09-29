@@ -3,21 +3,19 @@
   "type": "module",
   "version": "1.0-alpha",
   "scripts": {
-    "astro": "astro",
     "dev": "astro dev",
+    "start": "astro dev",
     "build": "astro build",
-    "denodev": "deno run -A --unstable --node-modules-dir npm:astro dev",
-    "denobuild": "deno run -A --unstable --node-modules-dir npm:astro build",
-    "preview": "deno run -A --unstable ./dist/server/entry.mjs",
-    "denorun": "deno run -A --unstable --node-modules-dir npm:astro build && deno run -A --unstable ./dist/server/entry.mjs"
+    "preview": "astro preview",
+    "astro": "astro",
+    "npmrun": "astro build && HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/deno": "^5.0.0",
     "@astrojs/node": "^6.0.1",
     "@astrojs/svelte": "^4.0.2",
     "@astrojs/tailwind": "^5.0.0",
     "@lucia-auth/adapter-mysql": "^2.1.0",
-    "astro": "^3.1.2",
+    "astro": "^3.2.0",
     "js-cookie": "^3.0.5",
     "lucia": "^2.7.0",
     "mysql2": "^3.6.1",
