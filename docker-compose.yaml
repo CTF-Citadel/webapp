@@ -44,6 +44,8 @@ services:
       dockerfile: Dockerfile
     hostname: astro
     environment:
+      EMAIL_NAME: 'someone@example.com'
+      EMAIL_PASS: 'CHANGEME'
       DB_HOST: 'localhost'
       DB_NAME: 'lucia'
       DB_PASS: 'CHANGEME'

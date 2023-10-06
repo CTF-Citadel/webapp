@@ -3,12 +3,15 @@
 
     let verified = false;
     let authResponse: any;
-    let inputs = {
-        password: '',
-        password_repeat: ''
-    };
 
     async function onResend() {
+        const RESP = await fetch('/verify/email', {
+            method: 'POST',
+            body: JSON.stringify({})
+        });
+        if (RESP) {
+            authResponse = await RESP.json();
+        }
 
     }
 </script>

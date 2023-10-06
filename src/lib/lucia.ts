@@ -29,6 +29,7 @@ export const auth = lucia({
 			user_role: data.user_role,
 			user_team: data.user_team,
 			email: data.email,
+			emailVerifyId: data.email_verify_id,
 			emailVerified: Boolean(data.email_verified)
 		};
 	}

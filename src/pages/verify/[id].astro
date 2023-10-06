@@ -1,0 +1,26 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.svelte";
+import { auth } from "../../lib/lucia";
+
+const { id } = Astro.params;
+const session = await Astro.locals.auth.validate();
+console.log(session);
+console.log(id);
+if (!session) return Astro.redirect("/login");
+if (!session.user.emailVerified && session.user.emailVerifyId == id) {
+    await auth.updateUserAttributes(session.user.userId, {
+        email_verified: true,
+        email_verify_id: "Verified"
+    });
+    await auth.invalidateAllUserSessions(session.user.userId);
+    return Astro.redirect("/");
+} else {
+    console.log(session.user.emailVerifyId)
+    return Astro.redirect("/");
+}
+---
+
+<Layout title={id || ""}>
+    <Header client:visible />
+</Layout>

@@ -2,9 +2,51 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import EmailVerify from '../../components/EmailVerification.svelte'
+import { sendVerificationLink } from '../../lib/lucia-email';
+import { generateRandomString } from "lucia/utils";
+import { auth } from "../../lib/lucia";
+
+let emailSent = false;
+let errorMessage = "None";
+let respStatus = 200;
+
+const session = await Astro.locals.auth.validate();
+if (!session) return Astro.redirect("/login");
+if (session.user.emailVerified) {
+	return Astro.redirect("/");
+}
+
+if (Astro.request.method === "POST") {
+    const ORIGIN = Astro.url.origin;
+    try {
+        const EMAIL_ID = generateRandomString(64);
+        const session = await Astro.locals.auth.validate();
+        if (!session) return Astro.redirect("/login");
+        if (!session.user.emailVerified) {
+            await auth.updateUserAttributes(session.user.userId, {
+                email_verify_id: EMAIL_ID
+            });
+            sendVerificationLink(ORIGIN, session.user.email, EMAIL_ID);
+            emailSent = true;
+        }
+    } catch (e: any) {
+        console.log(e);
+        errorMessage = 'An error occurred';
+    }
+    return new Response(
+        JSON.stringify({
+            status: respStatus,
+            error: errorMessage,
+            verifySent: emailSent
+        }),
+        {
+            status: respStatus
+        }
+    );
+}
 ---
 
-<Layout title="Login">
+<Layout title="Email Verification">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
         <EmailVerify client:visible />

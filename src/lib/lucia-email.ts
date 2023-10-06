@@ -1,34 +1,42 @@
 import nodemailer from "nodemailer";
 
+// read from env
+const EMAIL_USER = process.env.EMAIL_NAME;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+
 let transporter = nodemailer.createTransport({
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/bin/sendmail'
+    service: 'gmail',
+    auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS
+    }
 });
 
-export const sendVerificationLink = async (email: string, token: string) => {
-	const url = `https://some.url/verify/${token}`;
-    // @TODO: Implement Actual SMTP MailSender
+export const sendVerificationLink = async (origin: string, email: string, token: string) => {
+	const URL = `${origin}/verify/${token}`;
     transporter.sendMail({
-        from: 'no-reply@example.com',
+        from: EMAIL_USER,
         to: email,
         subject: 'Email Verification',
-        text: `Your email verification link: ${url}`
+        text: `Your email verification link: ${URL}`
     }, (err: any) => {
-        console.log(err);
+        if (err != null) {
+            console.log(err);
+        }
     });
 };
 
-export const sendPasswordResetLink = async (email: string, token: string) => {
-	const url = `https://some.url/reset/${token}`;
-    // @TODO: Implement Actual SMTP MailSender
+export const sendPasswordResetLink = async (origin: string, email: string, token: string) => {
+	const URL = `${origin}/reset/${token}`;
     transporter.sendMail({
-        from: 'no-reply@example.com',
+        from: EMAIL_USER,
         to: email,
         subject: 'Password Reset',
-        text: `Your password reset link: ${url}`
+        text: `Your password reset link: ${URL}`
     }, (err: any) => {
-        console.log(err);
+        if (err != null) {
+            console.log(err);
+        }
     });
 };
 
