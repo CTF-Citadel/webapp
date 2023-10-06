@@ -4,6 +4,7 @@ import LoginPage from '../components/Login.svelte';
 import Header from '../components/Header.svelte';
 import { isValidEmail } from '../lib/lucia-email';
 import { auth } from '../lib/lucia';
+import { LuciaError } from "lucia";
 
 let redirect = false;
 let emailInput = '';
@@ -27,12 +28,20 @@ if (Astro.request.method === 'POST') {
             });
             Astro.locals.auth.setSession(session);
             redirect = true;
-        } catch (e) {
-            console.log(e);
-            errorMessage = 'An error occurred';
+        } catch (e: any) {
+			if (
+				e instanceof LuciaError &&
+				(e.message === "AUTH_INVALID_KEY_ID" ||
+					e.message === "AUTH_INVALID_PASSWORD")
+			) {
+				errorMessage = "Wrong Email or Password";
+			} else {
+				console.log(e);
+            	errorMessage = 'Unknown Error';
+			}
         }
     } else {
-        errorMessage = 'Invalid input';
+        errorMessage = 'Invalid Input';
     }
     return new Response(
         JSON.stringify({

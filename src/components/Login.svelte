@@ -47,17 +47,8 @@
                 required
             />
         </Label>
-        <div class="flex items-start">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <span
-                on:click={() => {
-                    window.location.replace('/reset/password');
-                }}
-                class="mr-auto text-sm text-primary-700 hover:underline dark:text-primary-500"
-            >
-                Forgot password?
-            </span>
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+            <a href="/reset/password" class="text-primary-700 hover:underline dark:text-primary-500">Forgot Password?</a>
         </div>
         {#if authResponse && authResponse.error != "None"}
             <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>

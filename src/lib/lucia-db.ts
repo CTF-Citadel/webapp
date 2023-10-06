@@ -41,10 +41,16 @@ export const generateEmailVerificationToken = async (userId: string) => {
     return token;
 };
 
-export const generatePasswordResetToken = async (userId: string) => {
+export const generatePasswordResetToken = async (email: string) => {
+    const targetUser = await PRISMA.user.findUnique({
+        where: {
+            email: email,
+        },
+    });
+    if (!targetUser) return false;
     const storedUserTokens = await PRISMA.password_reset_token.findMany({
         where: {
-            user_id: userId,
+            user_id: targetUser.id,
         },
     });
     if (storedUserTokens.length > 0) {
@@ -58,7 +64,7 @@ export const generatePasswordResetToken = async (userId: string) => {
         data: {
             id: token,
             expires: new Date().getTime() + EXPIRES_IN,
-            user_id: userId
+            user_id: targetUser.id
         },
     })
     return token;
@@ -90,7 +96,7 @@ export const validatePasswordResetToken = async (token: string) => {
         },
     });
     if (!storedToken) return false;
-    await PRISMA.email_verification_token.deleteMany({
+    await PRISMA.password_reset_token.deleteMany({
         where: {
             id: token,
         },
@@ -113,5 +119,15 @@ export const isValidPasswordResetToken = async (token: string) => {
     if (!isWithinExpiration(tokenExpires)) {
         return false;
     }
+    return true;
+};
+
+export const isRegisteredEmail = async (email: string) => {
+    const storedUser = await PRISMA.user.findUnique({
+        where: {
+            email: email,
+        },
+    });
+    if (!storedUser) return false;
     return true;
 };
