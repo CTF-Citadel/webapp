@@ -12,10 +12,10 @@
     "denorun": "deno run -A --unstable --node-modules-dir npm:astro build && deno run -A --unstable ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/deno": "^5.0.0",
-    "@astrojs/svelte": "^4.0.2",
-    "@astrojs/tailwind": "^5.0.0",
-    "astro": "^3.1.2",
+    "@astrojs/deno": "^4.3.0",
+    "@astrojs/svelte": "^3.1.1",
+    "@astrojs/tailwind": "^4.0.0",
+    "astro": "^2.10.15",
     "js-cookie": "^3.0.5",
     "svelte": "^4.2.1",
     "tailwindcss": "^3.3.3"

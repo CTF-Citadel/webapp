@@ -6,17 +6,23 @@
 <div class="flex flex-col sm:flex-row overflow-x-scroll">
     <Card size="sm" padding="sm" img="/img/teams.webp" class="m-4">
         <Button>
-            Teams <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+            <a href="/teams">    
+                Teams <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
+            </a>
         </Button>
     </Card>
     <Card size="sm" padding="sm" img="/img/challenges.webp" class="m-4">
         <Button>
-            Challenges <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+            <a href="/challenge">    
+                Challenges <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+            </a>
         </Button>
     </Card>
     <Card size="sm" padding="sm" img="/img/scoreboard.webp" class="m-4">
         <Button>
-            Scoreboard <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+            <a href="/scoreboard">    
+                Scoreboard <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+            </a>
         </Button>
     </Card>
 </div>

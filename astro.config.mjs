@@ -12,5 +12,8 @@ export default defineConfig({
   },
   integrations: [svelte(), tailwind()],
   output: "server",
-  adapter: deno()
+  adapter: deno(),
+  experimental: {
+    viewTransitions: true
+  }
 });

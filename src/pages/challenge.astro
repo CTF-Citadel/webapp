@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Dashboard from '../components/Dashboard.svelte';
+import Challenges from '../components/Challenges.svelte';
 import Header from '../components/Header.svelte';
 ---
 
 <Layout title="CTF-Citadel">
-    <Header currentPage={"Dashboard"} client:visible />
+    <Header currentPage={"Challenges"} client:visible/>
     <div transition:animate="fade" class="flex flex-1 justify-center items-center">
-        <Dashboard client:visible />
+        <Challenges client:visible />
     </div>
 </Layout>
