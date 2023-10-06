@@ -4,7 +4,6 @@ import Dashboard from '../components/Dashboard.svelte';
 import Header from '../components/Header.svelte';
 
 const session = await Astro.locals.auth.validate();
-console.log(session);
 if (!session) return Astro.redirect("/login");
 if (!session.user.emailVerified) {
 	return Astro.redirect("/verify/email");

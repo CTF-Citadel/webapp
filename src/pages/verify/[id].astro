@@ -5,8 +5,6 @@ import { auth } from "../../lib/lucia";
 
 const { id } = Astro.params;
 const session = await Astro.locals.auth.validate();
-console.log(session);
-console.log(id);
 if (!session) return Astro.redirect("/login");
 if (!session.user.emailVerified && session.user.emailVerifyId == id) {
     await auth.updateUserAttributes(session.user.userId, {
@@ -15,10 +13,7 @@ if (!session.user.emailVerified && session.user.emailVerifyId == id) {
     });
     await auth.invalidateAllUserSessions(session.user.userId);
     return Astro.redirect("/");
-} else {
-    console.log(session.user.emailVerifyId)
-    return Astro.redirect("/");
-}
+} else return Astro.redirect("/");
 ---
 
 <Layout title={id || ""}>
