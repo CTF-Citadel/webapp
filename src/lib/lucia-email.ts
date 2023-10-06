@@ -14,7 +14,7 @@ let transporter = nodemailer.createTransport({
 });
 
 export const sendVerificationLink = async (origin: string, email: string, token: string) => {
-	const URL = `${origin}/verify/${token}`;
+    const URL = `${origin}/verify/${token}`;
     transporter.sendMail({
         from: EMAIL_USER,
         to: email,
@@ -28,7 +28,7 @@ export const sendVerificationLink = async (origin: string, email: string, token:
 };
 
 export const sendPasswordResetLink = async (origin: string, email: string, token: string) => {
-	const URL = `${origin}/reset/${token}`;
+    const URL = `${origin}/reset/${token}`;
     transporter.sendMail({
         from: EMAIL_USER,
         to: email,
@@ -42,9 +42,9 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
 };
 
 export const isValidEmail = (maybeEmail: unknown): maybeEmail is string => {
-	if (typeof maybeEmail !== "string") return false;
-	if (maybeEmail.length > 255) return false;
+    if (typeof maybeEmail !== "string") return false;
+    if (maybeEmail.length > 255) return false;
     // @TODO: Regex to allow only specific subdomains
-	const emailRegexp = /^.+@.+$/;
-	return emailRegexp.test(maybeEmail);
+    const emailRegexp = /^.+@.+$/;
+    return emailRegexp.test(maybeEmail);
 };

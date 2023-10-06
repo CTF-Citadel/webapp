@@ -1,21 +1,31 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import Header from "../../components/Header.svelte";
-import { auth } from "../../lib/lucia";
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.svelte';
+import { validateEmailVerificationToken } from "../../lib/lucia-db";
+import { auth } from '../../lib/lucia';
 
 const { id } = Astro.params;
-const session = await Astro.locals.auth.validate();
-if (!session) return Astro.redirect("/login");
-if (!session.user.emailVerified && session.user.emailVerifyId == id) {
-    await auth.updateUserAttributes(session.user.userId, {
-        email_verified: true,
-        email_verify_id: "Verified"
-    });
-    await auth.invalidateAllUserSessions(session.user.userId);
-    return Astro.redirect("/");
-} else return Astro.redirect("/");
+
+try {
+	const ID = await validateEmailVerificationToken(id || "");
+	if (!ID) {
+		return new Response("Invalid or Expired Token!", {
+			status: 401
+		});
+	}
+	const USER = await auth.getUser(ID);
+	await auth.invalidateAllUserSessions(USER.userId);
+	await auth.updateUserAttributes(USER.userId, {
+		email_verified: true
+	});
+	return Astro.redirect('/login')
+} catch {
+	return new Response("Invalid Email Verification Link!", {
+		status: 400
+	});
+}
 ---
 
-<Layout title={id || ""}>
+<Layout title={id || ''}>
     <Header client:visible />
 </Layout>

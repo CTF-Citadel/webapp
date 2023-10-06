@@ -1,7 +1,6 @@
 {
   "name": "webapp",
   "type": "module",
-  "version": "1.0-alpha",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -15,12 +14,12 @@
     "@astrojs/node": "^6.0.3",
     "@astrojs/svelte": "^4.0.3",
     "@astrojs/tailwind": "^5.0.1",
-    "@lucia-auth/adapter-mysql": "^2.1.0",
+    "@lucia-auth/adapter-prisma": "^3.0.2",
     "astro": "^3.2.3",
     "js-cookie": "^3.0.5",
     "lucia": "^2.7.1",
-    "mysql2": "^3.6.1",
     "nodemailer": "^6.9.5",
+    "prisma": "^5.4.1",
     "svelte": "^4.2.1",
     "tailwindcss": "^3.3.3"
   },
