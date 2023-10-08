@@ -21,8 +21,11 @@ COPY src ./src
 # Copy public folder
 COPY public ./public
 
+# initialize prisma
+RUN npx prisma generate
+
 # and build
 RUN npm run build
 
 # Start Astro
-CMD ["HOST=0.0.0.0", "PORT=8085", "node", "./dist/server/entry.mjs"]
+CMD ["npm", "run", "dist"]
