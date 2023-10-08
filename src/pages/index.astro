@@ -2,10 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import Dashboard from '../components/Dashboard.svelte';
 import Header from '../components/Header.svelte';
+
+const session = await Astro.locals.auth.validate();
+if (!session) return Astro.redirect('/login');
+if (!session.user.emailVerified) {
+    return Astro.redirect('/verify/email');
+}
 ---
 
 <Layout title="CTF-Citadel">
-    <Header client:visible />
+    <Header username={session.user.username} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center">
         <Dashboard client:visible />
     </div>

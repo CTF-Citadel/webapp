@@ -1,27 +1,30 @@
 {
   "name": "webapp",
   "type": "module",
-  "version": "1.0-alpha",
   "scripts": {
-    "astro": "astro",
     "dev": "astro dev",
+    "start": "astro dev",
     "build": "astro build",
-    "denodev": "deno run -A --unstable --node-modules-dir npm:astro dev",
-    "denobuild": "deno run -A --unstable --node-modules-dir npm:astro build",
-    "preview": "deno run -A --unstable ./dist/server/entry.mjs",
-    "denorun": "deno run -A --unstable --node-modules-dir npm:astro build && deno run -A --unstable ./dist/server/entry.mjs"
+    "preview": "astro preview",
+    "astro": "astro",
+    "dist": "HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs",
+    "npmrun": "astro build && HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/deno": "^5.0.0",
-    "@astrojs/svelte": "^4.0.2",
-    "@astrojs/tailwind": "^5.0.0",
-    "astro": "^3.1.2",
+    "@astrojs/node": "^6.0.3",
+    "@astrojs/svelte": "^4.0.3",
+    "@astrojs/tailwind": "^5.0.1",
+    "@lucia-auth/adapter-prisma": "^3.0.2",
+    "astro": "^3.2.3",
     "js-cookie": "^3.0.5",
+    "lucia": "^2.7.1",
+    "nodemailer": "^6.9.5",
+    "prisma": "^5.4.1",
     "svelte": "^4.2.1",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
-    "flowbite-svelte": "^0.44.15",
+    "flowbite-svelte": "^0.44.18",
     "flowbite-svelte-icons": "^0.4.4"
   }
 }
