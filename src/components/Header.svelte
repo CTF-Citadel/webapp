@@ -3,11 +3,11 @@
     import ArrowLeftToBracketOutline from 'flowbite-svelte-icons/ArrowLeftToBracketOutline.svelte';
 
     // from parent
-    export let username = "";
+    export let username = '';
 
     // header text
-    let headerText = "CTF Citadel";
-    if (username != "") {
+    let headerText = 'CTF Citadel';
+    if (username != '') {
         const currentTime = new Date();
         const currentHour = currentTime.getHours();
 
@@ -33,9 +33,11 @@
             </a>
             <div class="flex items-center lg:order-2">
                 <DarkMode class="text-2xl hover:bg-surface-900 border-surface-900 focus:ring-surface-900" />
-                <a href="/logout">
-                    <ArrowLeftToBracketOutline />
-                </a>
+                <form method="post" action="/logout">
+                    <button type="submit">
+                        <ArrowLeftToBracketOutline />
+                    </button>
+                </form>
             </div>
             <div class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1" id="mobile-menu-2">
                 <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">

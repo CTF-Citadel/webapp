@@ -3,10 +3,14 @@ import Layout from '../layouts/Layout.astro';
 import Dashboard from '../components/Dashboard.svelte';
 import Header from '../components/Header.svelte';
 
-const session = await Astro.locals.auth.validate();
-if (!session) return Astro.redirect('/login');
-if (!session.user.emailVerified) {
-    return Astro.redirect('/verify/email');
+let session = { user: { username: 'DEV' } };
+
+if (!import.meta.env.DEV) {
+    session = await Astro.locals.auth.validate();
+    if (!session) return Astro.redirect('/login');
+    if (!session.user.emailVerified) {
+        return Astro.redirect('/verify/email');
+    }
 }
 ---
 
