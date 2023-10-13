@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import TeamOverview from '../components/TeamOverview.svelte';
+import Scoreboards from '../components/Scoreboards.svelte';
 import Header from '../components/Header.svelte';
 ---
 
 <Layout title="CTF-Citadel">
     <Header client:visible />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <TeamOverview client:visible />
+        <Scoreboards client:visible />
     </div>
 </Layout>

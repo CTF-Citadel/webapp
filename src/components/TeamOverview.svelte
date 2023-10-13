@@ -2,7 +2,7 @@
     import { Card, Button, Modal, Label, Input } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
     let defaultModal = false;
-    let hasTeam = true;
+    let hasTeam = false;
     let teamSelection = {
         option: false
     };

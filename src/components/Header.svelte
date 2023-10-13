@@ -34,7 +34,7 @@
             <div class="flex items-center lg:order-2">
                 <DarkMode class="text-2xl hover:bg-surface-900 border-surface-900 focus:ring-surface-900" />
                 <form method="post" action="/logout">
-                    <button type="submit">
+                    <button type="submit" class="p-2.5">
                         <ArrowLeftToBracketOutline />
                     </button>
                 </form>
