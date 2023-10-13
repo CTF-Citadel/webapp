@@ -3,7 +3,7 @@
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
 </script>
 
-<div class="flex flex-col 2xl:flex-row overflow-x-scroll">
+<div class="flex flex-col 2xl:flex-row">
     <Card img="/img/teams.webp" class="m-2">
         <a href="/teams">
             <Button>
