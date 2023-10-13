@@ -1,5 +1,5 @@
 # from alpine latest
-FROM node:slim
+FROM node:bookworm
 
 # Set working directory
 WORKDIR /app
