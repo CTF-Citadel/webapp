@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SignupPage from '../components/Signup.svelte';
 import Header from '../components/Header.svelte';
+import { generateEmailVerificationToken } from "../../lib/lucia-db";
 import { isValidEmail, sendVerificationLink } from '../lib/lucia-email';
 import { generateRandomString } from 'lucia/utils';
 import { auth } from '../lib/lucia';
@@ -23,7 +24,6 @@ if (Astro.request.method === 'POST') {
     const validPassword = typeof password === 'string' && password.length >= 6 && password.length <= 255;
     if (isValidEmail(email) && validPassword) {
         try {
-            const email_verify_id = generateRandomString(64);
             const user = await auth.createUser({
                 key: {
                     providerId: 'email',
@@ -43,7 +43,8 @@ if (Astro.request.method === 'POST') {
                 attributes: {}
             });
             Astro.locals.auth.setSession(session);
-            sendVerificationLink(ORIGIN, session.user.email, email_verify_id);
+            const token = await generateEmailVerificationToken(session.user.userId);
+            sendVerificationLink(ORIGIN, session.user.email, token);
             emailSent = true;
         } catch (e: any) {
             console.log(e);

@@ -11,7 +11,7 @@ astro.config.mjs \
 svelte.config.js \
 tailwind.config.cjs \
 schema.prisma \
-tsconfig.json .
+tsconfig.json ./
 
 # Install dependencies
 RUN npm install
