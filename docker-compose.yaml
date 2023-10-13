@@ -22,6 +22,7 @@ services:
       MARIADB_ROOT_PASSWORD: 'CHANGEME'
       TZ: Europe/Vienna
     volumes:
+      - ./data/mariadb:/var/lib/mysql
       - ./db:/docker-entrypoint-initdb.d
     restart: unless-stopped
     profiles:
