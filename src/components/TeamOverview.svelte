@@ -23,7 +23,7 @@
 
 
 {#if !hasTeam}
-    <div class="flex flex-col sm:flex-row overflow-x-scroll">
+    <div class="flex flex-col sm:flex-row">
         <Card size="sm" padding="sm" img="" class="m-4">
             <Button on:click={() => modelOpen("Join")}>
                 Join Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
