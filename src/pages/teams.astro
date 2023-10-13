@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TeamOverview from '../components/TeamOverview.svelte';
+import Header from '../components/Header.svelte';
+---
+
+<Layout title="CTF-Citadel">
+    <Header currentPage={"Teams"} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
+        <TeamOverview client:visible />
+    </div>
+</Layout>
