@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SignupPage from '../components/Signup.svelte';
+import Header from '../components/Header.svelte';
+import { isValidEmail, sendVerificationLink } from '../lib/lucia-email';
+import { generateRandomString } from 'lucia/utils';
+import { auth } from '../lib/lucia';
+
+let emailInput = '';
+let errorMessage = 'None';
+let respStatus = 200;
+let emailSent = false;
+
+if (Astro.request.method === 'POST') {
+    const ORIGIN = Astro.url.origin;
+    const DATA = await Astro.request.json();
+    const email = DATA.email;
+    const username = DATA.username;
+    const password = DATA.password;
+    if (typeof email === 'string') {
+        emailInput = email;
+    }
+    const validPassword = typeof password === 'string' && password.length >= 6 && password.length <= 255;
+    if (isValidEmail(email) && validPassword) {
+        try {
+            const email_verify_id = generateRandomString(64);
+            const user = await auth.createUser({
+                key: {
+                    providerId: 'email',
+                    providerUserId: email.toLowerCase(),
+                    password
+                },
+                attributes: {
+                    username,
+                    user_role: String('participant'),
+                    user_team: String(''),
+                    email,
+                    email_verified: Boolean(false)
+                }
+            });
+            const session = await auth.createSession({
+                userId: user.userId,
+                attributes: {}
+            });
+            Astro.locals.auth.setSession(session);
+            sendVerificationLink(ORIGIN, session.user.email, email_verify_id);
+            emailSent = true;
+        } catch (e: any) {
+            console.log(e);
+            if (e.code == 'ER_DUP_ENTRY') {
+                errorMessage = 'User already exists';
+            } else {
+                errorMessage = 'An error occurred';
+            }
+        }
+    } else {
+        errorMessage = 'Invalid Input';
+    }
+    return new Response(
+        JSON.stringify({
+            status: respStatus,
+            error: errorMessage,
+            verifySent: emailSent
+        }),
+        {
+            status: respStatus
+        }
+    );
+}
+
+const session = await Astro.locals.auth.validate();
+if (session) {
+    await auth.invalidateSession(session.sessionId);
+    Astro.locals.auth.setSession(null);
+}
+---
+
+<Layout title="Login">
+    <Header client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
+        <SignupPage client:visible />
+    </div>
+</Layout>

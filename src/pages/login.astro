@@ -2,6 +2,66 @@
 import Layout from '../layouts/Layout.astro';
 import LoginPage from '../components/Login.svelte';
 import Header from '../components/Header.svelte';
+import { isValidEmail } from '../lib/lucia-email';
+import { auth } from '../lib/lucia';
+import { LuciaError } from "lucia";
+
+let redirect = false;
+let emailInput = '';
+let errorMessage = 'None';
+let respStatus = 200;
+
+if (Astro.request.method === 'POST') {
+    const DATA = await Astro.request.json();
+    const email = DATA.email;
+    const password = DATA.password;
+    if (typeof email === 'string') {
+        emailInput = email;
+    }
+    const validPassword = typeof password === 'string' && password.length >= 1 && password.length <= 255;
+    if (isValidEmail(email) && validPassword) {
+        try {
+            const key = await auth.useKey('email', email.toLowerCase(), password);
+            const session = await auth.createSession({
+                userId: key.userId,
+                attributes: {}
+            });
+            Astro.locals.auth.setSession(session);
+            redirect = true;
+        } catch (e: any) {
+			if (
+				e instanceof LuciaError &&
+				(e.message === "AUTH_INVALID_KEY_ID" ||
+					e.message === "AUTH_INVALID_PASSWORD")
+			) {
+				errorMessage = "Wrong Email or Password";
+			} else {
+				console.log(e);
+            	errorMessage = 'Unknown Error';
+			}
+        }
+    } else {
+        errorMessage = 'Invalid Input';
+    }
+    return new Response(
+        JSON.stringify({
+            status: respStatus,
+            error: errorMessage,
+            needsRedirect: redirect
+        }),
+        {
+            status: respStatus
+        }
+    );
+}
+
+const session = await Astro.locals.auth.validate();
+if (session) {
+    if (!session.user.emailVerified) {
+        return Astro.redirect('/verify/email');
+    }
+    return Astro.redirect('/');
+}
 ---
 
 <Layout title="Login">

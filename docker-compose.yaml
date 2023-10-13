@@ -1,0 +1,58 @@
+version: '3'
+services:
+  proxy:
+    image: nginx:latest
+    hostname: proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./proxy/conf:/etc/nginx/conf.d
+      - ./proxy/ssl:/etc/ssl/private
+    environment:
+      TZ: Europe/Vienna
+    restart: unless-stopped
+    profiles:
+      - full
+  mariadb:
+    image: mariadb:latest
+    hostname: mariadb
+    environment:
+      MARIADB_DATABASE: 'lucia'
+      MARIADB_ROOT_PASSWORD: 'CHANGEME'
+      TZ: Europe/Vienna
+    volumes:
+      - ${PWD}/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    profiles:
+      - full
+  mariadb-dev:
+    image: mariadb:latest
+    hostname: mariadb
+    environment:
+      MARIADB_DATABASE: 'lucia'
+      MARIADB_ROOT_PASSWORD: 'CHANGEME'
+      TZ: Europe/Vienna
+    ports:
+      - '127.0.0.1:3306:3306'
+    volumes:
+      - ${PWD}/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    profiles:
+      - dev
+  astro:
+    build:
+      context: ${PWD}
+      dockerfile: Dockerfile
+    hostname: astro
+    environment:
+      EMAIL_SERVICE: 'hotmail'
+      EMAIL_NAME: 'someone@example.com'
+      EMAIL_PASS: 'CHANGEME'
+      DB_HOST: 'localhost'
+      DB_NAME: 'lucia'
+      DB_PASS: 'CHANGEME'
+      TZ: Europe/Vienna
+    restart: unless-stopped
+    profiles:
+      - full

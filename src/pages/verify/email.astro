@@ -1,0 +1,50 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.svelte';
+import EmailVerify from '../../components/EmailVerification.svelte';
+import { sendVerificationLink } from '../../lib/lucia-email';
+import { generateEmailVerificationToken } from "../../lib/lucia-db";
+
+let emailSent = false;
+let errorMessage = 'None';
+let respStatus = 200;
+
+const session = await Astro.locals.auth.validate();
+if (!session) return Astro.redirect('/login');
+if (session.user.emailVerified) {
+    return Astro.redirect('/');
+}
+
+if (Astro.request.method === 'POST') {
+    const ORIGIN = Astro.url.origin;
+    try {
+        const session = await Astro.locals.auth.validate();
+        if (!session) return Astro.redirect('/login');
+        if (!session.user.emailVerified) {
+            const token = await generateEmailVerificationToken(session.user.userId);
+            sendVerificationLink(ORIGIN, session.user.email, token);
+            emailSent = true;
+        }
+    } catch (e: any) {
+        console.log(e);
+        errorMessage = 'An error occurred';
+    }
+    return new Response(
+        JSON.stringify({
+            status: respStatus,
+            error: errorMessage,
+            verifySent: emailSent
+        }),
+        {
+            status: respStatus
+        }
+    );
+}
+---
+
+<Layout title="Email Verification">
+    <Header client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
+        <EmailVerify client:visible />
+    </div>
+</Layout>
