@@ -119,6 +119,11 @@ export const isValidPasswordResetToken = async (token: string) => {
     if (storedToken == null) return false;
     const tokenExpires = Number(storedToken.expires);
     if (!isWithinExpiration(tokenExpires)) {
+        await PRISMA.password_reset_token.deleteMany({
+            where: {
+                id: token,
+            },
+        })
         return false;
     }
     return true;
