@@ -1,48 +1,84 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DB_NAME")
+  provider = "mysql"
+  url      = env("DB_NAME")
 }
 
 model user {
-    id              String      @id @unique
-    username        String      @unique
-    user_role       String
-    user_team       String
-    email           String      @unique
-    email_verified  Boolean
-    auth_session    user_session[]
-    key             user_key[]
+  id             String         @id @unique
+  username       String         @unique
+  user_role      String
+  user_team      String
+  email          String         @unique
+  email_verified Boolean
+  auth_session   user_session[]
+  key            user_key[]
 }
 
 model user_session {
-    id             String @id @unique
-    user_id        String
-    active_expires BigInt
-    idle_expires   BigInt
-    user           user   @relation(references: [id], fields: [user_id], onDelete: Cascade)
-    @@index([user_id])
+  id             String @id @unique
+  user_id        String
+  active_expires BigInt
+  idle_expires   BigInt
+  user           user   @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model user_key {
-    id              String  @id @unique
-    hashed_password String?
-    user_id         String
-    user            user    @relation(references: [id], fields: [user_id], onDelete: Cascade)
-    @@index([user_id])
+  id              String  @id @unique
+  hashed_password String?
+  user_id         String
+  user            user    @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model email_verification_token {
-    id              String      @id @unique
-    user_id         String
-    expires         BigInt
+  id      String @id @unique
+  user_id String
+  expires BigInt
 }
 
 model password_reset_token {
-    id              String      @id @unique
-    user_id         String
-    expires         BigInt
+  id      String @id @unique
+  user_id String
+  expires BigInt
+}
+
+model events {
+  id                String        @id @unique
+  event_name        String        @unique
+  event_description String
+  team_events       team_events[]
+  challenges        challenges[]
+}
+
+model teams {
+  id                String        @id @unique
+  team_name         String        @unique
+  team_country_code String
+  team_description  String
+  team_events       team_events[]
+}
+
+model team_events {
+  team_id  String
+  event_id String
+  team     teams  @relation(fields: [team_id], references: [id])
+  event    events @relation(fields: [event_id], references: [id])
+
+  @@id([team_id, event_id])
+}
+
+model challenges {
+  id                    String @id @unique
+  challenge_uuid        String @unique
+  challenge_name        String @unique
+  challenge_description String
+  event_id              String
+  event                 events @relation(fields: [event_id], references: [id])
 }

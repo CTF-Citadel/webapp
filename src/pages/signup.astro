@@ -35,7 +35,8 @@ if (Astro.request.method === 'POST') {
                     user_role: String('participant'),
                     user_team: String(''),
                     email,
-                    email_verified: Boolean(false)
+                    email_verified: Boolean(false),
+                    has_created_team: Boolean(false)
                 }
             });
             const session = await auth.createSession({
