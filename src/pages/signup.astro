@@ -35,7 +35,8 @@ if (Astro.request.method === 'POST') {
                     user_role: String('participant'),
                     user_team: String(''),
                     email,
-                    email_verified: Boolean(false)
+                    email_verified: Boolean(false),
+                    has_created_team: Boolean(false)
                 }
             });
             const session = await auth.createSession({
@@ -78,7 +79,7 @@ if (session) {
 
 <Layout title="Login">
     <Header client:visible />
-    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
+    <div transition:animate="slide" class="flex flex-1 justify-center items-center h-full">
         <SignupPage client:visible />
     </div>
 </Layout>

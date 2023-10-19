@@ -16,7 +16,7 @@ if (!import.meta.env.DEV) {
 
 <Layout title="CTF-Citadel">
     <Header username={session.user.username} client:visible />
-    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
+    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
         <Dashboard client:visible />
     </div>
 </Layout>
