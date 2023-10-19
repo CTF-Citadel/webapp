@@ -2,6 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import TeamOverview from '../components/TeamOverview.svelte';
 import Header from '../components/Header.svelte';
+
+let session = { user: { username: 'DEV' } };
+
+if (!import.meta.env.DEV) {
+    session = await Astro.locals.auth.validate();
+    if (!session) return Astro.redirect('/login');
+    if (!session.user.emailVerified) {
+        return Astro.redirect('/verify/email');
+    }
+}
 ---
 
 <Layout title="CTF-Citadel">
