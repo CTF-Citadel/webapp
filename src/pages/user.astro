@@ -17,6 +17,6 @@ if (!import.meta.env.DEV) {
 <Layout title="CTF-Citadel">
     <Header interactive={true} client:visible/>
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <UserSettings client:visible />
+        <UserSettings userSession={session.user} client:visible />
     </div>
 </Layout>

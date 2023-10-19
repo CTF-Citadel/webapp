@@ -83,8 +83,6 @@ export const validateEmailVerificationToken = async (token: string) => {
         },
     })
     const tokenExpires = Number(storedToken.expires);
-    console.log(tokenExpires)
-    console.log(isWithinExpiration(tokenExpires))
     if (!isWithinExpiration(tokenExpires)) {
         return false;
     }
@@ -136,5 +134,11 @@ export const isRegisteredEmail = async (email: string) => {
         },
     });
     if (!storedUser) return false;
+    return true;
+};
+
+export const isInitialUser = async () => {
+    const USERS = await PRISMA.user.findMany();
+    if (USERS.length > 0) return false;
     return true;
 };
