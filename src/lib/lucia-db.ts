@@ -47,7 +47,7 @@ export const generatePasswordResetToken = async (email: string) => {
             email: email,
         },
     });
-    if (!targetUser) return false;
+    if (targetUser == null) return false;
     const storedUserTokens = await PRISMA.password_reset_token.findMany({
         where: {
             user_id: targetUser.id,
@@ -76,13 +76,15 @@ export const validateEmailVerificationToken = async (token: string) => {
             id: token,
         },
     });
-    if (!storedToken) return false;
+    if (storedToken == null) return false;
     await PRISMA.email_verification_token.deleteMany({
         where: {
             id: token,
         },
     })
     const tokenExpires = Number(storedToken.expires);
+    console.log(tokenExpires)
+    console.log(isWithinExpiration(tokenExpires))
     if (!isWithinExpiration(tokenExpires)) {
         return false;
     }
@@ -95,7 +97,7 @@ export const validatePasswordResetToken = async (token: string) => {
             id: token,
         },
     });
-    if (!storedToken) return false;
+    if (storedToken == null) return false;
     await PRISMA.password_reset_token.deleteMany({
         where: {
             id: token,
@@ -114,7 +116,7 @@ export const isValidPasswordResetToken = async (token: string) => {
             id: token,
         },
     });
-    if (!storedToken) return false;
+    if (storedToken == null) return false;
     const tokenExpires = Number(storedToken.expires);
     if (!isWithinExpiration(tokenExpires)) {
         return false;

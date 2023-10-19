@@ -25,7 +25,7 @@ CREATE TABLE user_session (
 );
 CREATE TABLE email_verification_token (
     id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(15) NOT NULL,
+    user_id VARCHAR(16) NOT NULL,
     expires BIGINT NOT NULL
 );
 CREATE TABLE password_reset_token (
