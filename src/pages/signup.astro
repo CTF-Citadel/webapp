@@ -4,7 +4,6 @@ import SignupPage from '../components/Signup.svelte';
 import Header from '../components/Header.svelte';
 import { generateEmailVerificationToken } from "../lib/lucia-db";
 import { isValidEmail, sendVerificationLink } from '../lib/lucia-email';
-import { generateRandomString } from 'lucia/utils';
 import { auth } from '../lib/lucia';
 
 let emailInput = '';

@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 const EMAIL_SRVC = process.env.EMAIL_SERVICE;
 const EMAIL_USER = process.env.EMAIL_NAME;
 const EMAIL_PASS = process.env.EMAIL_PASS;
+const INSTANCE_NAME = process.env.INSTANCE_NAME;
 
 let transporter = nodemailer.createTransport({
     service: EMAIL_SRVC,
@@ -24,11 +25,24 @@ export const sendVerificationLink = async (origin: string, email: string, token:
             <title>Verify Your Email Address</title>
         </head>
             <body>
-                <p>Thank you for creating an account on CTF-Citadel. To complete the registration process, please click the link below to verify your email address:</p>
-                <a href="${URL}" style="text-decoration: none; padding: 10px 20px; background-color: #007BFF; color: #fff; border-radius: 4px; display: inline-block;">Verify Email</a>
+                <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center">
+                            <h1 style="text-align: center;">Verify Your Email</h1>
+                        </td>
+                    </tr>
+                </table>
+                <p>Thank you for creating an account on ${INSTANCE_NAME}. To complete the registration process, please click the link below to verify your email address:</p>
+                <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center">
+                            <a href="${URL}" style="text-decoration: none; padding: 10px 20px; background-color: #007BFF; color: #fff; border-radius: 4px; display: inline-block;">Verify Email</a>
+                        </td>
+                    </tr>
+                </table>
                 <p>By verifying your email, you will gain full access to our services and stay updated with the latest updates and notifications.</p>
                 <p>If you did not sign up for an account, please disregard this email.</p>
-                <p>Sincerely, <br>The CTF-Citadel Admin Team</p>
+                <p>Sincerely, <br>The ${INSTANCE_NAME} Team</p>
             </body>
         </html>`
     }, (err: any) => {
@@ -49,10 +63,23 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
             <title>Reset Your Password</title>
         </head>
             <body>
-                <p>You are receiving this email because you have requested to reset your password for your account on CTF-Citadel. To proceed with the password reset, please click the link below:</p>
-                <a href="${URL}" style="text-decoration: none; padding: 10px 20px; background-color: #007BFF; color: #fff; border-radius: 4px; display: inline-block;">Reset Password</a>
+                <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center">
+                            <h1 style="text-align: center;">Reset Your Password</h1>
+                        </td>
+                    </tr>
+                </table>
+                <p>You are receiving this email because you have requested to reset your password for your account on ${INSTANCE_NAME}. To proceed with the password reset, please click the link below:</p>
+                <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center">
+                            <a href="${URL}" style="text-decoration: none; padding: 10px 20px; background-color: #007BFF; color: #fff; border-radius: 4px; display: inline-block;">Reset Password</a>
+                        </td>
+                    </tr>
+                </table>
                 <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
-                <p>Sincerely, <br>The CTF-Citadel Admin Team</p>
+                <p>Sincerely, <br>The ${INSTANCE_NAME} Admin Team</p>
             </body>
         </html>`
     }, (err: any) => {

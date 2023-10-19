@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Scoreboards from '../components/Scoreboards.svelte';
+import Scoreboard from '../components/Scoreboards.svelte';
 import Header from '../components/Header.svelte';
 
-let session = { user: { username: 'DEV' } };
+let session = { user: { username: 'DEV', emailVerified: true } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -15,8 +15,8 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="CTF-Citadel">
-    <Header client:visible />
+    <Header interactive={true} client:visible />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Scoreboards client:visible />
+        <Scoreboard client:visible />
     </div>
 </Layout>

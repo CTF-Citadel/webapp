@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Event from '../components/Events.svelte';
+import UserSettings from '../components/User.svelte';
 import Header from '../components/Header.svelte';
 
 let session = { user: { username: 'DEV', emailVerified: true } };
@@ -17,6 +17,6 @@ if (!import.meta.env.DEV) {
 <Layout title="CTF-Citadel">
     <Header interactive={true} client:visible/>
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Event client:visible />
+        <UserSettings client:visible />
     </div>
 </Layout>
