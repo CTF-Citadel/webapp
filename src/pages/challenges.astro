@@ -3,13 +3,19 @@ import Layout from '../layouts/Layout.astro';
 import Challenge from '../components/Challenges.svelte';
 import Header from '../components/Header.svelte';
 
-let session = { user: { username: 'DEV' } };
+let session = { user: { username: 'DEV', emailVerified: true } };
+
+if (!import.meta.env.DEV) {
+    session = await Astro.locals.auth.validate();
+    if (!session) return Astro.redirect('/login');
+    if (!session.user.emailVerified) {
+        return Astro.redirect('/verify/email');
+    }
+}
 ---
 
-
-
 <Layout title="CTF-Citadel">
-    <Header username={session.user.username} client:visible />
+    <Header interactive={true} client:visible />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
         <Challenge client:visible />
     </div>
