@@ -25,6 +25,6 @@
   },
   "devDependencies": {
     "flowbite-svelte": "^0.44.18",
-    "flowbite-svelte-icons": "^0.4.4"
+    "flowbite-svelte-icons": "^0.4.5"
   }
 }
