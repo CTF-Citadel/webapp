@@ -180,7 +180,7 @@
                         </TableBody>
                     </Table>
                 {:else}
-                    <Alert color="blue">
+                    <Alert class="m-4" color="blue">
                         <span>
                             <span class="font-bold">Info!</span><br />
                             No Users found
@@ -217,7 +217,7 @@
                         </TableBody>
                     </Table>
                 {:else}
-                    <Alert color="blue">
+                    <Alert class="m-4" color="blue">
                         <span>
                             <span class="font-bold">Info!</span><br />
                             No Teams found.
@@ -254,7 +254,7 @@
                         </TableBody>
                     </Table>
                 {:else}
-                    <Alert color="blue">
+                    <Alert class="m-4" color="blue">
                         <span>
                             <span class="font-bold">Info!</span><br />
                             No Events found.
