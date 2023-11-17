@@ -17,7 +17,7 @@
     "@lucia-auth/adapter-prisma": "^3.0.2",
     "astro": "^3.5.3",
     "js-cookie": "^3.0.5",
-    "lucia": "^2.7.3",
+    "lucia": "^2.7.4",
     "nodemailer": "^6.9.7",
     "prisma": "^5.5.2",
     "svelte": "^4.2.3",
