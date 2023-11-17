@@ -15,8 +15,10 @@
 
         let greeting: string;
 
-        if (currentHour < 12) {
+        if (currentHour > 5 && currentHour < 12) {
             greeting = 'Good morning';
+        } else if (currentHour < 15) {
+            greeting = 'Good noon';
         } else if (currentHour < 18) {
             greeting = 'Good afternoon';
         } else {

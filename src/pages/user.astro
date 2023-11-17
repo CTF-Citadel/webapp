@@ -2,8 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import UserSettings from '../components/User.svelte';
 import Header from '../components/Header.svelte';
+import { backendWrapper } from '../lib/db';
 
-let session = { user: { username: 'DEV', emailVerified: true } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -12,11 +13,15 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
 }
+
+if (Astro.request.method === 'POST') {
+    return await backendWrapper(Astro.request);
+}
 ---
 
 <Layout title="CTF-Citadel">
     <Header interactive={true} client:visible/>
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
+    <div transition:animate="slide" class="flex flex-1">
         <UserSettings userSession={session.user} client:visible />
     </div>
 </Layout>

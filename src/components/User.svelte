@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { Card } from 'flowbite-svelte';
+    import AdminPanel from './AdminPanel.svelte';
 
     export let userSession: any = {};
 </script>
 
-<div class="flex flex-col 2xl:flex-row">
-    <Card class="m-2">
-        <h1>Hello {userSession.user_role}, {userSession.username}</h1>
-    </Card>
+<div class="flex flex-col 2xl:flex-row flex-1 w-full h-full p-2">
+    {#if userSession.user_role == 'admin'}
+        <AdminPanel />
+    {/if}
 </div>
