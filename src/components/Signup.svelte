@@ -42,7 +42,7 @@
             </Label>
             <Label class="space-y-2">
                 <span>Your password</span>
-                <Input bind:value={inputs.password} type="password" name="password" placeholder="••••••••••" required />
+                <Input bind:value={inputs.password} type="password" name="password" placeholder="••••••••••" required minlength="12"  maxlength="96"/>
             </Label>
             {#if authResponse && authResponse.error != 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>

@@ -70,8 +70,8 @@
             </Label>
         {/if}
         <svelte:fragment slot="footer">
-        <Button on:click={() => alert('Handle "success"')} disabled={!inputs.teamID}>I accept</Button>
-        <Button color="alternative">Decline</Button>
+        <Button on:click={() => alert('Handle "success"')} disabled={!inputs.teamID}>Proceed</Button>
+        <Button color="alternative">Cancle</Button>
         </svelte:fragment>
     </Modal>
 {:else if hasTeam}
