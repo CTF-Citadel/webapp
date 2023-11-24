@@ -263,7 +263,7 @@
 <div class="w-full h-full flex-1">
     {#if loading}
         <div class="text-center">
-            <Spinner size={'16'} /><Modal bind:open={edit.user} title="Edit User" />
+            <Spinner size={'16'} />
         </div>
     {:else}
         <Tabs

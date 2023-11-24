@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Challenge from '../components/Challenges.svelte';
 import Header from '../components/Header.svelte';
+import { normalWrapper } from '../lib/db';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
@@ -11,6 +12,10 @@ if (!import.meta.env.DEV) {
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
+}
+
+if (Astro.request.method === 'POST') {
+    return await normalWrapper(Astro.request);
 }
 ---
 
