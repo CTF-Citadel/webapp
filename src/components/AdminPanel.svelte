@@ -29,7 +29,7 @@
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
-        { value: 'Normal', name: 'Normal' },
+        { value: 'Medium', name: 'Medium' },
         { value: 'Hard', name: 'Hard' }
     ];
     let teams: any[] = [];
@@ -171,7 +171,7 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -196,16 +196,19 @@
         <Textarea id="event-textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
     </div>
     <svelte:fragment slot="footer">
-        <div>
-            <Button on:click={createEvent} disabled={eventTemplate.name == '' || eventTemplate.description == ''}
-                >Create</Button
-            >
-            <Button
-                on:click={() => {
-                    create.event = false;
-                }}
-                color="alternative">Cancel</Button
-            >
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={createEvent} disabled={eventTemplate.name == '' || eventTemplate.description == ''}
+                    >Create</Button
+                >
+                <Button
+                    on:click={() => {
+                        create.event = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -241,21 +244,24 @@
         </Label>
     </div>
     <svelte:fragment slot="footer">
-        <div>
-            <Button
-                on:click={createChallenge}
-                disabled={selectedDiff == '' ||
-                    selectedEvent == '' ||
-                    challengeTemplate.name == '' ||
-                    challengeTemplate.description == '' ||
-                    challengeTemplate.file == ''}>Create</Button
-            >
-            <Button
-                on:click={() => {
-                    create.challenge = false;
-                }}
-                color="alternative">Cancel</Button
-            >
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button
+                    on:click={createChallenge}
+                    disabled={selectedDiff == '' ||
+                        selectedEvent == '' ||
+                        challengeTemplate.name == '' ||
+                        challengeTemplate.description == '' ||
+                        challengeTemplate.file == ''}>Create</Button
+                >
+                <Button
+                    on:click={() => {
+                        create.challenge = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>

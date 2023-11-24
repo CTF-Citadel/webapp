@@ -40,6 +40,15 @@ export async function normalWrapper(request: Request): Promise<Response> {
         case 'challenges':
             response = await getEventChallenges(json.data.id);
             break;
+        case 'deploy-challenge':
+            const TEMP = await fetch(`http://172.31.35.112:8000/challenge?compose_file=FileNigma&environment_variables=%7B%22FLAG%22%3A%22${crypto.randomUUID().toString()}%22%7D`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            response = await TEMP.json()
+            break;
     }
     // formulate unifed response
     return new Response(

@@ -1,8 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Challenge from '../components/Challenges.svelte';
-import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/db';
+import Layout from '../../layouts/Layout.astro';
+import Challenge from '../../components/ChallengesOld.svelte';
+import Header from '../../components/Header.svelte';
+import { normalWrapper } from '../../lib/db';
+
+const { uuid } = Astro.params;
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
@@ -27,6 +29,6 @@ if (Astro.request.method === 'POST') {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Challenge client:visible />
+        <Challenge uuid={uuid} client:visible />
     </div>
 </Layout>

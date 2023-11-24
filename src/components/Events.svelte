@@ -30,7 +30,7 @@
         {#if events.length > 0}
             {#each events as event}
                 <Card img="/img/scoreboard.webp" class="m-2">
-                    <a href="/challenges">
+                    <a href="/events/{event.id}">
                         <Button>
                             {event.event_name} <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
                         </Button>
