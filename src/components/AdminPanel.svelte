@@ -171,7 +171,7 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -208,7 +208,7 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -261,7 +261,7 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
