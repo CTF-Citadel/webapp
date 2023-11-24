@@ -22,33 +22,33 @@
         '15:00'
     ];
 
+    //Testdata
     let teams = [
         {
-            name: 'Team A',
-            data: [0, 200, 400, 500, 600, 700],
+            name: 'Team Adler',
+            data: [0, 400, 600, 700, 800, 900],
             color: '#ffff00'
         },
         {
-            name: 'Team B',
+            name: 'Team Bär',
             data: [0, 250, 350, 550, 650, 750],
             color: '#ff00ff'
         },
         {
-            name: 'Team C',
+            name: 'Team Cocktail',
             data: [0, 200, 250, 300, 400, 500],
             color: '#6600ff'
         },
         {
-            name: 'Team D',
+            name: 'Team Decline ',
             data: [0, 200, 300, 320, 420, 520],
             color: '#00ffff'
         }
     ];
 
-    let leader = [];
     onMount(() => {
         //Sorts for the Ranking
-        leader = teams.sort((a, b) => b.data[b.data.length - 1] - a.data[a.data.length - 1]);
+        //TODO: After a valid team layout is established this will be adjusted
     });
 
     let options = {
@@ -114,6 +114,7 @@
     async function handleReportDownload() {
         //CHANGEME FOR lATER
         console.log('Output');
+
     }
 </script>
 
@@ -137,6 +138,7 @@
         </div>
     </div>
 
+    <!--
     <div class="flex justify-between border-gray-200 border-b dark:border-gray-700 pb-3">
         <h1 class=" text-gray-800 font-bold">Leaderboard</h1>
     </div>
@@ -149,4 +151,5 @@
             </div>
         {/each}
     {/if}
+    -->
 </div>
