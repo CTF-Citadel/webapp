@@ -45,8 +45,13 @@
             <AccordionItem class="border-none !rounded-none">
                 <div slot="header" class="flex-container">
                     <FileCodeSolid class="mt-0.5" />
-                    <div class="font-bold">{challenge.category}:</div>
-                    <div class="font-bold">{challenge.name} ({challenge.points})</div>
+                    {#if challenge.isdone == true}
+                        <div class="font-bold line-through">{challenge.category}:</div>
+                        <div class="font-bold line-through">{challenge.name} ({challenge.points})</div>
+                    {:else}
+                        <div class="font-bold">{challenge.category}:</div>
+                        <div class="font-bold">{challenge.name} ({challenge.points})</div>
+                    {/if}
                     {#if challenge.difficulty == 'Easy'}
                         <div class="text-green-500">Difficulty: {challenge.difficulty}</div>
                     {:else if challenge.difficulty == 'Medium'}
