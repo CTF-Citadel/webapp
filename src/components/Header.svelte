@@ -2,10 +2,12 @@
     import { DarkMode } from 'flowbite-svelte';
     import ArrowLeftToBracketOutline from 'flowbite-svelte-icons/ArrowLeftToBracketOutline.svelte';
     import UserCircleOutline from 'flowbite-svelte-icons/UserCircleOutline.svelte';
+    import CogOutline from 'flowbite-svelte-icons/CogOutline.svelte'
 
     // from parent
     export let username = '';
     export let interactive = false;
+    export let admin = false;
 
     // header text
     let headerText = 'CTF Citadel';
@@ -17,9 +19,9 @@
 
         if (currentHour > 5 && currentHour < 12) {
             greeting = 'Good morning';
-        } else if (currentHour < 15) {
+        } else if (currentHour > 12 && currentHour < 15) {
             greeting = 'Good noon';
-        } else if (currentHour < 18) {
+        } else if (currentHour > 15 && currentHour < 18) {
             greeting = 'Good afternoon';
         } else {
             greeting = 'Good evening';
@@ -40,6 +42,13 @@
                     <a href="/user">
                         <button class="p-2.5">
                             <UserCircleOutline />
+                        </button>
+                    </a>
+                {/if}
+                {#if admin}
+                    <a href="/settings">
+                        <button class="p-2.5">
+                            <CogOutline />
                         </button>
                     </a>
                 {/if}

@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Challenge from '../components/Challenges.svelte';
 import Header from '../components/Header.svelte';
 
-let session = { user: { username: 'DEV', emailVerified: true } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -15,7 +15,12 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="CTF-Citadel">
-    <Header interactive={true} client:visible />
+    <Header
+        username={session.user.username}
+        interactive={true}
+        admin={session.user.user_role == 'admin' ? true : false}
+        client:visible
+    />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
         <Challenge client:visible />
     </div>

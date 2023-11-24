@@ -58,12 +58,25 @@ model events {
   challenges        challenges[]
 }
 
+model challenges {
+  id                    String            @id @unique
+  challenge_name        String            @unique
+  challenge_diff        String
+  challenge_description String
+  needs_container       Boolean
+  container_file        String
+  event_id              String
+  event                 events            @relation(fields: [event_id], references: [id])
+  team_challenges       team_challenges[]
+}
+
 model teams {
-  id                String        @id @unique
-  team_name         String        @unique
+  id                String            @id @unique
+  team_name         String            @unique
   team_country_code String
   team_description  String
   team_events       team_events[]
+  team_challenges   team_challenges[]
 }
 
 model team_events {
@@ -75,11 +88,15 @@ model team_events {
   @@id([team_id, event_id])
 }
 
-model challenges {
-  id                    String @id @unique
-  challenge_uuid        String @unique
-  challenge_name        String @unique
-  challenge_description String
-  event_id              String
-  event                 events @relation(fields: [event_id], references: [id])
+model team_challenges {
+  challenge_uuid String
+  challenge_flag String
+  challenge_host String
+  challenge_port String
+  team_id        String
+  challenge_id   String
+  team           teams      @relation(fields: [team_id], references: [id])
+  challenge      challenges @relation(fields: [challenge_id], references: [id])
+
+  @@id([team_id, challenge_id])
 }
