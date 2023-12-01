@@ -194,7 +194,7 @@
         <!-- Change this to a nice Listing later-->
        <h1 class="text-xl font-bold leading-none text-gray-900 dark:text-white mr-1">Team Members and their Points</h1>
        {#each members as member, index}
-            <p>{member} with {points[index]}</p>
+            <p>{points[index]} -- {member}</p>
        {/each}
     </Card>
     <Card class="m-2">
@@ -203,7 +203,6 @@
             <p>Team Name: Name</p>
             <p>Team Description: Description</p>
             <p>Country: Country</p>
-
     </Card>
 </div>
 
