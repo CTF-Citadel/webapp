@@ -5,10 +5,12 @@ CREATE TABLE user (
     id VARCHAR(16) PRIMARY KEY,
     username VARCHAR(32) NOT NULL UNIQUE,
     user_role VARCHAR(16),
-    user_team VARCHAR(36),
+    team_id VARCHAR(36),
     email VARCHAR(32) NOT NULL UNIQUE,
     email_verified BOOLEAN,
+    is_blocked BOOLEAN,
     has_created_team BOOLEAN
+    FOREIGN KEY (team_id) REFERENCES teams(id),
 );
 CREATE TABLE user_key (
     id VARCHAR(255) PRIMARY KEY,

@@ -19,13 +19,15 @@
         SpeedDialButton,
         Textarea,
         Select,
-        Toggle
+        Toggle,
+        MultiSelect
     } from 'flowbite-svelte';
     import { onMount } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
     import UserGroup from 'flowbite-svelte-icons/UserGroupSolid.svelte';
     import CalendarPlus from 'flowbite-svelte-icons/CalendarPlusSolid.svelte';
+    import EyeSlash from 'flowbite-svelte-icons/EyeSlashOutline.svelte'
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
@@ -171,16 +173,92 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={() => alert('Handle "block"')} color="red"><EyeSlash class="w-4" /></Button>
+            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={edit.team} title="Edit Team" />
+<Modal bind:open={edit.team} title="Edit Team">
+    <div class="mb-6">
+        <Label for="team_name" class="mb-2">Change Team Name</Label>
+        <Input id="team_name" placeholder="name" required />
+    </div>
+    <div class="mb-6">
+        <Label for="event_select" class="mb-2">Change Team Events</Label>
+        <MultiSelect id="event_select" items={sortedEvents} size="lg" />
+    </div>
+    <svelte:fragment slot="footer">
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button
+                    on:click={() => {
+                        edit.user = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+        </div>
+    </svelte:fragment>
+</Modal>
 
-<Modal bind:open={edit.event} title="Edit Event" />
+<Modal bind:open={edit.event} title="Edit Event">
+    <div class="mb-6">
+        <Label for="event_name" class="mb-2">Change Event Name</Label>
+        <Input id="event_name" placeholder="name" required />
+    </div>
+    <div class="mb-6">
+        <Label for="event_textarea" class="mb-2">Change Event Description</Label>
+        <Textarea id="event_textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
+    </div>
+    <svelte:fragment slot="footer">
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button
+                    on:click={() => {
+                        edit.user = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+        </div>
+    </svelte:fragment>
+</Modal>
 
-<Modal bind:open={edit.challenge} title="Edit Challenge" />
+<Modal bind:open={edit.challenge} title="Edit Challenge">
+    <div class="mb-6">
+        <Label for="chal_name" class="mb-2">Change Challenge Name</Label>
+        <Input id="chal_name" placeholder="name" required />
+    </div>
+    <div class="mb-6">
+        <Label for="chall_textarea" class="mb-2">Change Challenge Description</Label>
+        <Textarea id="chal_textarea" placeholder="..." rows="4" />
+    </div>
+    <div class="mb-6">
+        <Label>
+            Change Challenge Difficulty
+            <Select class="mt-2" items={DIFFICULTIES} />
+        </Label>
+    </div>
+    <svelte:fragment slot="footer">
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button
+                    on:click={() => {
+                        edit.user = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+        </div>
+    </svelte:fragment>
+</Modal>
 
 <!--
     Create Popups
@@ -208,7 +286,6 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -261,7 +338,6 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
