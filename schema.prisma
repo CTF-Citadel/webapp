@@ -11,8 +11,8 @@ model user {
   id               String         @id @unique
   username         String         @unique
   user_role        String
-  team_id          String
-  team             teams          @relation(fields: [team_id], references: [id])
+  user_team_id     String
+  team             teams          @relation(fields: [user_team_id], references: [id])
   email            String         @unique
   email_verified   Boolean
   is_blocked       Boolean

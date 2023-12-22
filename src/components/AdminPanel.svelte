@@ -27,7 +27,7 @@
     import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
     import UserGroup from 'flowbite-svelte-icons/UserGroupSolid.svelte';
     import CalendarPlus from 'flowbite-svelte-icons/CalendarPlusSolid.svelte';
-    import EyeSlash from 'flowbite-svelte-icons/EyeSlashOutline.svelte'
+    import EyeSlash from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
@@ -68,6 +68,8 @@
         is_container: false,
         file: ''
     };
+    let editUUID: string = '';
+    let editData: any = {};
 
     onMount(async () => {
         await refreshEvents();
@@ -76,6 +78,27 @@
         await refreshChallenges();
         loading = false;
     });
+
+    function editInvocate(type: 'team' | 'event' | 'challenge' | 'user') {
+        switch (type) {
+            case 'user':
+                editData = users.find((item) => item['id'] === editUUID);
+                break;
+            case 'team':
+                editData = teams.find((item) => item['id'] === editUUID);
+                break;
+
+            case 'event':
+                editData = events.find((item) => item['id'] === editUUID);
+                break;
+
+            case 'challenge':
+                editData = challenges.find((item) => item['id'] === editUUID);
+                selectedDiff = editData.challenge_diff;
+                selectedEvent = editData.event_id;
+                break;
+        }
+    }
 
     async function refreshUsers() {
         const DATA = await requestWrapper('/settings', { type: 'users' });
@@ -99,6 +122,7 @@
         const DATA = await requestWrapper('/settings', { type: 'events' });
         const JSON = await DATA.json();
         events = JSON.data;
+        sortedEvents = [];
         events.forEach((element: any) => {
             sortedEvents.push({ value: element.id, name: element.event_name });
         });
@@ -121,6 +145,82 @@
         if (DATA.ok) {
             create.challenge = false;
             await refreshChallenges();
+            return true;
+        } else return false;
+    }
+
+    // @TODO: do this with Lucia Intgr
+    async function updateUser() {}
+
+    // @TODO: do user team creation first
+    async function updateTeam() {}
+
+    async function updateEvent() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'update-event',
+            data: {
+                id: editUUID,
+                name: editData.event_name,
+                description: editData.event_description
+            }
+        });
+        if (DATA.ok) {
+            edit.event = false;
+            await refreshEvents();
+            return true;
+        } else return false;
+    }
+
+    async function updateChallenge() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'update-challenge',
+            data: {
+                id: editUUID,
+                name: editData.challenge_name,
+                description: editData.challenge_description,
+                difficulty: selectedDiff,
+                event: selectedEvent
+            }
+        });
+        if (DATA.ok) {
+            edit.challenge = false;
+            await refreshChallenges();
+            return true;
+        } else return false;
+    }
+
+    async function deleteEvent() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'delete-event',
+            data: { id: editUUID }
+        });
+        if (DATA.ok) {
+            edit.event = false;
+            await refreshEvents();
+            return true;
+        } else return false;
+    }
+
+    async function deleteChallenge() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'delete-challenge',
+            data: { id: editUUID }
+        });
+        if (DATA.ok) {
+            edit.challenge = false;
+            await refreshChallenges();
+            return true;
+        } else return false;
+    }
+
+    async function deleteTeam() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'delete-team',
+            data: { id: editUUID }
+        });
+        if (DATA.ok) {
+            edit.team = false;
+            await refreshTeams();
             return true;
         } else return false;
     }
@@ -165,7 +265,7 @@
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button on:click={updateUser}>Update</Button>
                 <Button
                     on:click={() => {
                         edit.user = false;
@@ -182,7 +282,7 @@
 <Modal bind:open={edit.team} title="Edit Team">
     <div class="mb-6">
         <Label for="team_name" class="mb-2">Change Team Name</Label>
-        <Input id="team_name" placeholder="name" required />
+        <Input id="team_name" placeholder="name" bind:value={editData.user_name} required />
     </div>
     <div class="mb-6">
         <Label for="event_select" class="mb-2">Change Team Events</Label>
@@ -191,15 +291,15 @@
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button on:click={updateTeam}>Update</Button>
                 <Button
                     on:click={() => {
-                        edit.user = false;
+                        edit.team = false;
                     }}
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={deleteTeam} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -207,24 +307,24 @@
 <Modal bind:open={edit.event} title="Edit Event">
     <div class="mb-6">
         <Label for="event_name" class="mb-2">Change Event Name</Label>
-        <Input id="event_name" placeholder="name" required />
+        <Input id="event_name" placeholder="name" bind:value={editData.event_name} required />
     </div>
     <div class="mb-6">
         <Label for="event_textarea" class="mb-2">Change Event Description</Label>
-        <Textarea id="event_textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
+        <Textarea id="event_textarea" placeholder="..." rows="4" bind:value={editData.event_description} />
     </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button on:click={updateEvent}>Update</Button>
                 <Button
                     on:click={() => {
-                        edit.user = false;
+                        edit.event = false;
                     }}
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={deleteEvent} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -232,30 +332,36 @@
 <Modal bind:open={edit.challenge} title="Edit Challenge">
     <div class="mb-6">
         <Label for="chal_name" class="mb-2">Change Challenge Name</Label>
-        <Input id="chal_name" placeholder="name" required />
+        <Input id="chal_name" placeholder="name" bind:value={editData.challenge_name} required />
     </div>
     <div class="mb-6">
         <Label for="chall_textarea" class="mb-2">Change Challenge Description</Label>
-        <Textarea id="chal_textarea" placeholder="..." rows="4" />
+        <Textarea id="chal_textarea" placeholder="..." rows="4" bind:value={editData.challenge_description} />
     </div>
     <div class="mb-6">
         <Label>
             Change Challenge Difficulty
-            <Select class="mt-2" items={DIFFICULTIES} />
+            <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
+        </Label>
+    </div>
+    <div class="mb-6">
+        <Label>
+            Change Event Assignment
+            <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
         </Label>
     </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={() => alert('Handle "success"')}>Update</Button>
+                <Button on:click={updateChallenge}>Update</Button>
                 <Button
                     on:click={() => {
-                        edit.user = false;
+                        edit.challenge = false;
                     }}
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={deleteChallenge} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>
@@ -329,7 +435,7 @@
                         selectedEvent == '' ||
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
-                        challengeTemplate.file == ''}>Create</Button
+                        (challengeTemplate.file == '' && challengeTemplate.is_container)}>Create</Button
                 >
                 <Button
                     on:click={() => {
@@ -386,6 +492,8 @@
                                         <Button
                                             color="alternative"
                                             on:click={() => {
+                                                editUUID = entry.id;
+                                                editInvocate('user');
                                                 edit.user = edit.user ? false : true;
                                             }}><PenSolid class="w-4" /></Button
                                         >
@@ -431,6 +539,8 @@
                                     <TableBodyCell>
                                         <Button
                                             on:click={() => {
+                                                editUUID = entry.id;
+                                                editInvocate('team');
                                                 edit.team = edit.team ? false : true;
                                             }}>Edit</Button
                                         >
@@ -472,6 +582,8 @@
                                     <TableBodyCell>
                                         <Button
                                             on:click={() => {
+                                                editUUID = entry.id;
+                                                editInvocate('event');
                                                 edit.event = edit.event ? false : true;
                                             }}>Edit</Button
                                         >
@@ -513,6 +625,8 @@
                                     <TableBodyCell>
                                         <Button
                                             on:click={() => {
+                                                editUUID = entry.id;
+                                                editInvocate('challenge');
                                                 edit.challenge = edit.challenge ? false : true;
                                             }}>Edit</Button
                                         >

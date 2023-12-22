@@ -41,6 +41,8 @@ export async function normalWrapper(request: Request): Promise<Response> {
             response = await getEventChallenges(json.data.id);
             break;
         case 'deploy-challenge':
+            // ! @TODO: Awaiting proper request format from backend
+            /*
             const TEMP = await fetch(`http://172.31.35.112:8000/challenge?compose_file=FileNigma&environment_variables=%7B%22FLAG%22%3A%22${crypto.randomUUID().toString()}%22%7D`, {
                 method: 'POST',
                 headers: {
@@ -48,6 +50,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 }
             });
             response = await TEMP.json()
+            */
             break;
     }
     // formulate unifed response
@@ -107,6 +110,37 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             response = await createEvent(
                 json.data.name,
                 json.data.description
+            );
+            break;
+        case 'update-challenge':
+            response = await updateChallenge(
+                json.data.id,
+                json.data.name,
+                json.data.description,
+                json.data.difficulty,
+                json.data.event
+            );
+            break;
+        case 'update-event':
+            response = await updateEvent(
+                json.data.id,
+                json.data.name,
+                json.data.description
+            );
+            break;
+        case 'delete-event':
+            response = await deleteEvent(
+                json.data.id
+            );
+            break;
+        case 'delete-challenge':
+            response = await deleteChallenge(
+                json.data.id
+            );
+            break;
+        case 'delete-team':
+            response = await deleteTeam(
+                json.data.id
             );
             break;
     }
@@ -246,6 +280,56 @@ export const createTeam = async (name: string, desc: string, country: string) =>
             team_name: name,
             team_description: desc,
             team_country_code: country
+        }
+    });
+};
+
+export const updateEvent = async (id: string, name: string, desc: string) => {
+    await PRISMA.events.update({
+        where: {
+            id: id
+        },
+        data: {
+            event_name: name,
+            event_description: desc
+        }
+    });
+};
+
+export const updateChallenge = async (id: string, name: string, desc: string, diff: string, event: string) => {
+    await PRISMA.challenges.update({
+        where: {
+            id: id
+        },
+        data: {
+            challenge_name: name,
+            challenge_description: desc,
+            challenge_diff: diff,
+            event_id: event,
+        }
+    });
+};
+
+export const deleteTeam = async (id: string) => {
+    await PRISMA.teams.delete({
+        where: {
+            id: id
+        }
+    });
+};
+
+export const deleteChallenge = async (id: string) => {
+    await PRISMA.challenges.delete({
+        where: {
+            id: id
+        }
+    });
+};
+
+export const deleteEvent = async (id: string) => {
+    await PRISMA.events.delete({
+        where: {
+            id: id
         }
     });
 };
