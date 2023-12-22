@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Dashboard from '../components/Dashboard.svelte';
+import AdminSettings from '../components/Settings.svelte';
 import Header from '../components/Header.svelte';
+import { privilegedWrapper } from '../lib/db';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
@@ -10,6 +11,17 @@ if (!import.meta.env.DEV) {
     if (!session) return Astro.redirect('/login');
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
+    }
+    if (session.user.user_role != 'admin') {
+        return new Response('Forbidden', { status: 403 });
+    }
+}
+
+if (Astro.request.method === 'POST') {
+    if (session.user.user_role != 'admin') {
+        return new Response('Forbidden', { status: 403 });
+    } else {
+        return await privilegedWrapper(Astro.request);
     }
 }
 ---
@@ -21,7 +33,7 @@ if (!import.meta.env.DEV) {
         admin={session.user.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Dashboard client:visible />
+    <div transition:animate="slide" class="flex flex-1">
+        <AdminSettings userSession={session.user} client:visible />
     </div>
 </Layout>
