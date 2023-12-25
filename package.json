@@ -21,7 +21,7 @@
     "nodemailer": "^6.9.7",
     "prisma": "^5.6.0",
     "svelte": "^4.2.8",
-    "tailwindcss": "^3.3.6"
+    "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
     "flowbite-svelte": "^0.44.20",
