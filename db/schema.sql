@@ -60,8 +60,7 @@ CREATE TABLE user (
     email VARCHAR(64) NOT NULL UNIQUE,
     email_verified BOOLEAN,
     is_blocked BOOLEAN,
-    has_created_team BOOLEAN,
-    FOREIGN KEY (user_team_id) REFERENCES teams(id)
+    has_created_team BOOLEAN
 );
 CREATE TABLE user_key (
     id VARCHAR(255) PRIMARY KEY,

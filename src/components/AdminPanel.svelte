@@ -497,6 +497,7 @@
                             <TableHeadCell>Email</TableHeadCell>
                             <TableHeadCell>Type</TableHeadCell>
                             <TableHeadCell>Verified</TableHeadCell>
+                            <TableHeadCell>Blocked</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
                         <TableBody>
@@ -516,6 +517,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.email_verified}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.is_blocked}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         <Button

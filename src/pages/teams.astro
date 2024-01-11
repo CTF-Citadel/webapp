@@ -2,12 +2,17 @@
 import Layout from '../layouts/Layout.astro';
 import TeamOverview from '../components/TeamOverview.svelte';
 import Header from '../components/Header.svelte';
+import { auth } from '../lib/lucia';
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', is_blocked: false } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
-    if (!session || session.user.is_blocked) return Astro.redirect('/login');
+    if (!session) return Astro.redirect('/login');
+    if (session.user.isBlocked) {
+        await auth.invalidateAllUserSessions(session.user.userId);
+        return Astro.redirect('/login');
+    }
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }

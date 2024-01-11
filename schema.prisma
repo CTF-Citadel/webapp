@@ -12,7 +12,6 @@ model user {
   username         String         @unique
   user_role        String
   user_team_id     String
-  team             teams          @relation(fields: [user_team_id], references: [id])
   email            String         @unique
   email_verified   Boolean
   is_blocked       Boolean
@@ -80,7 +79,6 @@ model teams {
   team_description  String
   team_events       team_events[]
   team_challenges   team_challenges[]
-  user              user[]
 }
 
 model team_events {

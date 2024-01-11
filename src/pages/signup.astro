@@ -33,10 +33,11 @@ if (Astro.request.method === 'POST') {
                 attributes: {
                     username,
                     user_role: String(IS_INITIAL ? 'admin' : 'participant'),
-                    user_team: String(''),
+                    user_team_id: String(''),
                     email,
                     email_verified: Boolean(false),
-                    has_created_team: Boolean(false)
+                    has_created_team: Boolean(false),
+                    is_blocked: Boolean(false)
                 }
             });
             const session = await auth.createSession({

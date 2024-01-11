@@ -244,10 +244,17 @@ class DatabaseActions {
     };
 
     async blockUser(id: string) {
+        let RES = await auth.getUser(id);
         await auth.invalidateAllUserSessions(id);
-        await auth.updateUserAttributes(id, {
-            is_blocked: true
-        })
+        if (RES.isBlocked) {
+            await auth.updateUserAttributes(id, {
+                is_blocked: false
+            })
+        } else {
+            await auth.updateUserAttributes(id, {
+                is_blocked: true
+            })
+        }
     }
 
     async deleteEvent(id: string) {

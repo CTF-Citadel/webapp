@@ -4,13 +4,18 @@ import Header from '../../components/Header.svelte';
 import EmailVerify from '../../components/EmailVerification.svelte';
 import { sendVerificationLink } from '../../lib/lucia-email';
 import { generateEmailVerificationToken } from "../../lib/lucia-db";
+import { auth } from '../../lib/lucia';
 
 let emailSent = false;
 let errorMessage = 'None';
 let respStatus = 200;
 
 const session = await Astro.locals.auth.validate();
-if (!session || session.user.is_blocked) return Astro.redirect('/login');
+if (!session) return Astro.redirect('/login');
+if (session.user.isBlocked) {
+    await auth.invalidateAllUserSessions(session.user.userId);
+    return Astro.redirect('/login');
+}
 if (session.user.emailVerified) {
     return Astro.redirect('/');
 }
