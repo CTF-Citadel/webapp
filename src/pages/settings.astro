@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import AdminSettings from '../components/Settings.svelte';
 import Header from '../components/Header.svelte';
-import { privilegedWrapper } from '../lib/db';
+import { privilegedWrapper } from '../lib/backend';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
 
