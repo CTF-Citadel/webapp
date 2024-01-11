@@ -1,13 +1,13 @@
 import nodemailer from "nodemailer";
 
 // read from env
-const EMAIL_SRVC = process.env.EMAIL_SERVICE;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
 const EMAIL_USER = process.env.EMAIL_NAME;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 const INSTANCE_NAME = process.env.INSTANCE_NAME;
 
 let transporter = nodemailer.createTransport({
-    service: EMAIL_SRVC,
+    service: EMAIL_SERVICE,
     auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS

@@ -29,9 +29,9 @@
         challenges = JSON.data;
     }
 
-    async function deployChallenge() {
+    async function deployChallenge(challengeID: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge' });
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { id: challengeID } });
         if (DATA.ok) {
             const TEMP = await DATA.json();
             challengeResponse = TEMP.data;
@@ -65,13 +65,19 @@
                     <p id="challenge-diff">{challenge.challenge_diff}</p>
                 </div>
                 <div>
-                    <Button on:click={deployChallenge}>
-                        {#if deploymentStatus == 1}
-                            <Spinner class="mr-3" size="4" />Starting ..
-                        {:else}
-                            Start
-                        {/if}
-                    </Button>
+                    {#if challenge.needs_container}
+                        <Button
+                            on:click={() => {
+                                deployChallenge(challenge.id);
+                            }}
+                        >
+                            {#if deploymentStatus == 1}
+                                <Spinner class="mr-3" size="4" />Starting ..
+                            {:else}
+                                Start
+                            {/if}
+                        </Button>
+                    {/if}
                 </div>
                 {#if challengeResponse && deploymentStatus == 3}
                     <Alert class="my-2" color="green">

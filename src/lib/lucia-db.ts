@@ -1,25 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PRISMA_CONNECTION } from "./lucia";
 import { generateRandomString, isWithinExpiration } from "lucia/utils";
-
-// read from env
-const DB_PASS = process.env.DB_PASS;
-const DB_HOST = process.env.DB_HOST;
-const DB_NAME = process.env.DB_NAME;
 
 // expire time (15 minutes)
 const EXPIRES_IN = 1000 * 60 * 15;
 
-// db client
-const PRISMA = new PrismaClient({
-    datasources: {
-        db: {
-            url: `mysql://root:${DB_PASS}@${DB_HOST}:3306/${DB_NAME}`,
-        },
-    },
-});
-
 export const generateEmailVerificationToken = async (userId: string) => {
-    const storedUserTokens = await PRISMA.email_verification_token.findMany({
+    const storedUserTokens = await PRISMA_CONNECTION.email_verification_token.findMany({
         where: {
             user_id: userId,
         },
@@ -31,7 +17,7 @@ export const generateEmailVerificationToken = async (userId: string) => {
         if (reusableStoredToken) return reusableStoredToken.id;
     }
     const token = generateRandomString(64);
-    await PRISMA.email_verification_token.create({
+    await PRISMA_CONNECTION.email_verification_token.create({
         data: {
             id: token,
             expires: new Date().getTime() + EXPIRES_IN,
@@ -42,13 +28,13 @@ export const generateEmailVerificationToken = async (userId: string) => {
 };
 
 export const generatePasswordResetToken = async (email: string) => {
-    const targetUser = await PRISMA.user.findUnique({
+    const targetUser = await PRISMA_CONNECTION.user.findUnique({
         where: {
             email: email,
         },
     });
     if (targetUser == null) return false;
-    const storedUserTokens = await PRISMA.password_reset_token.findMany({
+    const storedUserTokens = await PRISMA_CONNECTION.password_reset_token.findMany({
         where: {
             user_id: targetUser.id,
         },
@@ -60,7 +46,7 @@ export const generatePasswordResetToken = async (email: string) => {
         if (reusableStoredToken) return reusableStoredToken.id;
     }
     const token = generateRandomString(64);
-    await PRISMA.password_reset_token.create({
+    await PRISMA_CONNECTION.password_reset_token.create({
         data: {
             id: token,
             expires: new Date().getTime() + EXPIRES_IN,
@@ -71,13 +57,13 @@ export const generatePasswordResetToken = async (email: string) => {
 };
 
 export const validateEmailVerificationToken = async (token: string) => {
-    const storedToken = await PRISMA.email_verification_token.findUnique({
+    const storedToken = await PRISMA_CONNECTION.email_verification_token.findUnique({
         where: {
             id: token,
         },
     });
     if (storedToken == null) return false;
-    await PRISMA.email_verification_token.deleteMany({
+    await PRISMA_CONNECTION.email_verification_token.deleteMany({
         where: {
             id: token,
         },
@@ -90,13 +76,13 @@ export const validateEmailVerificationToken = async (token: string) => {
 };
 
 export const validatePasswordResetToken = async (token: string) => {
-    const storedToken = await PRISMA.password_reset_token.findUnique({
+    const storedToken = await PRISMA_CONNECTION.password_reset_token.findUnique({
         where: {
             id: token,
         },
     });
     if (storedToken == null) return false;
-    await PRISMA.password_reset_token.deleteMany({
+    await PRISMA_CONNECTION.password_reset_token.deleteMany({
         where: {
             id: token,
         },
@@ -109,7 +95,7 @@ export const validatePasswordResetToken = async (token: string) => {
 };
 
 export const isValidPasswordResetToken = async (token: string) => {
-    const storedToken = await PRISMA.password_reset_token.findUnique({
+    const storedToken = await PRISMA_CONNECTION.password_reset_token.findUnique({
         where: {
             id: token,
         },
@@ -117,7 +103,7 @@ export const isValidPasswordResetToken = async (token: string) => {
     if (storedToken == null) return false;
     const tokenExpires = Number(storedToken.expires);
     if (!isWithinExpiration(tokenExpires)) {
-        await PRISMA.password_reset_token.deleteMany({
+        await PRISMA_CONNECTION.password_reset_token.deleteMany({
             where: {
                 id: token,
             },
@@ -128,7 +114,7 @@ export const isValidPasswordResetToken = async (token: string) => {
 };
 
 export const isRegisteredEmail = async (email: string) => {
-    const storedUser = await PRISMA.user.findUnique({
+    const storedUser = await PRISMA_CONNECTION.user.findUnique({
         where: {
             email: email,
         },
@@ -138,7 +124,7 @@ export const isRegisteredEmail = async (email: string) => {
 };
 
 export const isInitialUser = async () => {
-    const USERS = await PRISMA.user.findMany();
+    const USERS = await PRISMA_CONNECTION.user.findMany();
     if (USERS.length > 0) return false;
     return true;
 };

@@ -16,6 +16,7 @@ CREATE TABLE challenges (
     challenge_description VARCHAR(256),
     needs_container BOOLEAN,
     container_file VARCHAR(256),
+    static_file_url VARCHAR(256),
     event_id VARCHAR(36),
     FOREIGN KEY (event_id) REFERENCES events(id)
 );

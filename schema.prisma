@@ -67,6 +67,7 @@ model challenges {
   challenge_description String
   needs_container       Boolean
   container_file        String
+  static_file_url       String
   event_id              String
   event                 events            @relation(fields: [event_id], references: [id])
   team_challenges       team_challenges[]
