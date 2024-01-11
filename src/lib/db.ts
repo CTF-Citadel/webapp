@@ -71,8 +71,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 json.data.name,
                 json.data.description,
                 json.data.difficulty,
-                json.data.is_container,
-                json.data.file,
+                json.data.isContainer,
+                json.data.filePath,
+                json.data.fileURL,
                 json.data.event
             );
             break;
@@ -225,6 +226,7 @@ export const createChallenge = async (
     diff: string,
     isContainer: boolean,
     filePath: string,
+    fileURL: string,
     toEvent: string
 ) => {
     await PRISMA_CONNECTION.challenges.create({
@@ -235,7 +237,8 @@ export const createChallenge = async (
             challenge_description: desc,
             challenge_diff: diff,
             needs_container: isContainer,
-            container_file: filePath
+            container_file: filePath,
+            static_file_url: fileURL
         }
     });
 };

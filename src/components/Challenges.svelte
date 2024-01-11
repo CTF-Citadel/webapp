@@ -64,6 +64,14 @@
                     <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
                     <p id="challenge-diff">{challenge.challenge_diff}</p>
                 </div>
+                <div class="mb-6">
+                    <Label for="challenge-diff" class="mb-2">Challenge File</Label>
+                    <div class="p-2 bg-primary-500 rounded-lg w-fit">
+                        <a class="text-white" href={challenge.static_file_url} download
+                            >{challenge.static_file_url.split('/').pop()}</a
+                        >
+                    </div>
+                </div>
                 <div>
                     {#if challenge.needs_container}
                         <Button

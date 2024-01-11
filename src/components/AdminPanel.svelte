@@ -65,8 +65,9 @@
     let challengeTemplate = {
         name: '',
         description: '',
-        is_container: false,
-        file: ''
+        isContainer: false,
+        filePath: '',
+        fileURL: ''
     };
     let editUUID: string = '';
     let editData: any = {};
@@ -412,14 +413,18 @@
         </Label>
     </div>
     <div class="mb-6">
-        <Toggle bind:checked={challengeTemplate.is_container}>Needs Container</Toggle>
+        <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
     </div>
-    {#if challengeTemplate.is_container}
+    {#if challengeTemplate.isContainer}
         <div class="mb-6">
             <Label for="challenge-file" class="mb-2">Compose File</Label>
-            <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.file} required />
+            <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.filePath} required />
         </div>
     {/if}
+    <div class="mb-6">
+        <Label for="opt-file" class="mb-2">Optional File</Label>
+        <Input id="opt-file" placeholder="https://example.com/path/to/file.txt" bind:value={challengeTemplate.fileURL} required />
+    </div>
     <div class="mb-6">
         <Label>
             Assign To Event
@@ -435,7 +440,7 @@
                         selectedEvent == '' ||
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
-                        (challengeTemplate.file == '' && challengeTemplate.is_container)}>Create</Button
+                        (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button
                     on:click={() => {
