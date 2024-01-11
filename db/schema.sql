@@ -43,6 +43,8 @@ CREATE TABLE team_challenges (
     challenge_flag VARCHAR(36),
     challenge_host VARCHAR(36),
     challenge_port VARCHAR(36),
+    is_running BOOLEAN,
+    is_solved BOOLEAN,
     PRIMARY KEY (team_id, challenge_id),
     FOREIGN KEY (team_id) REFERENCES teams(id),
     FOREIGN KEY (challenge_id) REFERENCES challenges(id)

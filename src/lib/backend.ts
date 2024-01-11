@@ -1,4 +1,4 @@
-import DatabaseActions from "./db";
+import DatabaseActions from "./actions";
 
 const HANLDER = new DatabaseActions()
 
@@ -19,7 +19,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
             })
         );
     }
-    let response: any;
+    let response: any = "";
     // match the request tyoe
     switch (json.type) {
         case 'events':
@@ -29,7 +29,19 @@ export async function normalWrapper(request: Request): Promise<Response> {
             response = await HANLDER.getEventChallenges(json.data.id);
             break;
         case 'deploy-challenge':
-            response = await HANLDER.deployTeamChallenge(json.data.id);
+            response = await HANLDER.deployTeamChallenge(json.data.teamID, json.data.challengeID);
+            break;
+        case 'check-flag':
+            response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
+            if (response == true) {
+                response = {
+                    correct: true
+                }
+            } else {
+                response = {
+                    correct: false
+                }
+            }
             break;
     }
     // formulate unifed response
@@ -53,7 +65,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             })
         );
     }
-    let response: any;
+    let response: any = "";
     // match the request tyoe
     switch (json.type) {
         case 'users':
@@ -119,7 +131,12 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             );
             break;
         case 'delete-user':
-            response = await HANLDER.deleteTeam(
+            response = await HANLDER.deleteUser(
+                json.data.id
+            );
+            break;
+        case 'block-user':
+            response = await HANLDER.blockUser(
                 json.data.id
             );
             break;

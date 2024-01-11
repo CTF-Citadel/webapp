@@ -10,7 +10,7 @@ let errorMessage = 'None';
 let respStatus = 200;
 
 const session = await Astro.locals.auth.validate();
-if (!session) return Astro.redirect('/login');
+if (!session || session.user.is_blocked) return Astro.redirect('/login');
 if (session.user.emailVerified) {
     return Astro.redirect('/');
 }

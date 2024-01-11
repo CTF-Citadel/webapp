@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
 
     export let uuid: string = '';
+    export let team: string = '';
 
     let loading: boolean = true;
     let successFlag: boolean = false;
@@ -17,8 +18,10 @@
         loading = false;
     });
 
-    function checkFlag(input: string) {
-        if (input == challengeResponse.details.FLAG) {
+    async function checkFlag(challenge_id: string, input: string) {
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'check-flag', data: { teamID: team, challengeID: challenge_id, flag: input } });
+        const JSON = await DATA.json();
+        if (JSON.data.correct == true) {
             successFlag = true;
         }
     }
@@ -29,9 +32,9 @@
         challenges = JSON.data;
     }
 
-    async function deployChallenge(challengeID: string) {
+    async function deployChallenge(challenge_id: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { id: challengeID } });
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { teamID: team, challengeID: challenge_id } });
         if (DATA.ok) {
             const TEMP = await DATA.json();
             challengeResponse = TEMP.data;
@@ -107,7 +110,7 @@
                     <div>
                         <Button
                             on:click={() => {
-                                checkFlag(flagInput);
+                                checkFlag(challenge.challenge_uuid, flagInput);
                             }}
                         >
                             Submit

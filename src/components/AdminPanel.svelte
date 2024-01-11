@@ -225,6 +225,30 @@
             return true;
         } else return false;
     }
+
+    async function deleteUser() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'delete-user',
+            data: { id: editUUID }
+        });
+        if (DATA.ok) {
+            edit.user = false;
+            await refreshUsers();
+            return true;
+        } else return false;
+    }
+
+    async function blockUser() {
+        const DATA = await requestWrapper('/settings', {
+            type: 'block-user',
+            data: { id: editUUID }
+        });
+        if (DATA.ok) {
+            edit.user = false;
+            await refreshUsers();
+            return true;
+        } else return false;
+    }
 </script>
 
 <!--
@@ -274,8 +298,8 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={() => alert('Handle "block"')} color="red"><EyeSlash class="w-4" /></Button>
-            <Button on:click={() => alert('Handle "delete"')} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={() => blockUser()} color="red"><EyeSlash class="w-4" /></Button>
+            <Button on:click={() => deleteUser()} color="red"><TrashBinOutline class="w-4" /></Button>
         </div>
     </svelte:fragment>
 </Modal>

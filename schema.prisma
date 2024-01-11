@@ -97,6 +97,8 @@ model team_challenges {
   challenge_flag String
   challenge_host String
   challenge_port String
+  is_running     Boolean
+  is_solved      Boolean
   team_id        String
   challenge_id   String
   team           teams      @relation(fields: [team_id], references: [id])

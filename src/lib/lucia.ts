@@ -31,7 +31,8 @@ export const auth = lucia({
 			user_team: data.user_team,
 			email: data.email,
 			emailVerified: Boolean(data.email_verified),
-			hasCreatedTeam: Boolean(data.has_created_team)
+			hasCreatedTeam: Boolean(data.has_created_team),
+			isBlocked: Boolean(data.is_blocked)
 		};
 	}
 });

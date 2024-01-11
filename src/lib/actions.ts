@@ -1,7 +1,14 @@
 import { PRISMA_CONNECTION, auth } from './lucia';
 
+// read from env
+const BACKEND_HOST = process.env.BACKEND_HOST;
+const BACKEND_PORT = process.env.BACKEND_PORT;
+
 class DatabaseActions {
-    constructor() { }
+    #BACKEND_URL: string;
+    constructor() {
+        this.#BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`
+    }
 
     async getAllUsers() {
         const RES = await PRISMA_CONNECTION.user.findMany();
@@ -39,10 +46,9 @@ class DatabaseActions {
         }
     };
 
-    async getTeamEvents(id: string) {
-        let allEvents = [];
+    async getTeamEvents(team_id: string) {
         // @TODO: For Testing only!
-        const RES = await PRISMA_CONNECTION.events.findMany();
+        const EVENTS = await PRISMA_CONNECTION.events.findMany();
         /*
         const RES = await PRISMA.team_events.findMany({
             where: {
@@ -50,26 +56,8 @@ class DatabaseActions {
             }
         });
         */
-        if (RES.length > 0) {
-            for (const entry of RES) {
-                // @TODO: For Testing only!
-                const EVENT = await PRISMA_CONNECTION.events.findFirst({
-                    where: {
-                        id: entry.id
-                    }
-                });
-                /*
-                const EVENT = await PRISMA.events.findFirst({
-                    where: {
-                        id: entry.event_id
-                    }
-                });
-                */
-                if (EVENT != null) {
-                    allEvents.push(EVENT)
-                }
-            }
-            return allEvents;
+        if (EVENTS.length > 0) {
+            return EVENTS;
         } else {
             return [];
         }
@@ -111,10 +99,67 @@ class DatabaseActions {
         });
     };
 
-    async deployTeamChallenge(id: string) {
+    async deployTeamChallenge(team_id: string, challenge_id: string) {
         const GENERATED_UUID = crypto.randomUUID();
-        // ! @TODO: Awaiting proper request format from backend
+        const RES = await PRISMA_CONNECTION.challenges.findFirst({
+            where: {
+                id: challenge_id
+            }
+        });
+        if (RES != null) {
+            const REQ: Response = await fetch(this.#BACKEND_URL + "/challenge", {
+                body: JSON.stringify({
+                    challenge: RES.container_file,
+                    environment_variables: {
+                        FLAG: GENERATED_UUID
+                    }
+                })
+            })
+            try {
+                const DEPLOY_DATA = await REQ.json();
+                await PRISMA_CONNECTION.team_challenges.create({
+                    data: {
+                        team_id: team_id,
+                        challenge_id: challenge_id,
+                        challenge_uuid: DEPLOY_DATA.instance_id,
+                        challenge_flag: DEPLOY_DATA.details.FLAG,
+                        challenge_host: DEPLOY_DATA.details.IP,
+                        challenge_port: DEPLOY_DATA.details.PORT,
+                        is_running: true,
+                        is_solved: false
+                    }
+                })
+            } catch {
+                return false;
+            }
+        }
     };
+
+    async checkChallengeFlag(team_id: string, challenge_id: string, flag: string): Promise<boolean> {
+        const RES = await PRISMA_CONNECTION.team_challenges.findFirst({
+            where: {
+                team_id: team_id,
+                challenge_id: challenge_id
+            }
+        });
+        if (RES != null && RES.challenge_flag === flag) {
+            // @TODO: Maybe close the container here
+            // fetch(BACKEND) ...
+            await PRISMA_CONNECTION.team_challenges.update({
+                where: {
+                    team_id_challenge_id: {
+                        team_id: team_id,
+                        challenge_id: challenge_id
+                    }
+                },
+                data: {
+                    is_solved: true
+                }
+            })
+            return true;
+        }
+        return false;
+    }
 
     async createEvent(name: string, desc: string) {
         await PRISMA_CONNECTION.events.create({
@@ -169,6 +214,17 @@ class DatabaseActions {
                 id: id
             }
         });
+        let REF_USERS = await PRISMA_CONNECTION.user.findMany({
+            where: {
+                user_team_id: id
+            }
+        })
+        REF_USERS.forEach(async user => {
+            await auth.invalidateAllUserSessions(user.id);
+            await auth.updateUserAttributes(user.id, {
+                user_team: ""
+            })
+        })
     };
 
     async deleteUser(id: string) {
@@ -177,6 +233,9 @@ class DatabaseActions {
     };
 
     async deleteChallenge(id: string) {
+        // @TODO: Reference Checks for current challenge
+        // Either delete all references or choose to keep
+        // them if the event is still alive
         await PRISMA_CONNECTION.challenges.delete({
             where: {
                 id: id
@@ -184,7 +243,19 @@ class DatabaseActions {
         });
     };
 
+    async blockUser(id: string) {
+        await auth.invalidateAllUserSessions(id);
+        await auth.updateUserAttributes(id, {
+            is_blocked: true
+        })
+    }
+
     async deleteEvent(id: string) {
+        // @TODO: Event Deletion should prune:
+        // team_challenges since it could contain
+        // refs to old events
+        // We also need to delete any other event
+        // referenced data here
         await PRISMA_CONNECTION.events.delete({
             where: {
                 id: id

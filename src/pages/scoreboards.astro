@@ -3,11 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import Scoreboard from '../components/Scoreboards.svelte';
 import Header from '../components/Header.svelte';
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', is_blocked: false } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
-    if (!session) return Astro.redirect('/login');
+    if (!session || session.user.is_blocked) return Astro.redirect('/login');
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }

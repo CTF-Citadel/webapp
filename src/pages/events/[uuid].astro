@@ -6,11 +6,11 @@ import { normalWrapper } from '../../lib/backend';
 
 const { uuid } = Astro.params;
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin' } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', is_blocked: false } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
-    if (!session) return Astro.redirect('/login');
+    if (!session || session.user.is_blocked) return Astro.redirect('/login');
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
@@ -29,6 +29,6 @@ if (Astro.request.method === 'POST') {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Challenge uuid={uuid} client:visible />
+        <Challenge uuid={uuid} team={session.user.user_team} client:visible />
     </div>
 </Layout>
