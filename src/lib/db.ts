@@ -1,4 +1,4 @@
-import { PRISMA_CONNECTION } from './lucia';
+import { PRISMA_CONNECTION, auth } from './lucia';
 
 export type WrapperFormat = {
     type: string;
@@ -116,6 +116,11 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 json.data.id
             );
             break;
+        case 'delete-user':
+            response = await deleteTeam(
+                json.data.id
+            );
+            break;
         case 'delete-team':
             response = await deleteTeam(
                 json.data.id
@@ -131,7 +136,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
     );
 }
 
-export const getAllUsers = async () => {
+const getAllUsers = async () => {
     const RES = await PRISMA_CONNECTION.user.findMany();
     if (RES.length > 0) {
         return RES;
@@ -140,7 +145,7 @@ export const getAllUsers = async () => {
     }
 };
 
-export const getAllTeams = async () => {
+const getAllTeams = async () => {
     const RES = await PRISMA_CONNECTION.teams.findMany();
     if (RES.length > 0) {
         return RES;
@@ -149,7 +154,7 @@ export const getAllTeams = async () => {
     }
 };
 
-export const getAllEvents = async () => {
+const getAllEvents = async () => {
     const RES = await PRISMA_CONNECTION.events.findMany();
     if (RES.length > 0) {
         return RES;
@@ -158,7 +163,7 @@ export const getAllEvents = async () => {
     }
 };
 
-export const getAllChallenges = async () => {
+const getAllChallenges = async () => {
     const RES = await PRISMA_CONNECTION.challenges.findMany();
     if (RES.length > 0) {
         return RES;
@@ -167,7 +172,7 @@ export const getAllChallenges = async () => {
     }
 };
 
-export const getTeamEvents = async (id: string) => {
+const getTeamEvents = async (id: string) => {
     let allEvents = [];
     // @TODO: For Testing only!
     const RES = await PRISMA_CONNECTION.events.findMany();
@@ -203,7 +208,7 @@ export const getTeamEvents = async (id: string) => {
     }
 };
 
-export const getEventChallenges = async (id: string) => {
+const getEventChallenges = async (id: string) => {
     // @TODO: For Testing only!
     const RES = await PRISMA_CONNECTION.challenges.findMany();
     /*
@@ -220,7 +225,7 @@ export const getEventChallenges = async (id: string) => {
     }
 };
 
-export const createChallenge = async (
+const createChallenge = async (
     name: string,
     desc: string,
     diff: string,
@@ -243,12 +248,12 @@ export const createChallenge = async (
     });
 };
 
-export const deployTeamChallenge = async (id: string) => {
+const deployTeamChallenge = async (id: string) => {
     const GENERATED_UUID = crypto.randomUUID();
     // ! @TODO: Awaiting proper request format from backend
 };
 
-export const createEvent = async (name: string, desc: string) => {
+const createEvent = async (name: string, desc: string) => {
     await PRISMA_CONNECTION.events.create({
         data: {
             id: crypto.randomUUID().toString(),
@@ -258,7 +263,7 @@ export const createEvent = async (name: string, desc: string) => {
     });
 };
 
-export const createTeam = async (name: string, desc: string, country: string) => {
+const createTeam = async (name: string, desc: string, country: string) => {
     await PRISMA_CONNECTION.teams.create({
         data: {
             id: crypto.randomUUID().toString(),
@@ -269,7 +274,7 @@ export const createTeam = async (name: string, desc: string, country: string) =>
     });
 };
 
-export const updateEvent = async (id: string, name: string, desc: string) => {
+const updateEvent = async (id: string, name: string, desc: string) => {
     await PRISMA_CONNECTION.events.update({
         where: {
             id: id
@@ -281,7 +286,7 @@ export const updateEvent = async (id: string, name: string, desc: string) => {
     });
 };
 
-export const updateChallenge = async (id: string, name: string, desc: string, diff: string, event: string) => {
+const updateChallenge = async (id: string, name: string, desc: string, diff: string, event: string) => {
     await PRISMA_CONNECTION.challenges.update({
         where: {
             id: id
@@ -295,7 +300,7 @@ export const updateChallenge = async (id: string, name: string, desc: string, di
     });
 };
 
-export const deleteTeam = async (id: string) => {
+const deleteTeam = async (id: string) => {
     await PRISMA_CONNECTION.teams.delete({
         where: {
             id: id
@@ -303,7 +308,12 @@ export const deleteTeam = async (id: string) => {
     });
 };
 
-export const deleteChallenge = async (id: string) => {
+const deleteUser = async (id: string) => {
+    await auth.invalidateAllUserSessions(id);
+    await auth.deleteUser(id);
+};
+
+const deleteChallenge = async (id: string) => {
     await PRISMA_CONNECTION.challenges.delete({
         where: {
             id: id
@@ -311,7 +321,7 @@ export const deleteChallenge = async (id: string) => {
     });
 };
 
-export const deleteEvent = async (id: string) => {
+const deleteEvent = async (id: string) => {
     await PRISMA_CONNECTION.events.delete({
         where: {
             id: id
