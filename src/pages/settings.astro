@@ -1,9 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Event from '../components/Events.svelte';
+import AdminSettings from '../components/Settings.svelte';
 import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/backend';
-import { auth } from '../lib/lucia';
+import { privilegedWrapper } from '../lib/backend';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
 
@@ -11,16 +10,23 @@ if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
     if (!session) return Astro.redirect('/login');
     if (session.user.isBlocked) {
-        await auth.invalidateAllUserSessions(session.user.userId);
+        await Astro.locals.auth.invalidateAllUserSessions(session.user.userId);
         return Astro.redirect('/login');
     }
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
+    if (session.user.user_role != 'admin') {
+        return new Response('Forbidden', { status: 403 });
+    }
 }
 
 if (Astro.request.method === 'POST') {
-    return await normalWrapper(Astro.request);
+    if (session.user.user_role != 'admin') {
+        return new Response('Forbidden', { status: 403 });
+    } else {
+        return await privilegedWrapper(Astro.request);
+    }
 }
 ---
 
@@ -31,7 +37,7 @@ if (Astro.request.method === 'POST') {
         admin={session.user.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Event client:visible />
+    <div transition:animate="slide" class="flex flex-1">
+        <AdminSettings userSession={session.user} client:visible />
     </div>
 </Layout>

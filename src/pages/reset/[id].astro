@@ -2,46 +2,52 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import PasswordReset from '../../components/PasswordReset.svelte';
-import { validatePasswordResetToken } from "../../lib/lucia-db";
+import { validatePasswordResetToken, isValidPasswordResetToken } from "../../lib/lucia-db";
 import { auth } from '../../lib/lucia';
 
 const { id } = Astro.params;
-let resetID: any;
 let errorMessage = 'None';
 let respStatus = 200;
 
 try {
-    resetID = await validatePasswordResetToken(id || "");
-    if (!resetID) {
+    const VALID = await isValidPasswordResetToken(id || "");
+    if (!VALID) {
         return new Response("Invalid or Expired Token!", {
             status: 401
         });
     }
 } catch {
-    return new Response("Invalid Email Verification Link!", {
+    return new Response("Invalid Password Reset Link!", {
         status: 400
     });
 }
 
 if (Astro.request.method === 'POST') {
     const DATA = await Astro.request.json();
-    const password = DATA.password;
-    const USER = await auth.getUser(resetID);
-    await auth.invalidateAllUserSessions(USER.userId);
-    await auth.updateKeyPassword("email", USER.email, password)
-    return new Response(
-        JSON.stringify({
-            status: respStatus,
-            error: errorMessage
-        }),
-        {
-            status: respStatus
-        }
-    );
+    const TOKEN = await validatePasswordResetToken(id || "");
+    if (TOKEN) {
+        const password = DATA.password;
+        const USER = await auth.getUser(TOKEN);
+        await auth.invalidateAllUserSessions(USER.userId);
+        await auth.updateKeyPassword("email", USER.email, password)
+        return new Response(
+            JSON.stringify({
+                status: respStatus,
+                error: errorMessage
+            }),
+            {
+                status: respStatus
+            }
+        );
+    } else {
+        return new Response("Invalid or Expired Token!", {
+            status: 401
+        });
+    }
 }
 ---
 
-<Layout title={id || ''}>
+<Layout title="Password Reset Check">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
         <PasswordReset id={id} client:visible />

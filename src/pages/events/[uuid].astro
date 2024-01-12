@@ -1,9 +1,11 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Event from '../components/Events.svelte';
-import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/backend';
-import { auth } from '../lib/lucia';
+import Layout from '../../layouts/Layout.astro';
+import Challenge from '../../components/Challenges.svelte';
+import Header from '../../components/Header.svelte';
+import { normalWrapper } from '../../lib/backend';
+import { auth } from '../../lib/lucia';
+
+const { uuid } = Astro.params;
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
 
@@ -32,6 +34,6 @@ if (Astro.request.method === 'POST') {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Event client:visible />
+        <Challenge uuid={uuid} team={session.user.user_team} client:visible />
     </div>
 </Layout>

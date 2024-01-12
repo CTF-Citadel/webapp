@@ -1,97 +1,129 @@
-<script>
-    import AccordionItem from 'flowbite-svelte/AccordionItem.svelte';
-    import Accordion from 'flowbite-svelte/Accordion.svelte';
-    import FileCodeSolid from 'flowbite-svelte-icons/FileCodeSolid.svelte';
-    //import UsersGroupOutline from 'flowbite-svelte-icons/UsersGroupOutline.svelte';
-    //import FingerprintSolid from 'flowbite-svelte-icons/FingerprintSolid.svelte';
-    //import DrawSquareSolid from 'flowbite-svelte-icons/DrawSquareSolid.svelte';
-    //import EyeSlashOutline from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
+<script lang="ts">
+    import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
+    import { requestWrapper } from '../lib/helpers';
+    import { onMount } from 'svelte';
 
-    const TEMPLATE_CHALLENGES = {
-        challenge1: {
-            category: 'Programming',
-            difficulty: 'Easy',
-            points: 10,
-            name: 'Introduction to Variables',
-            description: 'This is a easy challenge',
-            isdone: true,
-            flagformat: "TH{ . . . }"
-        },
-        challenge2: {
-            category: 'OSINT',
-            difficulty: 'Medium',
-            points: 20,
-            name: 'Responsive Design Challenge',
-            description: 'This is a medium challenge',
-            isdone: false,
-            flagformat: "TH{ . . . }"
-        },
-        challenge3: {
-            category: 'Forensic',
-            difficulty: 'Hard',
-            points: 30,
-            name: 'Machine Learning Project',
-            description: 'This is a hard challenge',
-            isdone: false,
-            flagformat: "TH ..."
+    export let uuid: string = '';
+    export let team: string = '';
+
+    let loading: boolean = true;
+    let successFlag: boolean = false;
+    let deploymentStatus: 0 | 1 | 2 | 3 = 0;
+    let challenges: any[] = [];
+    let challengeResponse: any = false;
+    let flagInput: string = '';
+
+    onMount(async () => {
+        await refreshChallenges();
+        loading = false;
+    });
+
+    async function checkFlag(challenge_id: string, input: string) {
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'check-flag', data: { teamID: team, challengeID: challenge_id, flag: input } });
+        const JSON = await DATA.json();
+        if (JSON.data.correct == true) {
+            successFlag = true;
         }
-        // Template for real challenges
-    };
+    }
+
+    async function refreshChallenges() {
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'challenges', data: { id: uuid } });
+        const JSON = await DATA.json();
+        challenges = JSON.data;
+    }
+
+    async function deployChallenge(challenge_id: string) {
+        deploymentStatus = 1;
+        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { teamID: team, challengeID: challenge_id } });
+        if (DATA.ok) {
+            const TEMP = await DATA.json();
+            challengeResponse = TEMP.data;
+            deploymentStatus = 3;
+            return true;
+        } else {
+            deploymentStatus = 2;
+            return false;
+        }
+    }
 </script>
 
-<div class="!w-[90%]">
-    <Accordion multiple>
-        {#each Object.values(TEMPLATE_CHALLENGES) as challenge}
-            <AccordionItem class="border-none !rounded-none">
-                <div slot="header" class="flex-container">
-                    <FileCodeSolid class="mt-0.5" />
-                    {#if challenge.isdone == true}
-                        <div class="font-bold line-through">{challenge.category}:</div>
-                        <div class="font-bold line-through">{challenge.name} ({challenge.points})</div>
-                    {:else}
-                        <div class="font-bold">{challenge.category}:</div>
-                        <div class="font-bold">{challenge.name} ({challenge.points})</div>
-                    {/if}
-                    {#if challenge.difficulty == 'Easy'}
-                        <div class="text-green-500">Difficulty: {challenge.difficulty}</div>
-                    {:else if challenge.difficulty == 'Medium'}
-                        <div class="text-orange-500">Difficulty: {challenge.difficulty}</div>
-                    {:else}
-                        <div class="text-red-500">Difficulty: {challenge.difficulty}</div>
+<div class="flex flex-col 2xl:flex-row">
+    {#if loading}
+        <div class="text-center">
+            <Spinner size={'16'} />
+        </div>
+    {:else if challenges.length > 0}
+        {#each challenges as challenge}
+            <Card>
+                <div class="mb-6">
+                    <Label for="challenge-name" class="mb-2">Challenge Name</Label>
+                    <p id="challenge-diff">{challenge.challenge_name}</p>
+                </div>
+                <div class="mb-6">
+                    <Label for="challenge-desc" class="mb-2">Challenge Description</Label>
+                    <p id="challenge-diff">{challenge.challenge_description}</p>
+                </div>
+                <div class="mb-6">
+                    <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
+                    <p id="challenge-diff">{challenge.challenge_diff}</p>
+                </div>
+                <div class="mb-6">
+                    <Label for="challenge-diff" class="mb-2">Challenge File</Label>
+                    <div class="p-2 bg-primary-500 rounded-lg w-fit">
+                        <a class="text-white" href={challenge.static_file_url} download
+                            >{challenge.static_file_url.split('/').pop()}</a
+                        >
+                    </div>
+                </div>
+                <div>
+                    {#if challenge.needs_container}
+                        <Button
+                            on:click={() => {
+                                deployChallenge(challenge.id);
+                            }}
+                        >
+                            {#if deploymentStatus == 1}
+                                <Spinner class="mr-3" size="4" />Starting ..
+                            {:else}
+                                Start
+                            {/if}
+                        </Button>
                     {/if}
                 </div>
-                <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.description}</p>
-                <div class="relative">
-                    {#if challenge.isdone == false}
-                        <input
-                            type="text"
-                            id="search"
-                            class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder={challenge.flagformat}
-                            required
-                        />
-                        <button
-                            type="submit"
-                            class="text-white absolute right-2.5 bottom-2.5 bg-pink-700 hover:bg-pink-800 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
-                            >Submit Flag</button
+                {#if challengeResponse && deploymentStatus == 3}
+                    <Alert class="my-2" color="green">
+                        <span class="font-bold">Started!</span><br />
+                        Infos below.
+                    </Alert>
+                    <div class="mb-2">
+                        <Label for="challenge-ip" class="mb-2">IP</Label>
+                        <p id="challenge-ip">{challengeResponse.details.IP}</p>
+                    </div>
+                    <div class="mb-2">
+                        <Label for="challenge-port" class="mb-2">Port</Label>
+                        <p id="challenge-port">{challengeResponse.details.PORT}</p>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="flag" class="mb-2">Flag</Label>
+                        <Input id="flag" placeholder="TH..." bind:value={flagInput} required />
+                    </div>
+                    <div>
+                        <Button
+                            on:click={() => {
+                                checkFlag(challenge.challenge_uuid, flagInput);
+                            }}
                         >
-                    {:else}
-                        <input
-                            type="text"
-                            id="search"
-                            class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-green-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-green-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Submitted!, Well done"
-                            required
-                            disabled
-                        />
-                        <button
-                            type="submit"
-                            class="text-white absolute right-2.5 bottom-2.5 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-                            disabled>Flag Submitted</button
-                        >
+                            Submit
+                        </Button>
+                    </div>
+                    {#if successFlag}
+                        <Alert class="my-2" color="green">
+                            <span class="font-bold">Correct Flag!</span><br />
+                            Congratulations.
+                        </Alert>
                     {/if}
-                </div>
-            </AccordionItem>
+                {/if}
+            </Card>
         {/each}
-    </Accordion>
+    {/if}
 </div>

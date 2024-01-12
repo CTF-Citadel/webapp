@@ -2,9 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import SignupPage from '../components/Signup.svelte';
 import Header from '../components/Header.svelte';
-import { generateEmailVerificationToken } from "../lib/lucia-db";
+import { generateEmailVerificationToken, isInitialUser } from "../lib/lucia-db";
 import { isValidEmail, sendVerificationLink } from '../lib/lucia-email';
-import { generateRandomString } from 'lucia/utils';
 import { auth } from '../lib/lucia';
 
 let emailInput = '';
@@ -24,6 +23,7 @@ if (Astro.request.method === 'POST') {
     const validPassword = typeof password === 'string' && password.length >= 6 && password.length <= 255;
     if (isValidEmail(email) && validPassword) {
         try {
+            const IS_INITIAL = await isInitialUser();
             const user = await auth.createUser({
                 key: {
                     providerId: 'email',
@@ -32,11 +32,12 @@ if (Astro.request.method === 'POST') {
                 },
                 attributes: {
                     username,
-                    user_role: String('participant'),
-                    user_team: String(''),
+                    user_role: String(IS_INITIAL ? 'admin' : 'participant'),
+                    user_team_id: String(''),
                     email,
                     email_verified: Boolean(false),
-                    has_created_team: Boolean(false)
+                    has_created_team: Boolean(false),
+                    is_blocked: Boolean(false)
                 }
             });
             const session = await auth.createSession({

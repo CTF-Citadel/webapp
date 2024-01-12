@@ -1,8 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Event from '../components/Events.svelte';
+import UserPage from '../components/User.svelte';
 import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/backend';
 import { auth } from '../lib/lucia';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
@@ -18,10 +17,6 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
 }
-
-if (Astro.request.method === 'POST') {
-    return await normalWrapper(Astro.request);
-}
 ---
 
 <Layout title="CTF-Citadel">
@@ -31,7 +26,7 @@ if (Astro.request.method === 'POST') {
         admin={session.user.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Event client:visible />
+    <div transition:animate="slide" class="flex flex-1">
+        <UserPage userSession={session.user} client:visible />
     </div>
 </Layout>

@@ -11,18 +11,20 @@
         password_repeat: ''
     };
 
+    function checkInput() {
+        if (inputs.password != inputs.password_repeat) {
+            noMatch = true;
+        } else noMatch = false;
+    }
+
     async function onSubmit() {
-        // check for password
-        noMatch = false;
-        if (inputs.password == inputs.password_repeat) {
-            const RESP = await fetch(`/reset/${id}`, {
-                method: 'POST',
-                body: JSON.stringify(inputs)
-            });
-            if (RESP) {
-                authResponse = await RESP.json();
-            }
-        } else noMatch = true;
+        const RESP = await fetch(`/reset/${id}`, {
+            method: 'POST',
+            body: JSON.stringify(inputs)
+        });
+        if (RESP) {
+            authResponse = await RESP.json();
+        }
     }
 </script>
 
@@ -53,6 +55,7 @@
                 <span>Repeat Password</span>
                 <Input
                     bind:value={inputs.password_repeat}
+                    on:input={checkInput}
                     type="password"
                     name="password"
                     autocomplete="password"
@@ -66,7 +69,7 @@
             {#if authResponse && authResponse.error != 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
-            <Button on:click={onSubmit} class="w-full">Reset Password</Button>
+            <Button on:click={onSubmit} class="w-full" disabled={noMatch || inputs.password == '' || inputs.password_repeat == ''}>Reset Password</Button>
         {/if}
     </div>
 </Card>

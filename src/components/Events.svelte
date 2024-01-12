@@ -1,22 +1,42 @@
-<script>
-    import { Card, Button } from 'flowbite-svelte';
+<script lang="ts">
+    import { Card, Button, Spinner } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
+    import { requestWrapper } from '../lib/helpers';
+    import { onMount } from 'svelte';
+
+    export let userSession: any = {};
+
+    let loading: boolean = true;
+    let events: any[] = [];
+
+    onMount(async () => {
+        await refreshEvents();
+        loading = false;
+    });
+
+    async function refreshEvents() {
+        const DATA = await requestWrapper('/events', { type: 'events', data: { id: userSession.user_team } });
+        const JSON = await DATA.json();
+        events = JSON.data;
+    }
 </script>
 
-
 <div class="flex flex-col 2xl:flex-row">
-    <Card img="/img/scoreboard.webp" class="m-2">
-        <a href="/challenges">
-            <Button>
-                Senior Challenges <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
-            </Button>
-        </a>
-    </Card>
-    <Card img="/img/teams.webp" class="m-2">
-        <a href="/challenges">
-            <Button>
-                Junior Challenges <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
-            </Button>
-        </a>
-    </Card>
+    {#if loading}
+        <div class="text-center">
+            <Spinner size={'16'} />
+        </div>
+    {:else}
+        {#if events.length > 0}
+            {#each events as event}
+                <Card img="/img/scoreboard.webp" class="m-2">
+                    <a href="/events/{event.id}">
+                        <Button>
+                            {event.event_name} <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            
+                        </Button>
+                    </a>
+                </Card>
+            {/each}
+        {/if}
+    {/if}
 </div>

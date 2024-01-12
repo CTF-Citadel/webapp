@@ -47,12 +47,15 @@ services:
       dockerfile: Dockerfile
     hostname: astro
     environment:
+      INSTANCE_NAME: 'testCTF'
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
       DB_HOST: 'mariadb'
       DB_NAME: 'lucia'
       DB_PASS: 'CHANGEME'
+      BACKEND_HOST: '127.0.0.1'
+      BACKEND_PORT: 8080
       TZ: Europe/Vienna
     restart: unless-stopped
     profiles:

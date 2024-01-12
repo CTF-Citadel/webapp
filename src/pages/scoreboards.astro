@@ -1,13 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Scoreboards from '../components/Scoreboards.svelte';
+import Scoreboard from '../components/Scoreboards.svelte';
 import Header from '../components/Header.svelte';
+import { auth } from '../lib/lucia';
 
-let session = { user: { username: 'DEV' } };
+let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
     if (!session) return Astro.redirect('/login');
+    if (session.user.isBlocked) {
+        await auth.invalidateAllUserSessions(session.user.userId);
+        return Astro.redirect('/login');
+    }
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
@@ -15,8 +20,13 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="CTF-Citadel">
-    <Header client:visible />
+    <Header
+        username={session.user.username}
+        interactive={true}
+        admin={session.user.user_role == 'admin' ? true : false}
+        client:visible
+    />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Scoreboards client:visible />
+        <Scoreboard client:visible />
     </div>
 </Layout>
