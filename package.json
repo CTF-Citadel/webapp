@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/nodemailer": "^6.4.14",
     "@types/node": "^20.10.5",
-    "flowbite-svelte": "^0.44.20",
+    "flowbite-svelte": "^0.44.21",
     "flowbite-svelte-icons": "^0.4.5"
   }
 }
