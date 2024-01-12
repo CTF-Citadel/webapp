@@ -16,10 +16,15 @@
     onMount(async () => {
         await refreshChallenges();
         loading = false;
+        console.log(challenges);
+        console.log(challenges.length);
     });
 
     async function checkFlag(challenge_id: string, input: string) {
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'check-flag', data: { teamID: team, challengeID: challenge_id, flag: input } });
+        const DATA = await requestWrapper('/events/' + uuid, {
+            type: 'check-flag',
+            data: { teamID: team, challengeID: challenge_id, flag: input }
+        });
         const JSON = await DATA.json();
         if (JSON.data.correct == true) {
             successFlag = true;
@@ -34,7 +39,10 @@
 
     async function deployChallenge(challenge_id: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { teamID: team, challengeID: challenge_id } });
+        const DATA = await requestWrapper('/events/' + uuid, {
+            type: 'deploy-challenge',
+            data: { teamID: team, challengeID: challenge_id }
+        });
         if (DATA.ok) {
             const TEMP = await DATA.json();
             challengeResponse = TEMP.data;
@@ -47,14 +55,14 @@
     }
 </script>
 
-<div class="flex flex-col 2xl:flex-row">
+<div class="flex flex-1 flex-wrap">
     {#if loading}
-        <div class="text-center">
+        <div class="flex-1 text-center justify-center">
             <Spinner size={'16'} />
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card>
+            <Card class="flex-1 max-w-[33%] min-w-[33%]">
                 <div class="mb-6">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                     <p id="challenge-diff">{challenge.challenge_name}</p>
@@ -70,8 +78,8 @@
                 <div class="mb-6">
                     <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                     <div class="p-2 bg-primary-500 rounded-lg w-fit">
-                        <a class="text-white" href={challenge.static_file_url} download
-                            >{challenge.static_file_url.split('/').pop()}</a
+                        <a class="text-white" href={challenge.container_file} download
+                            >{challenge.container_file.split('/').pop()}</a
                         >
                     </div>
                 </div>
@@ -127,3 +135,4 @@
         {/each}
     {/if}
 </div>
+
