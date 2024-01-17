@@ -33,7 +33,7 @@ if (Astro.request.method === 'POST') {
         admin={session.user.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 flex-col">
+    <div transition:animate="slide">
         <Challenge uuid={uuid} team={session.user.user_team} client:visible />
     </div>
 </Layout>

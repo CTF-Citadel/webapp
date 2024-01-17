@@ -2,6 +2,7 @@
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
     import { requestWrapper } from '../lib/helpers';
     import { onMount } from 'svelte';
+    import { AccordionItem, Accordion } from 'flowbite-svelte';
 
     export let uuid: string = '';
     export let team: string = '';
@@ -55,22 +56,24 @@
     }
 </script>
 
-<div class="flex flex-1 flex-wrap">
+<div class="flex flex-wrap gap-4 ml-4 mt-3 overflow-hidden">
     {#if loading}
         <div class="flex-1 text-center justify-center">
             <Spinner size={'16'} />
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card class="flex-1 max-w-[33%] min-w-[33%]">
+            <Card class="flex-1 max-w-[32%] min-w-[32%]">
                 <div class="mb-6">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                     <p id="challenge-diff">{challenge.challenge_name}</p>
                 </div>
-                <div class="mb-6">
-                    <Label for="challenge-desc" class="mb-2">Challenge Description</Label>
-                    <p id="challenge-diff">{challenge.challenge_description}</p>
-                </div>
+                <Accordion flush>
+                    <AccordionItem>
+                        <span slot="header">Challenge Description</span>
+                        <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>                    
+                    </AccordionItem>
+                </Accordion>
                 <div class="mb-6">
                     <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
                     <p id="challenge-diff">{challenge.challenge_diff}</p>
