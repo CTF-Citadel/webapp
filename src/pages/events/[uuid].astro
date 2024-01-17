@@ -7,7 +7,9 @@ import { auth } from '../../lib/lucia';
 
 const { uuid } = Astro.params;
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
+let session = {
+    user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false }
+};
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();

@@ -24,7 +24,8 @@
                 id: '475ccb4f-56a0-4881-b52b-483ddc194c8e',
                 challenge_name: 'TestChallenge5',
                 challenge_diff: 'Medium',
-                challenge_description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+                challenge_description:
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
                 needs_container: true,
                 container_file: '/test5',
                 event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
@@ -65,7 +66,7 @@
                 container_file: '/test3',
                 event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
             }
-            ]
+        ];
     });
 
     async function checkFlag(challenge_id: string, input: string) {
@@ -118,33 +119,33 @@
                 <Accordion flush>
                     <AccordionItem>
                         <span slot="header">Challenge Description</span>
-                        <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>                    
+                        <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
                     </AccordionItem>
                 </Accordion>
                 <div class="mb-6 mt-6">
                     <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
-                    {#if challenge.challenge_diff == "Easy"}
-                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_diff}</p>   
-                    {:else if challenge.challenge_diff == "Medium"}
-                        <p id="challenge-diff"  class="text-orange-400">{challenge.challenge_diff}</p>
+                    {#if challenge.challenge_diff == 'Easy'}
+                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_diff}</p>
+                    {:else if challenge.challenge_diff == 'Medium'}
+                        <p id="challenge-diff" class="text-orange-400">{challenge.challenge_diff}</p>
                     {:else}
-                        <p id="challenge-diff"  class="text-red-400">{challenge.challenge_diff}</p>
+                        <p id="challenge-diff" class="text-red-400">{challenge.challenge_diff}</p>
                     {/if}
-
                 </div>
                 <div class="mb-6">
                     <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                     <div class="p-2 bg-primary-500 rounded-lg w-fit">
                         <a class="text-white" href={challenge.container_file} download
-                            >{challenge.container_file.split('/').pop()}</a>
+                            >{challenge.container_file.split('/').pop()}</a
+                        >
                     </div>
                 </div>
                 <Label for="flag-submit" class="mb-2">Submit Flag</Label>
                 <div class="mb-6 flex">
                     <Input id="flag-submit" placeholder="TH ..." />
                     <Button type="submit" class="text-white px-4 py-2">Submit</Button>
-                  </div>
-                <div>   
+                </div>
+                <div>
                     {#if challenge.needs_container}
                         <Button
                             on:click={() => {
@@ -196,4 +197,3 @@
         {/each}
     {/if}
 </div>
-
