@@ -11,21 +11,21 @@
     "npmrun": "astro build && NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^6.1.0",
-    "@astrojs/svelte": "^4.0.4",
-    "@astrojs/tailwind": "^5.0.1",
+    "@astrojs/node": "^7.0.4",
+    "@astrojs/svelte": "^5.0.3",
+    "@astrojs/tailwind": "^5.1.0",
     "@lucia-auth/adapter-prisma": "^3.0.2",
-    "astro": "^3.6.4",
-    "lucia": "^2.7.4",
-    "nodemailer": "^6.9.7",
+    "astro": "^4.1.2",
+    "lucia": "^2.7.6",
+    "nodemailer": "^6.9.8",
     "prisma": "^5.8.0",
     "svelte": "^4.2.8",
-    "tailwindcss": "^3.3.6"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
+    "@types/node": "^20.11.0",
     "@types/nodemailer": "^6.4.14",
-    "@types/node": "^20.10.5",
-    "flowbite-svelte": "^0.44.20",
-    "flowbite-svelte-icons": "^0.4.5"
+    "flowbite-svelte": "^0.44.22",
+    "flowbite-svelte-icons": "^1.0.2"
   }
 }
