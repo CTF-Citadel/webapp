@@ -17,56 +17,6 @@
     onMount(async () => {
         await refreshChallenges();
         loading = false;
-        console.log(challenges);
-        console.log(challenges.length);
-        challenges = [
-            {
-                id: '475ccb4f-56a0-4881-b52b-483ddc194c8e',
-                challenge_name: 'TestChallenge5',
-                challenge_diff: 'Medium',
-                challenge_description:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-                needs_container: true,
-                container_file: '/test5',
-                event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
-            },
-            {
-                id: '5db7f19c-c0b1-4757-bfb7-5e1f82cb0ec4',
-                challenge_name: 'TestChallenge2',
-                challenge_diff: 'Medium',
-                challenge_description: 'TestChallenge2',
-                needs_container: true,
-                container_file: '/test2',
-                event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
-            },
-            {
-                id: '88381fe0-2c7f-4c32-b510-35ba3776aee8',
-                challenge_name: 'TestChallenge4',
-                challenge_diff: 'Hard',
-                challenge_description: 'TestChallenge4',
-                needs_container: true,
-                container_file: '/test3',
-                event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
-            },
-            {
-                id: '892e00c8-efd4-438b-8411-da273b5d40ac',
-                challenge_name: 'TestChallenge1',
-                challenge_diff: 'Easy',
-                challenge_description: 'TestChallenge1',
-                needs_container: true,
-                container_file: '/test',
-                event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
-            },
-            {
-                id: 'f24d184e-bb13-4e66-8df5-26ff751ff549',
-                challenge_name: 'TestChallenge3',
-                challenge_diff: 'Hard',
-                challenge_description: 'TestChallenge3',
-                needs_container: true,
-                container_file: '/test3',
-                event_id: '0307d3fd-729e-490b-8d34-70d01d3e2d4f'
-            }
-        ];
     });
 
     async function checkFlag(challenge_id: string, input: string) {
