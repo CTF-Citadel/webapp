@@ -7,7 +7,9 @@ import { auth } from '../../lib/lucia';
 
 const { uuid } = Astro.params;
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
+let session = {
+    user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false }
+};
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -33,7 +35,7 @@ if (Astro.request.method === 'POST') {
         admin={session.user.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
+    <div transition:animate="slide">
         <Challenge uuid={uuid} team={session.user.user_team} client:visible />
     </div>
 </Layout>

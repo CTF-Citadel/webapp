@@ -2,6 +2,7 @@
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
     import { requestWrapper } from '../lib/helpers';
     import { onMount } from 'svelte';
+    import { AccordionItem, Accordion } from 'flowbite-svelte';
 
     export let uuid: string = '';
     export let team: string = '';
@@ -19,7 +20,10 @@
     });
 
     async function checkFlag(challenge_id: string, input: string) {
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'check-flag', data: { teamID: team, challengeID: challenge_id, flag: input } });
+        const DATA = await requestWrapper('/events/' + uuid, {
+            type: 'check-flag',
+            data: { teamID: team, challengeID: challenge_id, flag: input }
+        });
         const JSON = await DATA.json();
         if (JSON.data.correct == true) {
             successFlag = true;
@@ -34,7 +38,10 @@
 
     async function deployChallenge(challenge_id: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'deploy-challenge', data: { teamID: team, challengeID: challenge_id } });
+        const DATA = await requestWrapper('/events/' + uuid, {
+            type: 'deploy-challenge',
+            data: { teamID: team, challengeID: challenge_id }
+        });
         if (DATA.ok) {
             const TEMP = await DATA.json();
             challengeResponse = TEMP.data;
@@ -47,33 +54,46 @@
     }
 </script>
 
-<div class="flex flex-col 2xl:flex-row">
+<div class="flex flex-wrap gap-4 ml-4 mt-3 overflow-hidden">
     {#if loading}
-        <div class="text-center">
+        <div class="flex-1 text-center justify-center">
             <Spinner size={'16'} />
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card>
-                <div class="mb-6">
+            <Card class="flex-1 max-w-[32%] min-w-[32%]">
+                <div class="mb-2">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
-                    <p id="challenge-diff">{challenge.challenge_name}</p>
+                    <p id="challenge-name">{challenge.challenge_name}</p>
                 </div>
-                <div class="mb-6">
-                    <Label for="challenge-desc" class="mb-2">Challenge Description</Label>
-                    <p id="challenge-diff">{challenge.challenge_description}</p>
-                </div>
-                <div class="mb-6">
+                <Accordion flush>
+                    <AccordionItem>
+                        <span slot="header">Challenge Description</span>
+                        <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
+                    </AccordionItem>
+                </Accordion>
+                <div class="mb-6 mt-6">
                     <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
-                    <p id="challenge-diff">{challenge.challenge_diff}</p>
+                    {#if challenge.challenge_diff == 'Easy'}
+                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_diff}</p>
+                    {:else if challenge.challenge_diff == 'Medium'}
+                        <p id="challenge-diff" class="text-orange-400">{challenge.challenge_diff}</p>
+                    {:else}
+                        <p id="challenge-diff" class="text-red-400">{challenge.challenge_diff}</p>
+                    {/if}
                 </div>
                 <div class="mb-6">
                     <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                     <div class="p-2 bg-primary-500 rounded-lg w-fit">
-                        <a class="text-white" href={challenge.static_file_url} download
-                            >{challenge.static_file_url.split('/').pop()}</a
+                        <a class="text-white" href={challenge.container_file} download
+                            >{challenge.container_file.split('/').pop()}</a
                         >
                     </div>
+                </div>
+                <Label for="flag-submit" class="mb-2">Submit Flag</Label>
+                <div class="mb-6 flex">
+                    <Input id="flag-submit" placeholder="TH ..." />
+                    <Button type="submit" class="text-white px-4 py-2">Submit</Button>
                 </div>
                 <div>
                     {#if challenge.needs_container}
