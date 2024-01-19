@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import TeamOverview from '../components/TeamOverview.svelte';
 import Header from '../components/Header.svelte';
 import { auth } from '../lib/lucia';
+import { normalWrapper } from '../lib/backend';
 
 let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
 
@@ -16,6 +17,10 @@ if (!import.meta.env.DEV) {
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
+}
+
+if (Astro.request.method === 'POST') {
+    return await normalWrapper(Astro.request);
 }
 ---
 

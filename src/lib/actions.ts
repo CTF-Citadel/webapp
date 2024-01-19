@@ -19,9 +19,12 @@ class DatabaseActions {
         }
     };
 
-    async getAllTeams() {
+    async getAllTeams(redacted: boolean = false) {
         const RES = await PRISMA_CONNECTION.teams.findMany();
         if (RES.length > 0) {
+            if (redacted) {
+                return RES;
+            }
             return RES;
         } else {
             return [];

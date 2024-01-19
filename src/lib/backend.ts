@@ -20,8 +20,11 @@ export async function normalWrapper(request: Request): Promise<Response> {
         );
     }
     let response: any = "";
-    // match the request tyoe
+    // match the request type
     switch (json.type) {
+        case 'teams':
+            response = await HANLDER.getAllTeams(true);
+            break;
         case 'events':
             response = await HANLDER.getTeamEvents(json.data.id);
             break;
@@ -30,6 +33,13 @@ export async function normalWrapper(request: Request): Promise<Response> {
             break;
         case 'deploy-challenge':
             response = await HANLDER.deployTeamChallenge(json.data.teamID, json.data.challengeID);
+            break;
+        case 'create-team':
+            response = await HANLDER.createTeam(
+                json.data.name,
+                json.data.description,
+                json.data.country
+            );
             break;
         case 'check-flag':
             response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
@@ -89,13 +99,6 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 json.data.filePath,
                 json.data.fileURL,
                 json.data.event
-            );
-            break;
-        case 'create-team':
-            response = await HANLDER.createTeam(
-                json.data.name,
-                json.data.description,
-                json.data.country
             );
             break;
         case 'create-event':
