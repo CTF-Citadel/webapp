@@ -185,6 +185,14 @@ class DatabaseActions {
         });
     };
 
+    async joinTeam(teamToken: string ) {
+        await PRISMA_CONNECTION.teams.create({
+            data: {
+                teamToken: teamToken,
+            }
+        });
+    };
+
     async updateEvent(id: string, name: string, desc: string) {
         await PRISMA_CONNECTION.events.update({
             where: {

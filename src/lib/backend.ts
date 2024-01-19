@@ -41,6 +41,11 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 json.data.country
             );
             break;
+        case 'join-team':
+            response = await HANLDER.joinTeam(
+                json.data.teamID
+            );
+            break; 
         case 'check-flag':
             response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
             if (response == true) {

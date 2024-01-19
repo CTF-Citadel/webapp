@@ -38,6 +38,18 @@
         } else return false;
     }
 
+    async function joinTeam() {
+        const DATA = await requestWrapper('/teams', {
+            type: 'join-team',
+            data: { teamID: inputs.teamToken }
+        });
+        console.log(DATA)
+        if (DATA.ok) {
+            defaultModal = false;
+            return true;
+        } else return false;
+    }
+
     function modelOpen(option: 'Join' | 'Create') {
         defaultModal = false;
         inputs.teamName = '';
