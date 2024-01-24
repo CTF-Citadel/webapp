@@ -15,7 +15,7 @@
     "@astrojs/svelte": "^5.0.3",
     "@astrojs/tailwind": "^5.1.0",
     "@lucia-auth/adapter-prisma": "^3.0.2",
-    "astro": "^4.2.1",
+    "astro": "^4.2.4",
     "lucia": "^2.7.6",
     "nodemailer": "^6.9.8",
     "prisma": "^5.8.1",
