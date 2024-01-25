@@ -27,33 +27,46 @@
     }
 
     async function createTeam() {
-        const DATA = await requestWrapper('/teams', {
-            type: 'create-team',
-            data: { name: inputs.teamName, description: inputs.teamDesc, country: inputs.teamCountry }
-        });
-        if (DATA.ok) {
-            defaultModal = false;
-            await refreshTeams();
-            return true;
-        } else return false;
+
     }
 
-    async function joinTeam() {
-        const DATA = await requestWrapper('/teams', {
-            type: 'join-team',
-            data: { teamID: inputs.teamToken }
-        });
-        console.log(DATA)
-        if (DATA.ok) {
-            defaultModal = false;
-            return true;
-        } else return false;
+    async function handleTeamAction() {
+        if (selection == "Join") {
+            const DATA = await requestWrapper('/teams', {
+                type: 'join-team',
+                data: { teamID: inputs.teamToken }
+            });
+            console.log(DATA)
+            if (DATA.ok) {
+                defaultModal = false;
+                return true;
+            } else return false;
+            
+        }   else {
+            const DATA = await requestWrapper('/teams', {
+                type: 'create-team',
+                data: { name: inputs.teamName, description: inputs.teamDesc, country: inputs.teamCountry }
+            });
+            if (DATA.ok) {
+                defaultModal = false;
+                await refreshTeams();
+                return true;
+            } else return false;
+        }
+    }
+
+    function refreshValues() {
+        inputs.teamName = '';
+        inputs.teamDesc = '';
+        inputs.teamCountry = '';
+        inputs.teamToken = '';
     }
 
     function modelOpen(option: 'Join' | 'Create') {
         defaultModal = false;
-        inputs.teamName = '';
-        inputs.teamDesc = '';
+        refreshValues();
+        if (option == "Join") { inputs.teamName = "placeholder"}
+        else { inputs.teamToken = "placeholder"}
         selection = option;
         defaultModal = true;
     }
@@ -81,7 +94,7 @@
         </div>
     {/if}
     <svelte:fragment slot="footer">
-        <Button on:click={createTeam} disabled={inputs.teamName == '' || inputs.teamDesc == ''}>{selection}</Button>
+        <Button on:click={handleTeamAction} disabled={inputs.teamName == '' || inputs.teamToken == ''}>{selection}</Button>
         <Button color="alternative">Cancel</Button>
     </svelte:fragment>
 </Modal>

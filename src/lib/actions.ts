@@ -186,9 +186,9 @@ class DatabaseActions {
     };
 
     async joinTeam(teamToken: string ) {
-        await PRISMA_CONNECTION.teams.create({
+        await PRISMA_CONNECTION.user.update({
             data: {
-                teamToken: teamToken,
+                user_team: teamToken,
             }
         });
     };
