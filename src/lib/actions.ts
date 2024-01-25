@@ -1,4 +1,5 @@
 import { PRISMA_CONNECTION, auth } from './lucia';
+import crypto from 'node:crypto'
 
 // read from env
 const BACKEND_HOST = process.env.BACKEND_HOST;
@@ -9,6 +10,113 @@ class DatabaseActions {
     constructor() {
         this.#BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`
     }
+
+    /**
+     * Validate if an event exists by id
+     * @return True if it exists, False if it doesn't
+    */
+    async checkEventExist(event_id: string) {
+        const RES = await PRISMA_CONNECTION.events.findFirst({
+            where: {
+                id: event_id
+            }
+        });
+        if (RES == null) {
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * Validate if an event exists by username and email
+     * @return True if it exists, False if it doesn't
+    */
+    async checkUserExist(userName: string, userEmail: string) {
+        const RES_NAME = await PRISMA_CONNECTION.user.findFirst({
+            where: {
+                username: userName
+            }
+        });
+        if (RES_NAME == null) {
+            return false;
+        }
+        const RES_EMAIL = await PRISMA_CONNECTION.user.findFirst({
+            where: {
+                email: userEmail
+            }
+        });
+        if (RES_EMAIL == null) {
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * Validate if a team exists by name
+     * @return The team's ID if exists, False if it doesn't
+    */
+    async checkTeamNameExist(teamName: string) {
+        const RES = await PRISMA_CONNECTION.teams.findFirst({
+            where: {
+                team_name: teamName
+            }
+        });
+        if (RES == null) {
+            return false;
+        }
+        return RES.id;
+    };
+
+    /**
+     * Validate if a team token is valid and corresponds to a team
+     * @return The team's ID if exists and valid, else false
+    */
+    async checkTeamToken(token: string) {
+        const RES = await PRISMA_CONNECTION.teams.findFirst({
+            where: {
+                team_join_token: token
+            }
+        });
+        if (RES == null) {
+            return false;
+        }
+        return RES.id;
+    };
+
+    /**
+     * Validate if a user has created a team
+     * @return True if the user has, false if he hasn't
+    */
+    async checkHasCreatedTeam(userID: string) {
+        const RES = await PRISMA_CONNECTION.teams.findFirst({
+            where: {
+                team_creator: userID
+            }
+        });
+        if (RES == null) {
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * Validate if a user is currently in a team
+     * @return The team's ID if user is, false if he isn't
+    */
+    async checkUserInTeam(userID: string) {
+        const RES = await PRISMA_CONNECTION.user.findFirst({
+            where: {
+                id: userID
+            }
+        });
+        if (RES == null) {
+            return false;
+        }
+        if (RES.user_team_id == '') {
+            return false;
+        }
+        return RES.user_team_id;
+    };
 
     async getAllUsers() {
         const RES = await PRISMA_CONNECTION.user.findMany();
@@ -164,20 +272,24 @@ class DatabaseActions {
         return false;
     }
 
-    async createEvent(name: string, desc: string) {
+    async createEvent(name: string, desc: string, start: number, end: number) {
         await PRISMA_CONNECTION.events.create({
             data: {
                 id: crypto.randomUUID().toString(),
                 event_name: name,
-                event_description: desc
+                event_description: desc,
+                event_start: start,
+                event_end: end
             }
         });
     };
 
-    async createTeam(name: string, desc: string, country: string) {
+    async createTeam(userID: string, name: string, desc: string, country: string) {
         await PRISMA_CONNECTION.teams.create({
             data: {
                 id: crypto.randomUUID().toString(),
+                team_creator: userID,
+                team_join_token: crypto.randomBytes(16).toString('base64').replaceAll('=', ''),
                 team_name: name,
                 team_description: desc,
                 team_country_code: country
@@ -185,12 +297,32 @@ class DatabaseActions {
         });
     };
 
-    async joinTeam(teamToken: string ) {
-        await PRISMA_CONNECTION.user.update({
-            data: {
-                user_team: teamToken,
-            }
-        });
+    async joinTeam(sessionID: string, teamID: string) {
+        let valid = await auth.validateSession(sessionID);
+        if (valid) {
+            await PRISMA_CONNECTION.user.update({
+                where: {
+                    id: valid.user.userId
+                },
+                data: {
+                    user_team_id: teamID
+                }
+            });
+        }
+    };
+
+    async leaveTeam(sessionID: string) {
+        let valid = await auth.validateSession(sessionID);
+        if (valid) {
+            await PRISMA_CONNECTION.user.update({
+                where: {
+                    id: valid.user.userId
+                },
+                data: {
+                    user_team_id: ''
+                }
+            });
+        }
     };
 
     async updateEvent(id: string, name: string, desc: string) {
@@ -233,7 +365,7 @@ class DatabaseActions {
         REF_USERS.forEach(async user => {
             await auth.invalidateAllUserSessions(user.id);
             await auth.updateUserAttributes(user.id, {
-                user_team: ""
+                user_team_id: ""
             })
         })
     };

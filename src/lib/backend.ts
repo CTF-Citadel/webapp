@@ -34,18 +34,54 @@ export async function normalWrapper(request: Request): Promise<Response> {
         case 'deploy-challenge':
             response = await HANLDER.deployTeamChallenge(json.data.teamID, json.data.challengeID);
             break;
-        case 'create-team':
-            response = await HANLDER.createTeam(
-                json.data.name,
-                json.data.description,
-                json.data.country
+        case 'has-created':
+            response = await HANLDER.checkHasCreatedTeam(
+                json.data.user
             );
             break;
+        case 'create-team':
+            const HAS_CREATED = await HANLDER.checkHasCreatedTeam(
+                json.data.creator
+            )
+            if (!HAS_CREATED) {
+                response = await HANLDER.createTeam(
+                    json.data.creator,
+                    json.data.name,
+                    json.data.description,
+                    json.data.country
+                );
+                const TEAM_ID = await HANLDER.checkTeamNameExist(
+                    json.data.name
+                )
+                if (TEAM_ID != false) {
+                    response = await HANLDER.joinTeam(
+                        json.data.session,
+                        TEAM_ID
+                    );
+                }
+            }
+            break;
         case 'join-team':
-            response = await HANLDER.joinTeam(
-                json.data.teamID
+            const IS_JOINED = await HANLDER.checkUserInTeam(
+                json.data.user,
+            )
+            if (!IS_JOINED) {
+                const TEAM_ID = await HANLDER.checkTeamToken(
+                    json.data.token,
+                )
+                if (TEAM_ID != false) {
+                    response = await HANLDER.joinTeam(
+                        json.data.session,
+                        TEAM_ID
+                    );
+                }
+            }
+            break;
+        case 'leave-team':
+            response = await HANLDER.leaveTeam(
+                json.data.session
             );
-            break; 
+            break;
         case 'check-flag':
             response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
             if (response == true) {
@@ -109,7 +145,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
         case 'create-event':
             response = await HANLDER.createEvent(
                 json.data.name,
-                json.data.description
+                json.data.description,
+                json.data.start,
+                json.data.end
             );
             break;
         case 'update-challenge':

@@ -15,7 +15,6 @@ model user {
   email            String         @unique
   email_verified   Boolean
   is_blocked       Boolean
-  has_created_team Boolean
   auth_session     user_session[]
   key              user_key[]
 }
@@ -55,6 +54,8 @@ model events {
   id                String        @id @unique
   event_name        String        @unique
   event_description String
+  event_start       Int
+  event_end         Int
   team_events       team_events[]
   challenges        challenges[]
 }
@@ -74,6 +75,8 @@ model challenges {
 
 model teams {
   id                String            @id @unique
+  team_creator      String
+  team_join_token   String
   team_name         String            @unique
   team_country_code String
   team_description  String

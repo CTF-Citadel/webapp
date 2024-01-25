@@ -4,8 +4,9 @@ import TeamOverview from '../components/TeamOverview.svelte';
 import Header from '../components/Header.svelte';
 import { auth } from '../lib/lucia';
 import { normalWrapper } from '../lib/backend';
+import { DUMMY_SESSION } from '../lib/helpers';
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
+let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -32,6 +33,6 @@ if (Astro.request.method === 'POST') {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <TeamOverview client:visible />
+        <TeamOverview sessionID={session.sessionId} teamID={session.user.user_team_id} userID={session.user.userId} client:visible />
     </div>
 </Layout>

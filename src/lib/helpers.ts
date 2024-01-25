@@ -7,6 +7,18 @@ export async function requestWrapper(dest: string, request: WrapperFormat): Prom
     });
 }
 
+export const DUMMY_SESSION = {
+    sessionId: 'someSession',
+    user: {
+        userId: 'someUser',
+        username: 'DEV',
+        emailVerified: true,
+        user_role: 'admin',
+        user_team_id: 'someTeam',
+        isBlocked: false
+    }
+}
+
 export const COUNTRIES = [
     { value: 'AF', name: 'Afghanistan' },
     { value: 'AL', name: 'Albania' },

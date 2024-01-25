@@ -10,7 +10,6 @@ declare namespace Lucia {
 		user_team_id: string,
 		email: string,
 		email_verified: boolean,
-		has_created_team: boolean,
 		is_blocked: boolean
 	};
 	type DatabaseSessionAttributes = {};

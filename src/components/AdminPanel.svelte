@@ -69,6 +69,10 @@
         filePath: '',
         fileURL: ''
     };
+    let datePicker = {
+        start: '',
+        end: ''
+    };
     let editUUID: string = '';
     let editData: any = {};
 
@@ -130,7 +134,15 @@
     }
 
     async function createEvent() {
-        const DATA = await requestWrapper('/settings', { type: 'create-event', data: { ...eventTemplate } });
+        let tempStart = { ...datePicker };
+        const DATA = await requestWrapper('/settings', {
+            type: 'create-event',
+            data: {
+                ...eventTemplate,
+                start: Math.floor(new Date(tempStart.start).getTime() / 1000),
+                end: Math.floor(new Date(tempStart.end).getTime() / 1000)
+            }
+        });
         if (DATA.ok) {
             create.event = false;
             await refreshEvents();
@@ -404,6 +416,14 @@
         <Label for="event-textarea" class="mb-2">Event Description</Label>
         <Textarea id="event-textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
     </div>
+    <div class="mb-6">
+        <Label class="mb-2">Event Start</Label>
+        <input type="datetime-local" bind:value={datePicker.start} />
+    </div>
+    <div class="mb-6">
+        <Label class="mb-2">Event End</Label>
+        <input type="datetime-local" bind:value={datePicker.end} />
+    </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
@@ -447,7 +467,12 @@
     {/if}
     <div class="mb-6">
         <Label for="opt-file" class="mb-2">Optional File</Label>
-        <Input id="opt-file" placeholder="https://example.com/path/to/file.txt" bind:value={challengeTemplate.fileURL} required />
+        <Input
+            id="opt-file"
+            placeholder="https://example.com/path/to/file.txt"
+            bind:value={challengeTemplate.fileURL}
+            required
+        />
     </div>
     <div class="mb-6">
         <Label>
@@ -549,9 +574,11 @@
                     <Table>
                         <TableHead>
                             <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell>Creator ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Description</TableHeadCell>
                             <TableHeadCell>Country</TableHeadCell>
+                            <TableHeadCell>Token</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
                         <TableBody>
@@ -561,6 +588,9 @@
                                         {entry.id}
                                     </TableBodyCell>
                                     <TableBodyCell>
+                                        {entry.team_creator}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
                                         {entry.team_name}
                                     </TableBodyCell>
                                     <TableBodyCell>
@@ -568,6 +598,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.team_country_code}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.team_join_token}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         <Button
@@ -598,6 +631,8 @@
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Description</TableHeadCell>
+                            <TableHeadCell>Starts</TableHeadCell>
+                            <TableHeadCell>Ends</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
                         <TableBody>
@@ -611,6 +646,12 @@
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.event_description}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.event_start}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.event_end}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         <Button

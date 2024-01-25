@@ -2,14 +2,14 @@
 import Layout from '../../layouts/Layout.astro';
 import Challenge from '../../components/Challenges.svelte';
 import Header from '../../components/Header.svelte';
+import DatabaseActions from '../../lib/actions';
 import { normalWrapper } from '../../lib/backend';
 import { auth } from '../../lib/lucia';
+import { DUMMY_SESSION } from '../../lib/helpers';
 
 const { uuid } = Astro.params;
 
-let session = {
-    user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false }
-};
+let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
@@ -21,6 +21,14 @@ if (!import.meta.env.DEV) {
     if (!session.user.emailVerified) {
         return Astro.redirect('/verify/email');
     }
+}
+
+// check if we access a non-existing challenge
+const ACTION = new DatabaseActions();
+let exists = await ACTION.checkEventExist(uuid || '');
+if (!exists) {
+    // early exit to 404
+    return Astro.redirect('/404');
 }
 
 if (Astro.request.method === 'POST') {
@@ -36,6 +44,6 @@ if (Astro.request.method === 'POST') {
         client:visible
     />
     <div transition:animate="slide">
-        <Challenge uuid={uuid} team={session.user.user_team} client:visible />
+        <Challenge uuid={uuid} team={session.user.user_team_id} client:visible />
     </div>
 </Layout>

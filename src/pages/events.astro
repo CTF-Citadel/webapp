@@ -4,8 +4,9 @@ import Event from '../components/Events.svelte';
 import Header from '../components/Header.svelte';
 import { normalWrapper } from '../lib/backend';
 import { auth } from '../lib/lucia';
+import { DUMMY_SESSION } from '../lib/helpers';
 
-let session = { user: { username: 'DEV', emailVerified: true, user_role: 'admin', user_team: 'someID', isBlocked: false } };
+let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
     session = await Astro.locals.auth.validate();
