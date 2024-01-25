@@ -139,6 +139,19 @@ class DatabaseActions {
         }
     };
 
+    async getTeamInfo(teamID: string) {
+        let RES = await PRISMA_CONNECTION.teams.findFirst({
+            where: {
+                id: teamID
+            }
+        });
+        if (RES != null) {
+            return RES;
+        } else {
+            return {};
+        }
+    };
+
     async getAllEvents() {
         const RES = await PRISMA_CONNECTION.events.findMany();
         if (RES.length > 0) {

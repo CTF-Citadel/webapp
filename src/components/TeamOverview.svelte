@@ -27,6 +27,7 @@
     let defaultModal = false;
     let hasTeam = false;
     let hasCreated = false;
+    let thisTeam: any = {};
     let teams: any[] = [];
     let selection: 0 | 'Join' | 'Create' = 0;
     let inputs = {
@@ -39,11 +40,12 @@
     onMount(async () => {
         await refreshTeams();
         hasCreated = await hasCreatedTeam();
-        loading = false;
         // check for team
         if (teamID != '' && teamID != 'someTeam') {
             hasTeam = true;
+            await refreshTeamInfo();
         }
+        loading = false;
     });
 
     async function hasCreatedTeam() {
@@ -61,6 +63,12 @@
         const DATA = await requestWrapper('/teams', { type: 'teams' });
         const JSON = await DATA.json();
         teams = JSON.data;
+    }
+
+    async function refreshTeamInfo() {
+        const DATA = await requestWrapper('/teams', { type: 'team-info', data: { team: teamID } });
+        const JSON = await DATA.json();
+        thisTeam = JSON.data;
     }
 
     async function createTeam() {
@@ -88,6 +96,16 @@
         });
         if (DATA.ok) {
             defaultModal = false;
+            window.location.reload();
+        } else return false;
+    }
+
+    async function leaveTeam() {
+        const DATA = await requestWrapper('/teams', {
+            type: 'leave-team',
+            data: { session: sessionID }
+        });
+        if (DATA.ok) {
             window.location.reload();
         } else return false;
     }
@@ -178,7 +196,17 @@
         </Card>
     {:else}
         <div class="flex flex-col sm:flex-row">
-            <h1>You are playing for: {teamID}</h1>
+            {#if Object.keys(thisTeam).length > 0}
+                <Card size="lg" padding="sm" img="" class="m-4">
+                    <h1>You are playing for: {thisTeam.team_name}</h1>
+                    <p>Description {thisTeam.team_description}</p>
+                    <p>Country: {thisTeam.team_country_code}</p>
+                    <h1>Your Team-Token is: <bold>{thisTeam.team_join_token}</bold></h1>
+                    <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={hasCreated}>
+                        Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                    </Button>
+                </Card>
+            {/if}
         </div>
     {/if}
 

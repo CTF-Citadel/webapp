@@ -522,6 +522,7 @@
                             <TableHeadCell>Email</TableHeadCell>
                             <TableHeadCell>Type</TableHeadCell>
                             <TableHeadCell>Verified</TableHeadCell>
+                            <TableHeadCell>Team ID</TableHeadCell>
                             <TableHeadCell>Blocked</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
@@ -542,6 +543,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.email_verified}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.user_team_id}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.is_blocked}

@@ -39,6 +39,11 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 json.data.user
             );
             break;
+        case 'team-info':
+            response = await HANLDER.getTeamInfo(
+                json.data.team
+            );
+            break;
         case 'create-team':
             const HAS_CREATED = await HANLDER.checkHasCreatedTeam(
                 json.data.creator
