@@ -4,7 +4,9 @@
 CREATE TABLE events (
     id VARCHAR(36) PRIMARY KEY,
     event_name VARCHAR(32) NOT NULL UNIQUE,
-    event_description VARCHAR(256)
+    event_description VARCHAR(256),
+    event_start INT,
+    event_end INT
 );
 /*
     CHALLENGES
@@ -25,6 +27,8 @@ CREATE TABLE challenges (
 */
 CREATE TABLE teams (
     id VARCHAR(36) PRIMARY KEY,
+    team_creator VARCHAR(36),
+    team_join_token VARCHAR(36),
     team_name VARCHAR(32) NOT NULL UNIQUE,
     team_country_code VARCHAR(3),
     team_description VARCHAR(256)
@@ -59,8 +63,7 @@ CREATE TABLE user (
     user_team_id VARCHAR(36) NOT NULL,
     email VARCHAR(64) NOT NULL UNIQUE,
     email_verified BOOLEAN,
-    is_blocked BOOLEAN,
-    has_created_team BOOLEAN
+    is_blocked BOOLEAN
 );
 CREATE TABLE user_key (
     id VARCHAR(255) PRIMARY KEY,

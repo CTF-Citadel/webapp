@@ -28,10 +28,9 @@ export const auth = lucia({
 		return {
 			username: data.username,
 			user_role: data.user_role,
-			user_team: data.user_team,
+			user_team_id: data.user_team_id,
 			email: data.email,
 			emailVerified: Boolean(data.email_verified),
-			hasCreatedTeam: Boolean(data.has_created_team),
 			isBlocked: Boolean(data.is_blocked)
 		};
 	}
