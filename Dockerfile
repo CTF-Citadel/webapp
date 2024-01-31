@@ -10,7 +10,7 @@ package-lock.json \
 astro.config.mjs \
 svelte.config.js \
 tailwind.config.cjs \
-schema.prisma \
+drizzle.config.ts \
 tsconfig.json ./
 
 # Install dependencies
