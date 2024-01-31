@@ -3,26 +3,25 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import { validateEmailVerificationToken } from "../../lib/lucia-db";
 import { lucia } from '../../lib/lucia';
+import { DB_ADAPTER } from '../../lib/db';
+import { userTable } from '../../lib/schema';
+import { eq } from 'drizzle-orm';
 
 const { id } = Astro.params;
 
-try {
-	const USER_ID = await validateEmailVerificationToken(id || "");
-	if (!USER_ID) {
-		return new Response("Invalid or Expired Token!", {
-			status: 401
-		});
-	}
-	await lucia.invalidateUserSessions(USER_ID);
-	// ###
-	// @TODO: Update User Attributes here
-	// ###
-	return Astro.redirect('/login')
-} catch {
-	return new Response("Invalid Email Verification Link!", {
-		status: 400
+const USER_ID = await validateEmailVerificationToken(id || "");
+if (!USER_ID) {
+	return new Response("Invalid or Expired Token!", {
+		status: 401
 	});
 }
+await lucia.invalidateUserSessions(USER_ID);
+Astro.cookies.delete(lucia.sessionCookieName);
+await DB_ADAPTER.update(userTable).set({
+	is_verified: true
+}).where(eq(userTable.id, USER_ID));
+
+return Astro.redirect('/login')
 ---
 
 <Layout title="Email Verify Check">

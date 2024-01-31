@@ -26,18 +26,13 @@ if (Astro.request.method === 'POST') {
         try {
             const EXISTING_USER = await DB_ADAPTER.select().from(userTable).where(eq(userTable.email, email));
             const VALID = await new Argon2id().verify(EXISTING_USER[0].hashed_password || '', password);
-
-            if (!VALID) {
-                throw Error('Incorrect username or password');
-            }
-
+            if (!VALID) throw Error('AUTH_INVALID_PASSWORD');
             const SESSION = await lucia.createSession(EXISTING_USER[0].id, {});
-            const COOKIE = await lucia.createSessionCookie(SESSION.id);
+            const COOKIE = lucia.createSessionCookie(SESSION.id);
             Astro.cookies.set(COOKIE.name, COOKIE.value, COOKIE.attributes);
-
             redirect = true;
         } catch (e: any) {
-            if (e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD') {
+            if (e.message === 'AUTH_INVALID_PASSWORD') {
                 errorMessage = 'Wrong Email or Password';
             } else {
                 console.log(e);
@@ -59,9 +54,8 @@ if (Astro.request.method === 'POST') {
     );
 }
 
-const session = await Astro.locals.auth.validate();
-if (session) {
-    if (!session.user.emailVerified) {
+if (Astro.locals.user) {
+    if (!Astro.locals.user.is_verified) {
         return Astro.redirect('/verify/email');
     }
     return Astro.redirect('/');

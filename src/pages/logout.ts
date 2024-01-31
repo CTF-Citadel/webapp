@@ -10,5 +10,6 @@ export const POST: APIRoute = async (context) => {
 	}
 	await lucia.invalidateSession(context.locals.session.id);
 	await lucia.deleteExpiredSessions();
+	context.cookies.delete(lucia.sessionCookieName);
 	return context.redirect("/login", 302);
 };

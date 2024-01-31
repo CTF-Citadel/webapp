@@ -21,3 +21,4 @@ pnpm-debug.log*
 .vscode
 .vscode-test
 .DS_Store
+drizzle/*

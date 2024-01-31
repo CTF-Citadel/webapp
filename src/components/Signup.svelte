@@ -21,7 +21,7 @@
 
 <Card class="w-full max-w-md">
     <div class="flex flex-col space-y-6">
-        <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign In</h3>
+        <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign Up</h3>
         {#if authResponse && authResponse.verifySent == true}
             <p>Done, check your Inbox!</p>
         {:else}

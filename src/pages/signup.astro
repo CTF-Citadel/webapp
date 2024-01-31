@@ -36,16 +36,15 @@ if (Astro.request.method === 'POST') {
                 hashed_password: HASH_PASS,
                 username: username,
                 user_role: String(IS_INITIAL ? 'admin' : 'participant'),
-                user_team_id: String(''),
+                user_team_id: '',
                 email: email,
-                is_verified: Boolean(false),
-                is_blocked: Boolean(false)
+                is_verified: false,
+                is_blocked: false
             });
 
             const SESSION = await lucia.createSession(USER_ID, {});
-            const COOKIE = await lucia.createSessionCookie(SESSION.id);
+            const COOKIE = lucia.createSessionCookie(SESSION.id);
             Astro.cookies.set(COOKIE.name, COOKIE.value, COOKIE.attributes);
-
             const TOKEN = await generateEmailVerificationToken(USER_ID);
             sendVerificationLink(ORIGIN, email, TOKEN);
             emailSent = true;
@@ -75,10 +74,11 @@ if (Astro.request.method === 'POST') {
 if (Astro.locals.user) {
     await lucia.invalidateSession(Astro.locals.session.id);
     await lucia.deleteExpiredSessions();
+    Astro.cookies.delete(lucia.sessionCookieName);
 }
 ---
 
-<Layout title="Login">
+<Layout title="Sign Up">
     <Header client:visible />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center h-full">
         <SignupPage client:visible />

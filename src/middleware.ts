@@ -4,10 +4,8 @@ import { verifyRequestOrigin } from "lucia";
 import { defineMiddleware } from "astro:middleware";
 
 export const onRequest = defineMiddleware(async (context: any, next: any) => {
-	/*
 	if (context.request.method !== "GET") {
 		const originHeader = context.request.headers.get("Origin");
-		// NOTE: You may need to use `X-Forwarded-Host` instead
 		const hostHeader = context.request.headers.get("Host");
 		if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
 			return new Response(null, {
@@ -15,7 +13,6 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 			});
 		}
 	}
-	*/
 
 	const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
 	if (!sessionId) {
@@ -34,6 +31,6 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 		context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 	}
 	context.locals.user = user;
-	context.locals.user = session;
+	context.locals.session = session;
 	return next();
 });

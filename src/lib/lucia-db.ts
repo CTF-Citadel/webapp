@@ -12,11 +12,11 @@ export const generateEmailVerificationToken = async (userId: string) => {
         .where(eq(verificationToken.user_id, userId));
     if (storedUserTokens.length > 0) {
         const reusableStoredToken = storedUserTokens.find((token: any) => {
-            return isWithinExpiration(Number(token.expires) - EXPIRES_IN / 2);
+            return isWithinExpiration(Number(token.expires));
         });
         if (reusableStoredToken) return reusableStoredToken.id;
     }
-    const token = generateRandomString(32);
+    const token = generateRandomString(24);
     await DB_ADAPTER.insert(verificationToken).values({
         id: token,
         expires: new Date().getTime() + EXPIRES_IN,
@@ -27,7 +27,7 @@ export const generateEmailVerificationToken = async (userId: string) => {
 
 export const generatePasswordResetToken = async (email: string) => {
     const targetUser = await DB_ADAPTER.select().from(userTable).where(eq(userTable.email, email));
-    if (targetUser.length > 0) return false;
+    if (targetUser.length == 0) return false;
     const storedUserTokens = await DB_ADAPTER.select().from(resetToken).where(eq(resetToken.user_id, targetUser[0].id));
     if (storedUserTokens.length > 0) {
         const reusableStoredToken = storedUserTokens.find((token) => {
@@ -35,7 +35,7 @@ export const generatePasswordResetToken = async (email: string) => {
         });
         if (reusableStoredToken) return reusableStoredToken.id;
     }
-    const token = generateRandomString(32);
+    const token = generateRandomString(24);
     await DB_ADAPTER.insert(resetToken).values({
         id: token,
         expires: new Date().getTime() + EXPIRES_IN,
@@ -45,11 +45,10 @@ export const generatePasswordResetToken = async (email: string) => {
 };
 
 export const validateEmailVerificationToken = async (token: string) => {
-    const storedTokens = await DB_ADAPTER.select().from(resetToken).where(eq(verificationToken.id, token));
-    if (storedTokens.length > 0) return false;
+    const storedTokens = await DB_ADAPTER.select().from(verificationToken).where(eq(verificationToken.id, token));
+    if (storedTokens.length == 0) return false;
     await DB_ADAPTER.delete(verificationToken).where(eq(verificationToken.id, token));
-    const tokenExpires = Number(storedTokens[0].expires);
-    if (!isWithinExpiration(tokenExpires)) {
+    if (!isWithinExpiration(Number(storedTokens[0].expires))) {
         return false;
     }
     return storedTokens[0].user_id;
