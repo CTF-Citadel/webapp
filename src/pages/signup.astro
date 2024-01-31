@@ -2,9 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 import SignupPage from '../components/Signup.svelte';
 import Header from '../components/Header.svelte';
-import { generateEmailVerificationToken, isInitialUser } from "../lib/lucia-db";
+import { generateEmailVerificationToken, isInitialUser } from '../lib/lucia-db';
 import { isValidEmail, sendVerificationLink } from '../lib/lucia-email';
-import { auth } from '../lib/lucia';
+import { lucia } from '../lib/lucia';
+import { generateId } from 'lucia';
+import { Argon2id } from 'oslo/password';
+import { DB_ADAPTER } from '../lib/db';
+import { userTable } from '../lib/schema';
 
 let emailInput = '';
 let errorMessage = 'None';
@@ -24,28 +28,26 @@ if (Astro.request.method === 'POST') {
     if (isValidEmail(email) && validPassword) {
         try {
             const IS_INITIAL = await isInitialUser();
-            const user = await auth.createUser({
-                key: {
-                    providerId: 'email',
-                    providerUserId: email.toLowerCase(),
-                    password
-                },
-                attributes: {
-                    username,
-                    user_role: String(IS_INITIAL ? 'admin' : 'participant'),
-                    user_team_id: String(''),
-                    email,
-                    email_verified: Boolean(false),
-                    is_blocked: Boolean(false)
-                }
+            const USER_ID = generateId(32);
+            const HASH_PASS = await new Argon2id().hash(password);
+
+            await DB_ADAPTER.insert(userTable).values({
+                id: USER_ID,
+                hashed_password: HASH_PASS,
+                username: username,
+                user_role: String(IS_INITIAL ? 'admin' : 'participant'),
+                user_team_id: String(''),
+                email: email,
+                is_verified: Boolean(false),
+                is_blocked: Boolean(false)
             });
-            const session = await auth.createSession({
-                userId: user.userId,
-                attributes: {}
-            });
-            Astro.locals.auth.setSession(session);
-            const token = await generateEmailVerificationToken(session.user.userId);
-            sendVerificationLink(ORIGIN, session.user.email, token);
+
+            const SESSION = await lucia.createSession(USER_ID, {});
+            const COOKIE = await lucia.createSessionCookie(SESSION.id);
+            Astro.cookies.set(COOKIE.name, COOKIE.value, COOKIE.attributes);
+
+            const TOKEN = await generateEmailVerificationToken(USER_ID);
+            sendVerificationLink(ORIGIN, email, TOKEN);
             emailSent = true;
         } catch (e: any) {
             console.log(e);
@@ -70,10 +72,9 @@ if (Astro.request.method === 'POST') {
     );
 }
 
-const session = await Astro.locals.auth.validate();
-if (session) {
-    await auth.invalidateSession(session.sessionId);
-    Astro.locals.auth.setSession(null);
+if (Astro.locals.user) {
+    await lucia.invalidateSession(Astro.locals.session.id);
+    await lucia.deleteExpiredSessions();
 }
 ---
 

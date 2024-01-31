@@ -56,6 +56,7 @@ CREATE TABLE team_challenges (
 /*
     LUCIA-AUTH
 */
+/*
 CREATE TABLE user (
     id VARCHAR(16) PRIMARY KEY,
     username VARCHAR(32) NOT NULL UNIQUE,
@@ -78,6 +79,7 @@ CREATE TABLE user_session (
     idle_expires BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+*/
 CREATE TABLE email_verification_token (
     id VARCHAR(64) PRIMARY KEY,
     user_id VARCHAR(16) NOT NULL,

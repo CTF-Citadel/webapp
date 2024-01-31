@@ -1,16 +1,9 @@
-/// <reference types="lucia" />
-declare namespace Lucia { }
+// src/env.d.ts
 
 /// <reference types="astro/client" />
-declare namespace Lucia {
-	type Auth = import("./lib/lucia").Auth;
-	type DatabaseUserAttributes = {
-		username: string;
-		user_role: string,
-		user_team_id: string,
-		email: string,
-		email_verified: boolean,
-		is_blocked: boolean
-	};
-	type DatabaseSessionAttributes = {};
+declare namespace App {
+	interface Locals {
+		user: import("lucia").User;
+		session: import("lucia").Session;
+	}
 }

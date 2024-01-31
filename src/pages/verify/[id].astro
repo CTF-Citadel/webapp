@@ -2,22 +2,21 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import { validateEmailVerificationToken } from "../../lib/lucia-db";
-import { auth } from '../../lib/lucia';
+import { lucia } from '../../lib/lucia';
 
 const { id } = Astro.params;
 
 try {
-	const ID = await validateEmailVerificationToken(id || "");
-	if (!ID) {
+	const USER_ID = await validateEmailVerificationToken(id || "");
+	if (!USER_ID) {
 		return new Response("Invalid or Expired Token!", {
 			status: 401
 		});
 	}
-	const USER = await auth.getUser(ID);
-	await auth.invalidateAllUserSessions(USER.userId);
-	await auth.updateUserAttributes(USER.userId, {
-		email_verified: true
-	});
+	await lucia.invalidateUserSessions(USER_ID);
+	// ###
+	// @TODO: Update User Attributes here
+	// ###
 	return Astro.redirect('/login')
 } catch {
 	return new Response("Invalid Email Verification Link!", {

@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import PasswordReset from '../../components/PasswordReset.svelte';
 import { validatePasswordResetToken, isValidPasswordResetToken } from "../../lib/lucia-db";
-import { auth } from '../../lib/lucia';
+import { lucia } from '../../lib/lucia';
 
 const { id } = Astro.params;
 let errorMessage = 'None';
@@ -24,12 +24,13 @@ try {
 
 if (Astro.request.method === 'POST') {
     const DATA = await Astro.request.json();
-    const TOKEN = await validatePasswordResetToken(id || "");
-    if (TOKEN) {
+    const USER_ID = await validatePasswordResetToken(id || "");
+    if (USER_ID) {
         const password = DATA.password;
-        const USER = await auth.getUser(TOKEN);
-        await auth.invalidateAllUserSessions(USER.userId);
-        await auth.updateKeyPassword("email", USER.email, password)
+        await lucia.invalidateUserSessions(USER_ID);
+        // ###
+        // @TODO: Update Password
+        // ###
         return new Response(
             JSON.stringify({
                 status: respStatus,

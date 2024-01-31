@@ -3,8 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import LoginPage from '../components/Login.svelte';
 import Header from '../components/Header.svelte';
 import { isValidEmail } from '../lib/lucia-email';
-import { auth } from '../lib/lucia';
-import { LuciaError } from "lucia";
+import { lucia } from '../lib/lucia';
+import { Argon2id } from 'oslo/password';
+import { DB_ADAPTER } from '../lib/db';
+import { userTable } from '../lib/schema';
+import { eq } from 'drizzle-orm';
 
 let redirect = false;
 let emailInput = '';
@@ -21,24 +24,25 @@ if (Astro.request.method === 'POST') {
     const validPassword = typeof password === 'string' && password.length >= 1 && password.length <= 255;
     if (isValidEmail(email) && validPassword) {
         try {
-            const key = await auth.useKey('email', email.toLowerCase(), password);
-            const session = await auth.createSession({
-                userId: key.userId,
-                attributes: {}
-            });
-            Astro.locals.auth.setSession(session);
+            const EXISTING_USER = await DB_ADAPTER.select().from(userTable).where(eq(userTable.email, email));
+            const VALID = await new Argon2id().verify(EXISTING_USER[0].hashed_password || '', password);
+
+            if (!VALID) {
+                throw Error('Incorrect username or password');
+            }
+
+            const SESSION = await lucia.createSession(EXISTING_USER[0].id, {});
+            const COOKIE = await lucia.createSessionCookie(SESSION.id);
+            Astro.cookies.set(COOKIE.name, COOKIE.value, COOKIE.attributes);
+
             redirect = true;
         } catch (e: any) {
-			if (
-				e instanceof LuciaError &&
-				(e.message === "AUTH_INVALID_KEY_ID" ||
-					e.message === "AUTH_INVALID_PASSWORD")
-			) {
-				errorMessage = "Wrong Email or Password";
-			} else {
-				console.log(e);
-            	errorMessage = 'Unknown Error';
-			}
+            if (e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD') {
+                errorMessage = 'Wrong Email or Password';
+            } else {
+                console.log(e);
+                errorMessage = 'Unknown Error';
+            }
         }
     } else {
         errorMessage = 'Invalid Input';

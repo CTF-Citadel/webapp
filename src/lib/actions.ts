@@ -1,5 +1,5 @@
-import { PRISMA_CONNECTION, auth } from './lucia';
-import crypto from 'node:crypto'
+import { DB_ADAPTER } from './db';
+import { randomBytes, randomUUID } from 'node:crypto';
 
 // read from env
 const BACKEND_HOST = process.env.BACKEND_HOST;
@@ -211,7 +211,7 @@ class DatabaseActions {
     ) {
         await PRISMA_CONNECTION.challenges.create({
             data: {
-                id: crypto.randomUUID().toString(),
+                id: randomUUID(),
                 event_id: toEvent,
                 challenge_name: name,
                 challenge_description: desc,
@@ -224,7 +224,7 @@ class DatabaseActions {
     };
 
     async deployTeamChallenge(team_id: string, challenge_id: string) {
-        const GENERATED_UUID = crypto.randomUUID();
+        const GENERATED_UUID = randomUUID();
         const RES = await PRISMA_CONNECTION.challenges.findFirst({
             where: {
                 id: challenge_id
@@ -288,7 +288,7 @@ class DatabaseActions {
     async createEvent(name: string, desc: string, start: number, end: number) {
         await PRISMA_CONNECTION.events.create({
             data: {
-                id: crypto.randomUUID().toString(),
+                id: randomUUID(),
                 event_name: name,
                 event_description: desc,
                 event_start: start,
@@ -300,9 +300,9 @@ class DatabaseActions {
     async createTeam(userID: string, name: string, desc: string, country: string) {
         await PRISMA_CONNECTION.teams.create({
             data: {
-                id: crypto.randomUUID().toString(),
+                id: randomUUID(),
                 team_creator: userID,
-                team_join_token: crypto.randomBytes(16).toString('base64').replaceAll('=', ''),
+                team_join_token: randomBytes(16).toString('base64').replaceAll('=', ''),
                 team_name: name,
                 team_description: desc,
                 team_country_code: country

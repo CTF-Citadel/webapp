@@ -4,30 +4,28 @@ import Header from '../../components/Header.svelte';
 import EmailVerify from '../../components/EmailVerification.svelte';
 import { sendVerificationLink } from '../../lib/lucia-email';
 import { generateEmailVerificationToken } from "../../lib/lucia-db";
-import { auth } from '../../lib/lucia';
+import { lucia } from '../../lib/lucia';
 
 let emailSent = false;
 let errorMessage = 'None';
 let respStatus = 200;
 
-const session = await Astro.locals.auth.validate();
-if (!session) return Astro.redirect('/login');
-if (session.user.isBlocked) {
-    await auth.invalidateAllUserSessions(session.user.userId);
+if (!Astro.locals.user) return Astro.redirect('/login');
+if (Astro.locals.user.is_blocked) {
+    await lucia.invalidateUserSessions(Astro.locals.user.id);
     return Astro.redirect('/login');
 }
-if (session.user.emailVerified) {
+if (Astro.locals.user.is_verified) {
     return Astro.redirect('/');
 }
 
 if (Astro.request.method === 'POST') {
     const ORIGIN = Astro.url.origin;
     try {
-        const session = await Astro.locals.auth.validate();
-        if (!session) return Astro.redirect('/login');
-        if (!session.user.emailVerified) {
-            const token = await generateEmailVerificationToken(session.user.userId);
-            sendVerificationLink(ORIGIN, session.user.email, token);
+        if (!Astro.locals.user) return Astro.redirect('/login');
+        if (!Astro.locals.user.is_verified) {
+            const token = await generateEmailVerificationToken(Astro.locals.user.id);
+            sendVerificationLink(ORIGIN, Astro.locals.user.email, token);
             emailSent = true;
         }
     } catch (e: any) {

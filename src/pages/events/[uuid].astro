@@ -4,7 +4,7 @@ import Challenge from '../../components/Challenges.svelte';
 import Header from '../../components/Header.svelte';
 import DatabaseActions from '../../lib/actions';
 import { normalWrapper } from '../../lib/backend';
-import { auth } from '../../lib/lucia';
+import { lucia } from '../../lib/lucia';
 import { DUMMY_SESSION } from '../../lib/helpers';
 
 const { uuid } = Astro.params;
@@ -12,15 +12,15 @@ const { uuid } = Astro.params;
 let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
-    session = await Astro.locals.auth.validate();
-    if (!session) return Astro.redirect('/login');
-    if (session.user.isBlocked) {
-        await auth.invalidateAllUserSessions(session.user.userId);
+    if (!Astro.locals.user) return Astro.redirect('/login');
+    if (Astro.locals.user.is_blocked) {
+        await lucia.invalidateUserSessions(Astro.locals.user.id);
         return Astro.redirect('/login');
     }
-    if (!session.user.emailVerified) {
+    if (!Astro.locals.user.is_verified) {
         return Astro.redirect('/verify/email');
     }
+    session = { ...Astro.locals.user };
 }
 
 // check if we access a non-existing challenge
@@ -38,12 +38,12 @@ if (Astro.request.method === 'POST') {
 
 <Layout title="CTF-Citadel">
     <Header
-        username={session.user.username}
+        username={session.username}
         interactive={true}
-        admin={session.user.user_role == 'admin' ? true : false}
+        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
     <div transition:animate="slide">
-        <Challenge uuid={uuid} team={session.user.user_team_id} client:visible />
+        <Challenge uuid={uuid} team={session.user_team_id} client:visible />
     </div>
 </Layout>
