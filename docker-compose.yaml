@@ -23,7 +23,6 @@ services:
       TZ: Europe/Vienna
     volumes:
       - ./data/mariadb:/var/lib/mysql
-      - ./db:/docker-entrypoint-initdb.d
     restart: unless-stopped
     profiles:
       - full
@@ -36,8 +35,6 @@ services:
       TZ: Europe/Vienna
     ports:
       - '127.0.0.1:3306:3306'
-    volumes:
-      - ./db:/docker-entrypoint-initdb.d
     restart: unless-stopped
     profiles:
       - dev

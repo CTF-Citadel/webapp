@@ -21,4 +21,9 @@ pnpm-debug.log*
 .vscode
 .vscode-test
 .DS_Store
+
+# drizzle gen files
 drizzle/*
+
+# vscode gen files
+.vscode/
