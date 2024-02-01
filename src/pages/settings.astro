@@ -2,28 +2,29 @@
 import Layout from '../layouts/Layout.astro';
 import AdminSettings from '../components/Settings.svelte';
 import Header from '../components/Header.svelte';
+import { lucia } from '../lib/lucia';
 import { privilegedWrapper } from '../lib/backend';
 import { DUMMY_SESSION } from '../lib/helpers';
 
 let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
-    session = await Astro.locals.auth.validate();
-    if (!session) return Astro.redirect('/login');
-    if (session.user.isBlocked) {
-        await Astro.locals.auth.invalidateAllUserSessions(session.user.userId);
+    if (!Astro.locals.user) return Astro.redirect('/login');
+    if (Astro.locals.user.is_blocked) {
+        await lucia.invalidateUserSessions(Astro.locals.user.id);
         return Astro.redirect('/login');
     }
-    if (!session.user.emailVerified) {
+    if (!Astro.locals.user.is_verified) {
         return Astro.redirect('/verify/email');
     }
-    if (session.user.user_role != 'admin') {
+    if (Astro.locals.user.user_role != 'admin') {
         return new Response('Forbidden', { status: 403 });
     }
+    session = { ...Astro.locals.user };
 }
 
 if (Astro.request.method === 'POST') {
-    if (session.user.user_role != 'admin') {
+    if (Astro.locals.user.user_role != 'admin') {
         return new Response('Forbidden', { status: 403 });
     } else {
         return await privilegedWrapper(Astro.request);
@@ -33,12 +34,12 @@ if (Astro.request.method === 'POST') {
 
 <Layout title="CTF-Citadel">
     <Header
-        username={session.user.username}
+        username={session.username}
         interactive={true}
-        admin={session.user.user_role == 'admin' ? true : false}
+        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1">
-        <AdminSettings userSession={session.user} client:visible />
+        <AdminSettings userSession={session} client:visible />
     </div>
 </Layout>

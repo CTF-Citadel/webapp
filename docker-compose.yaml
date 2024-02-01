@@ -23,7 +23,6 @@ services:
       TZ: Europe/Vienna
     volumes:
       - ./data/mariadb:/var/lib/mysql
-      - ./db:/docker-entrypoint-initdb.d
     restart: unless-stopped
     profiles:
       - full
@@ -36,8 +35,6 @@ services:
       TZ: Europe/Vienna
     ports:
       - '127.0.0.1:3306:3306'
-    volumes:
-      - ./db:/docker-entrypoint-initdb.d
     restart: unless-stopped
     profiles:
       - dev
@@ -53,6 +50,7 @@ services:
       EMAIL_PASS: 'CHANGEME'
       DB_HOST: 'mariadb'
       DB_NAME: 'lucia'
+      DB_USER: 'root'
       DB_PASS: 'CHANGEME'
       BACKEND_HOST: '127.0.0.1'
       BACKEND_PORT: 8080

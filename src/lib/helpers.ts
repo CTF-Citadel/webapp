@@ -1,4 +1,5 @@
 import type { WrapperFormat } from "./backend";
+const { randomBytes } = await import('node:crypto');
 
 export async function requestWrapper(dest: string, request: WrapperFormat): Promise<Response> {
     return await fetch(dest, {
@@ -7,16 +8,25 @@ export async function requestWrapper(dest: string, request: WrapperFormat): Prom
     });
 }
 
+// generator
+export function generateRandomString(bytes: number) {
+    return randomBytes(bytes).toString('hex');
+}
+
+// expiration check
+export function isWithinExpiration(unix_seconds: number) {
+    const CURRENT = new Date().getTime();
+    return CURRENT < unix_seconds ? true : false
+}
+
 export const DUMMY_SESSION = {
-    sessionId: 'someSession',
-    user: {
-        userId: 'someUser',
-        username: 'DEV',
-        emailVerified: true,
-        user_role: 'admin',
-        user_team_id: 'someTeam',
-        isBlocked: false
-    }
+    id: 'someUser',
+    username: 'DEV',
+    email: 'some-email',
+    user_role: 'admin',
+    user_team_id: 'someTeam',
+    is_blocked: false,
+    is_verified: true
 }
 
 export const COUNTRIES = [

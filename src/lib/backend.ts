@@ -140,6 +140,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             response = await HANLDER.createChallenge(
                 json.data.name,
                 json.data.description,
+                json.data.category,
                 json.data.difficulty,
                 json.data.isContainer,
                 json.data.filePath,
@@ -160,6 +161,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 json.data.id,
                 json.data.name,
                 json.data.description,
+                json.data.category,
                 json.data.difficulty,
                 json.data.event
             );

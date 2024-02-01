@@ -10,7 +10,7 @@ package-lock.json \
 astro.config.mjs \
 svelte.config.js \
 tailwind.config.cjs \
-schema.prisma \
+drizzle.config.ts \
 tsconfig.json ./
 
 # Install dependencies
@@ -21,10 +21,10 @@ COPY src ./src
 # Copy public folder
 COPY public ./public
 
-# initialize prisma
-RUN npx prisma generate
+# build drizzle schema
+RUN npm run generate
 
-# and build
+# and build webapp
 RUN npm run build
 
 # Start Astro

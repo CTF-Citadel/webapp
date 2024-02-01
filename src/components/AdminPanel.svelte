@@ -65,6 +65,7 @@
     let challengeTemplate = {
         name: '',
         description: '',
+        category: '',
         isContainer: false,
         filePath: '',
         fileURL: ''
@@ -191,6 +192,7 @@
                 id: editUUID,
                 name: editData.challenge_name,
                 description: editData.challenge_description,
+                category: '',
                 difficulty: selectedDiff,
                 event: selectedEvent
             }

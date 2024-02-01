@@ -9,6 +9,10 @@ module.exports = {
     ],
     theme: {
         extend: {
+            backgroundImage: {
+                'gradient-dark': "linear-gradient(260deg, #440025, transparent 10%), linear-gradient(80deg, #440025, transparent 10%);",
+                'gradient-light': "linear-gradient(260deg, #ff82cf, transparent 10%), linear-gradient(80deg, #ff82cf, transparent 10%);",
+            },
             colors: {
                 primary: {
                     900: '#e93296',
