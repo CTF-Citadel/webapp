@@ -25,8 +25,8 @@
     import { onMount } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
-    import UserGroup from 'flowbite-svelte-icons/UserGroupSolid.svelte';
-    import CalendarPlus from 'flowbite-svelte-icons/CalendarPlusSolid.svelte';
+    import UserGroup from 'flowbite-svelte-icons/UsersGroupSolid.svelte';
+    import CalendarPlus from 'flowbite-svelte-icons/CalendarMonthSolid.svelte';
     import EyeSlash from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
 
     const DIFFICULTIES = [

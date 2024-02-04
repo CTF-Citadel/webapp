@@ -11,6 +11,9 @@ export default defineConfig({
     mode: "standalone"
   }),
   vite: {
+    build: {
+      chunkSizeWarningLimit: 750
+    },
 		optimizeDeps: {
 			exclude: ["oslo"]
 		}
