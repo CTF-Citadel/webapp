@@ -1,5 +1,5 @@
 import type { WrapperFormat } from "./backend";
-const { randomBytes } = await import('node:crypto');
+import { generateId } from 'lucia';
 
 export async function requestWrapper(dest: string, request: WrapperFormat): Promise<Response> {
     return await fetch(dest, {
@@ -9,8 +9,8 @@ export async function requestWrapper(dest: string, request: WrapperFormat): Prom
 }
 
 // generator
-export function generateRandomString(bytes: number) {
-    return randomBytes(bytes).toString('hex');
+export function generateRandomString(length: number) {
+    return generateId(length);
 }
 
 // expiration check
