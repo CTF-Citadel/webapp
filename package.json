@@ -8,8 +8,7 @@
     "generate": "npx drizzle-kit generate:mysql",
     "preview": "astro preview",
     "astro": "astro",
-    "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs",
-    "npmrun": "astro build && NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
+    "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^8.2.0",

@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Event from '../components/Events.svelte';
 import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/backend';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
@@ -18,10 +17,6 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
     session = { ...Astro.locals.user };
-}
-
-if (Astro.request.method === 'POST') {
-    return await normalWrapper(Astro.request);
 }
 ---
 

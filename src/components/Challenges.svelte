@@ -20,7 +20,7 @@
     });
 
     async function checkFlag(challenge_id: string, input: string) {
-        const DATA = await requestWrapper('/events/' + uuid, {
+        const DATA = await requestWrapper(false, {
             type: 'check-flag',
             data: { teamID: team, challengeID: challenge_id, flag: input }
         });
@@ -31,14 +31,14 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'challenges', data: { id: uuid } });
+        const DATA = await requestWrapper(false, { type: 'challenges', data: { id: uuid } });
         const JSON = await DATA.json();
         challenges = JSON.data;
     }
 
     async function deployChallenge(challenge_id: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, {
+        const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
             data: { teamID: team, challengeID: challenge_id }
         });

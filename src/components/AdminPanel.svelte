@@ -107,25 +107,25 @@
     }
 
     async function refreshUsers() {
-        const DATA = await requestWrapper('/settings', { type: 'users' });
+        const DATA = await requestWrapper(true, { type: 'users' });
         const JSON = await DATA.json();
         users = JSON.data;
     }
 
     async function refreshTeams() {
-        const DATA = await requestWrapper('/settings', { type: 'teams' });
+        const DATA = await requestWrapper(true, { type: 'teams' });
         const JSON = await DATA.json();
         teams = JSON.data;
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper('/settings', { type: 'challenges' });
+        const DATA = await requestWrapper(true, { type: 'challenges' });
         const JSON = await DATA.json();
         challenges = JSON.data;
     }
 
     async function refreshEvents() {
-        const DATA = await requestWrapper('/settings', { type: 'events' });
+        const DATA = await requestWrapper(true, { type: 'events' });
         const JSON = await DATA.json();
         events = JSON.data;
         sortedEvents = [];
@@ -136,7 +136,7 @@
 
     async function createEvent() {
         let tempStart = { ...datePicker };
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'create-event',
             data: {
                 ...eventTemplate,
@@ -152,7 +152,7 @@
     }
 
     async function createChallenge() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'create-challenge',
             data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent }
         });
@@ -170,7 +170,7 @@
     async function updateTeam() {}
 
     async function updateEvent() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'update-event',
             data: {
                 id: editUUID,
@@ -186,7 +186,7 @@
     }
 
     async function updateChallenge() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'update-challenge',
             data: {
                 id: editUUID,
@@ -205,7 +205,7 @@
     }
 
     async function deleteEvent() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'delete-event',
             data: { id: editUUID }
         });
@@ -217,7 +217,7 @@
     }
 
     async function deleteChallenge() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'delete-challenge',
             data: { id: editUUID }
         });
@@ -229,7 +229,7 @@
     }
 
     async function deleteTeam() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'delete-team',
             data: { id: editUUID }
         });
@@ -241,7 +241,7 @@
     }
 
     async function deleteUser() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'delete-user',
             data: { id: editUUID }
         });
@@ -253,7 +253,7 @@
     }
 
     async function blockUser() {
-        const DATA = await requestWrapper('/settings', {
+        const DATA = await requestWrapper(true, {
             type: 'block-user',
             data: { id: editUUID }
         });

@@ -1,8 +1,9 @@
 import type { WrapperFormat } from "./backend";
 import { generateId } from 'lucia';
 
-export async function requestWrapper(dest: string, request: WrapperFormat): Promise<Response> {
-    return await fetch(dest, {
+export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
+    const DEST = privileged ? '/admin' : '/user';
+    return await fetch(`/api/v1/${DEST}`, {
         method: 'POST',
         body: JSON.stringify(request)
     });

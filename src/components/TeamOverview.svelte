@@ -49,7 +49,7 @@
     });
 
     async function hasCreatedTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'has-created',
             data: {
                 user: userID
@@ -60,19 +60,19 @@
     }
 
     async function refreshTeams() {
-        const DATA = await requestWrapper('/teams', { type: 'teams' });
+        const DATA = await requestWrapper(false, { type: 'teams' });
         const JSON = await DATA.json();
         teams = JSON.data;
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper('/teams', { type: 'team-info', data: { team: teamID } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { team: teamID } });
         const JSON = await DATA.json();
         thisTeam = JSON.data;
     }
 
     async function createTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'create-team',
             data: {
                 session: sessionID,
@@ -90,7 +90,7 @@
     }
 
     async function joinTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'join-team',
             data: { session: sessionID, user: userID, token: inputs.teamToken }
         });
@@ -101,7 +101,7 @@
     }
 
     async function leaveTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'leave-team',
             data: { session: sessionID }
         });
