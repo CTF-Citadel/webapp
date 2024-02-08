@@ -185,7 +185,7 @@
 
 <div class="flex flex-1 flex-col justify-center items-center">
     {#if !hasTeam}
-        <Card size="sm" padding="sm" img="" class="m-4">
+        <Card size="sm" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
             <p>You are currently not playing for any team!</p>
             <Button size="lg" class="mt-4" on:click={() => modalOpen('Join')}>
                 Join Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
@@ -197,7 +197,7 @@
     {:else}
         <div class="flex flex-col sm:flex-row">
             {#if Object.keys(thisTeam).length > 0}
-                <Card size="lg" padding="sm" img="" class="m-4">
+                <Card size="lg" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                     <h1>You are playing for: {thisTeam.team_name}</h1>
                     <p>Description {thisTeam.team_description}</p>
                     <p>Country: {thisTeam.team_country_code}</p>
