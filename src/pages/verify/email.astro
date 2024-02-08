@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import EmailVerify from '../../components/EmailVerification.svelte';
 import { sendVerificationLink } from '../../lib/lucia-email';
-import { generateEmailVerificationToken } from "../../lib/lucia-db";
+import { generateEmailverificationTokens } from "../../lib/lucia-db";
 import { lucia } from '../../lib/lucia';
 
 let emailSent = false;
@@ -24,7 +24,7 @@ if (Astro.request.method === 'POST') {
     try {
         if (!Astro.locals.user) return Astro.redirect('/login');
         if (!Astro.locals.user.is_verified) {
-            const token = await generateEmailVerificationToken(Astro.locals.user.id);
+            const token = await generateEmailverificationTokens(Astro.locals.user.id);
             sendVerificationLink(ORIGIN, Astro.locals.user.email, token);
             emailSent = true;
         }

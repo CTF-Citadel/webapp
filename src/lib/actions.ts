@@ -1,5 +1,5 @@
 import { DB_ADAPTER } from './db';
-import { events, teams, team_events, team_challenges, userTable, challenges } from './schema';
+import { events, teams, team_events, team_challenges, users, challenges } from './schema';
 import { eq, and } from 'drizzle-orm';
 import { lucia } from './lucia';
 import { generateRandomString } from './helpers';
@@ -28,9 +28,9 @@ class DatabaseActions {
      * @return True if it exists, False if it doesn't
     */
     async checkUserExist(userName: string, userEmail: string) {
-        const RES_NAME = await DB_ADAPTER.select().from(userTable).where(eq(userTable.id, userName))
+        const RES_NAME = await DB_ADAPTER.select().from(users).where(eq(users.id, userName))
         if (RES_NAME.length == 0) return false;
-        const RES_EMAIL = await DB_ADAPTER.select().from(userTable).where(eq(userTable.email, userEmail))
+        const RES_EMAIL = await DB_ADAPTER.select().from(users).where(eq(users.email, userEmail))
         return RES_EMAIL.length == 0 ? false : true;
     };
 
@@ -66,14 +66,14 @@ class DatabaseActions {
      * @return The team's ID if user is, false if he isn't
     */
     async checkUserInTeam(userID: string) {
-        const RES = await DB_ADAPTER.select().from(userTable).where(eq(userTable.id, userID))
+        const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID))
         if (RES.length == 0) return false;
         if (RES[0].user_team_id == '') return false;
         return RES[0].user_team_id;
     };
 
     async getAllUsers() {
-        const RES = await DB_ADAPTER.select().from(userTable);
+        const RES = await DB_ADAPTER.select().from(users);
         return RES.length > 0 ? RES : [];
     };
 
@@ -202,18 +202,18 @@ class DatabaseActions {
     async joinTeam(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user) {
-            await DB_ADAPTER.update(userTable).set({
+            await DB_ADAPTER.update(users).set({
                 user_team_id: teamID
-            }).where(eq(userTable.id, user.id))
+            }).where(eq(users.id, user.id))
         }
     };
 
     async leaveTeam(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user) {
-            await DB_ADAPTER.update(userTable).set({
+            await DB_ADAPTER.update(users).set({
                 user_team_id: ''
-            }).where(eq(userTable.id, user.id))
+            }).where(eq(users.id, user.id))
         }
     };
 
@@ -236,18 +236,18 @@ class DatabaseActions {
 
     async deleteTeam(id: string) {
         await DB_ADAPTER.delete(teams).where(eq(teams.id, id))
-        const REF_USERS = await DB_ADAPTER.select().from(userTable).where(eq(userTable.user_team_id, id))
+        const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, id))
         REF_USERS.forEach(async user => {
             await lucia.invalidateUserSessions(user.id);
-            await DB_ADAPTER.update(userTable).set({
+            await DB_ADAPTER.update(users).set({
                 user_team_id: ''
-            }).where(eq(userTable.id, user.id));
+            }).where(eq(users.id, user.id));
         })
     };
 
     async deleteUser(id: string) {
         await lucia.invalidateUserSessions(id);
-        await DB_ADAPTER.delete(userTable).where(eq(userTable.id, id));
+        await DB_ADAPTER.delete(users).where(eq(users.id, id));
         await lucia.deleteExpiredSessions();
     };
 
@@ -261,16 +261,16 @@ class DatabaseActions {
     };
 
     async blockUser(id: string) {
-        const RES = await DB_ADAPTER.select().from(userTable).where(eq(userTable.id, id));
+        const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, id));
         await lucia.invalidateUserSessions(id);
         if (RES[0].is_blocked) {
-            await DB_ADAPTER.update(userTable).set({
+            await DB_ADAPTER.update(users).set({
                 is_blocked: false
-            }).where(eq(userTable.id, id));
+            }).where(eq(users.id, id));
         } else {
-            await DB_ADAPTER.update(userTable).set({
+            await DB_ADAPTER.update(users).set({
                 is_blocked: true
-            }).where(eq(userTable.id, id));
+            }).where(eq(users.id, id));
         }
     }
 

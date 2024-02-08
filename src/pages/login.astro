@@ -6,7 +6,7 @@ import { isValidEmail } from '../lib/lucia-email';
 import { lucia } from '../lib/lucia';
 import { Argon2id } from 'oslo/password';
 import { DB_ADAPTER } from '../lib/db';
-import { userTable } from '../lib/schema';
+import { users } from '../lib/schema';
 import { eq } from 'drizzle-orm';
 
 let redirect = false;
@@ -24,7 +24,7 @@ if (Astro.request.method === 'POST') {
     const validPassword = typeof password === 'string' && password.length >= 1 && password.length <= 255;
     if (isValidEmail(email) && validPassword) {
         try {
-            const EXISTING_USER = await DB_ADAPTER.select().from(userTable).where(eq(userTable.email, email));
+            const EXISTING_USER = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
             const VALID = await new Argon2id().verify(EXISTING_USER[0].hashed_password || '', password);
             if (!VALID) throw Error('AUTH_INVALID_PASSWORD');
             const SESSION = await lucia.createSession(EXISTING_USER[0].id, {});

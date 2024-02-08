@@ -27,6 +27,8 @@ const MIGRATE_CONN = await mysql.createConnection({
 });
 const MIGRATE_DB = drizzle(MIGRATE_CONN);
 
-// run migrate
+// check run migrate
+
+MIGRATE_DB.select().from(schema.users)
 await migrate(MIGRATE_DB, { migrationsFolder: './drizzle' });
 await MIGRATE_CONN.end();

@@ -1,6 +1,6 @@
 import { mysqlTable, varchar, datetime, boolean, bigint, int } from "drizzle-orm/mysql-core";
 
-export const userTable = mysqlTable("user", {
+export const users = mysqlTable("users", {
 	id: varchar("id", {
 		length: 64
 	}).primaryKey(),
@@ -23,7 +23,7 @@ export const userTable = mysqlTable("user", {
     is_blocked: boolean("is_blocked")
 });
 
-export const sessionTable = mysqlTable("session", {
+export const sessions = mysqlTable("sessions", {
 	id: varchar("id", {
 		length: 64
 	}).primaryKey(),
@@ -31,11 +31,11 @@ export const sessionTable = mysqlTable("session", {
 		length: 64
 	})
 		.notNull()
-		.references(() => userTable.id),
+		.references(() => users.id),
 	expiresAt: datetime("expires_at").notNull()
 });
 
-export const resetToken = mysqlTable("password_reset_token", {
+export const resetTokens = mysqlTable("password_reset_tokens", {
 	id: varchar("id", {
 		length: 64
 	}).primaryKey(),
@@ -47,7 +47,7 @@ export const resetToken = mysqlTable("password_reset_token", {
     })
 });
 
-export const verificationToken = mysqlTable("email_verification_token", {
+export const verificationTokens = mysqlTable("email_verification_tokens", {
 	id: varchar("id", {
 		length: 64
 	}).primaryKey(),
@@ -107,7 +107,7 @@ export const teams = mysqlTable("teams", {
 	}).primaryKey(),
     team_creator: varchar("team_creator", {
 		length: 64
-	}).references(() => userTable.id),
+	}).references(() => users.id),
     team_name: varchar("team_name", {
 		length: 64
 	}).unique(),

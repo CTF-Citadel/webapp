@@ -2,10 +2,10 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
 import PasswordReset from '../../components/PasswordReset.svelte';
-import { validatePasswordResetToken, isValidPasswordResetToken } from "../../lib/lucia-db";
+import { validatePasswordresetTokens, isValidPasswordresetTokens } from "../../lib/lucia-db";
 import { lucia } from '../../lib/lucia';
 import { DB_ADAPTER } from '../../lib/db';
-import { userTable } from '../../lib/schema';
+import { users } from '../../lib/schema';
 import { eq } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 
@@ -13,7 +13,7 @@ const { id } = Astro.params;
 let errorMessage = 'None';
 let respStatus = 200;
 
-const VALID = await isValidPasswordResetToken(id || "");
+const VALID = await isValidPasswordresetTokens(id || "");
 if (!VALID) {
     return new Response("Invalid or Expired Token!", {
         status: 401
@@ -22,7 +22,7 @@ if (!VALID) {
 
 if (Astro.request.method === 'POST') {
     const DATA = await Astro.request.json();
-    const USER_ID = await validatePasswordResetToken(id || "");
+    const USER_ID = await validatePasswordresetTokens(id || "");
     if (!USER_ID) {
         return new Response("Invalid or Expired Token!", {
             status: 401
@@ -33,9 +33,9 @@ if (Astro.request.method === 'POST') {
     Astro.cookies.delete(lucia.sessionCookieName);
 
     const HASH_PASS = await new Argon2id().hash(password);
-    await DB_ADAPTER.update(userTable).set({
+    await DB_ADAPTER.update(users).set({
         hashed_password: HASH_PASS
-    }).where(eq(userTable.id, USER_ID));
+    }).where(eq(users.id, USER_ID));
 
     return new Response(
         JSON.stringify({

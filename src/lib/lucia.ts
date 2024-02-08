@@ -16,8 +16,8 @@ const LUCIA_CONN = mysql.createPool({
     password: DB_PASS
 });
 const LUCIA_ADAPTER = new Mysql2Adapter(LUCIA_CONN, {
-	user: "user",
-	session: "session"
+	user: "users",
+	session: "sessions"
 });
 
 export const lucia = new Lucia(LUCIA_ADAPTER, {
