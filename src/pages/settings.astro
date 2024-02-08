@@ -24,7 +24,7 @@ if (!import.meta.env.DEV) {
 }
 
 if (Astro.request.method === 'POST') {
-    if (Astro.locals.user.user_role != 'admin') {
+    if (session.user_role != 'admin') {
         return new Response('Forbidden', { status: 403 });
     } else {
         return await privilegedWrapper(Astro.request);
