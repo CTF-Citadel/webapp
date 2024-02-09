@@ -38,7 +38,7 @@ export const generatePasswordresetTokens = async (email: string) => {
     const token = generateRandomString(24);
     await DB_ADAPTER.insert(resetTokens).values({
         id: token,
-        expires: new Date().getTime() + EXPIRES_IN,
+        expires: Date.now() + EXPIRES_IN,
         user_id: targetUser[0].id
     });
     return token;

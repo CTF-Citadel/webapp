@@ -5,7 +5,7 @@
     let authResponse: any;
 
     async function onResend() {
-        const RESP = await fetch('/verify/email', {
+        const RESP = await fetch('/api/v1/token/email', {
             method: 'POST',
             body: JSON.stringify({})
         });

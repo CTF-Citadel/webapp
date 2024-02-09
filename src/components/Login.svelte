@@ -9,7 +9,7 @@
 
     async function onLogin() {
         authResponse = '';
-        const RESP = await fetch('/login', {
+        const RESP = await fetch('/api/v1/account/auth', {
             method: 'POST',
             body: JSON.stringify(inputs)
         });

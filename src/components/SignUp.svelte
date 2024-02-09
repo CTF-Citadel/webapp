@@ -9,7 +9,7 @@
     };
 
     async function onSignup() {
-        const RESP = await fetch('/signup', {
+        const RESP = await fetch('/api/v1/account/new', {
             method: 'POST',
             body: JSON.stringify(inputs)
         });

@@ -15,9 +15,8 @@ export function generateRandomString(length: number) {
 }
 
 // expiration check
-export function isWithinExpiration(unix_seconds: number) {
-    const CURRENT = new Date().getTime();
-    return CURRENT < unix_seconds ? true : false
+export function isWithinExpiration(expiryUnixEpoch: number) {
+    return Date.now() < expiryUnixEpoch ? true : false
 }
 
 export const DUMMY_SESSION = {

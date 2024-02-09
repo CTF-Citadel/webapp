@@ -1,12 +1,10 @@
 import { Lucia, TimeSpan } from "lucia";
-import { NodePostgresAdapter } from "@lucia-auth/adapter-postgresql";
-import { DB_CONN } from "./db";
+import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
+import { DB_ADAPTER } from "./db";
+import { sessions, users } from "./schema";
 
 // init drizzle
-const LUCIA_ADAPTER = new NodePostgresAdapter(DB_CONN, {
-	user: "users",
-	session: "sessions"
-});
+const LUCIA_ADAPTER = new DrizzlePostgreSQLAdapter(DB_ADAPTER, sessions, users);
 
 export const lucia = new Lucia(LUCIA_ADAPTER, {
 	sessionExpiresIn: new TimeSpan(30, "d"),

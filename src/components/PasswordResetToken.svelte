@@ -7,7 +7,7 @@
     };
 
     async function onSubmit() {
-        const RESP = await fetch('/reset/password', {
+        const RESP = await fetch('/api/v1/token/password', {
             method: 'POST',
             body: JSON.stringify(inputs)
         });

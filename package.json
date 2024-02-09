@@ -14,7 +14,7 @@
     "@astrojs/node": "^8.2.0",
     "@astrojs/svelte": "^5.0.3",
     "@astrojs/tailwind": "^5.1.0",
-    "@lucia-auth/adapter-postgresql": "^3.1.0",
+    "@lucia-auth/adapter-drizzle": "^1.0.1",
     "astro": "^4.3.2",
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.3",

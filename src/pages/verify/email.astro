@@ -1,14 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.svelte';
-import EmailVerify from '../../components/EmailVerification.svelte';
-import { sendVerificationLink } from '../../lib/lucia-email';
-import { generateEmailverificationTokens } from "../../lib/lucia-db";
+import EmailVerify from '../../components/EmailVerifyToken.svelte';
 import { lucia } from '../../lib/lucia';
-
-let emailSent = false;
-let errorMessage = 'None';
-let respStatus = 200;
 
 if (!Astro.locals.user) return Astro.redirect('/login');
 if (Astro.locals.user.is_blocked) {
@@ -17,31 +11,6 @@ if (Astro.locals.user.is_blocked) {
 }
 if (Astro.locals.user.is_verified) {
     return Astro.redirect('/');
-}
-
-if (Astro.request.method === 'POST') {
-    const ORIGIN = Astro.url.origin;
-    try {
-        if (!Astro.locals.user) return Astro.redirect('/login');
-        if (!Astro.locals.user.is_verified) {
-            const token = await generateEmailverificationTokens(Astro.locals.user.id);
-            sendVerificationLink(ORIGIN, Astro.locals.user.email, token);
-            emailSent = true;
-        }
-    } catch (e: any) {
-        console.log(e);
-        errorMessage = 'An error occurred';
-    }
-    return new Response(
-        JSON.stringify({
-            status: respStatus,
-            error: errorMessage,
-            verifySent: emailSent
-        }),
-        {
-            status: respStatus
-        }
-    );
 }
 ---
 

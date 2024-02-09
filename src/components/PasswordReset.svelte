@@ -18,7 +18,7 @@
     }
 
     async function onSubmit() {
-        const RESP = await fetch(`/reset/${id}`, {
+        const RESP = await fetch(`/api/v1/reset/${id}`, {
             method: 'POST',
             body: JSON.stringify(inputs)
         });
