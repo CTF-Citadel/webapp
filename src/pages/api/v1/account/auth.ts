@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { isValidEmail } from '../../../../lib/lucia-email';
+import { validEmail, validPassword } from "../../../../lib/helpers";
 import { lucia } from '../../../../lib/lucia';
 import { Argon2id } from 'oslo/password';
 import { DB_ADAPTER } from '../../../../lib/db';
@@ -13,9 +13,8 @@ export const POST: APIRoute = async (context) => {
 	const DATA = await context.request.json();
     const email = DATA.email;
     const password = DATA.password;
-    const validPassword = typeof password === 'string' && password.length >= 1 && password.length <= 255;
 
-    if (isValidEmail(email) && validPassword) {
+    if (validEmail(email) && validPassword(password)) {
         try {
             const EXISTING_USER = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
             const VALID = await new Argon2id().verify(EXISTING_USER[0].hashed_password || '', password);
@@ -33,6 +32,7 @@ export const POST: APIRoute = async (context) => {
             }
         }
     } else {
+        respStatus = 400;
         errorMessage = 'Invalid Input';
     }
     return new Response(
