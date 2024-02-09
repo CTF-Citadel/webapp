@@ -77,7 +77,10 @@ export const team_events = pgTable('team_events', {
         .references(() => teams.id)
         .primaryKey(),
     event_id: text('event_id')
-        .references(() => events.id)
+        .references(() => events.id),
+    team_points: bigint('team_points', {
+        mode: 'number'
+    })
 });
 
 export const team_challenges = pgTable('team_challenges', {
