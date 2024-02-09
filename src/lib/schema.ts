@@ -78,7 +78,6 @@ export const team_events = pgTable('team_events', {
         .primaryKey(),
     event_id: text('event_id')
         .references(() => events.id)
-        .unique()
 });
 
 export const team_challenges = pgTable('team_challenges', {
@@ -86,8 +85,7 @@ export const team_challenges = pgTable('team_challenges', {
         .references(() => teams.id)
         .primaryKey(),
     challenge_id: text('challenge_id')
-        .references(() => challenges.id)
-        .unique(),
+        .references(() => challenges.id),
     solved_by: text('solved_by'),
     challenge_uuid: text('challenge_uuid'),
     challenge_flag: text('challenge_flag'),
