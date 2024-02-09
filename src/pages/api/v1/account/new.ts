@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { generateEmailverificationTokens, isInitialUser } from '../../../../lib/lucia-db';
-import { isValidEmail, sendVerificationLink } from '../../../../lib/lucia-email';
+import { sendVerificationLink } from '../../../../lib/lucia-email';
+import { validEmail, validPassword, validUsername } from "../../../../lib/helpers";
 import { lucia } from '../../../../lib/lucia';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
@@ -16,8 +17,7 @@ export const POST: APIRoute = async (context) => {
     const email = DATA.email;
     const username = DATA.username;
     const password = DATA.password;
-    const validPassword = typeof password === 'string' && password.length >= 6 && password.length <= 255;
-    if (isValidEmail(email) && validPassword) {
+    if (validEmail(email) && validPassword(password) && validUsername(username)) {
         try {
             const IS_INITIAL = await isInitialUser();
             const USER_ID = generateId(32);
@@ -49,6 +49,7 @@ export const POST: APIRoute = async (context) => {
             }
         }
     } else {
+        respStatus = 400;
         errorMessage = 'Invalid Input';
     }
     return new Response(

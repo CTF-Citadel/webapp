@@ -5,6 +5,7 @@ import { DB_ADAPTER } from '../../../../lib/db';
 import { users } from '../../../../lib/schema';
 import { eq } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
+import { validPassword } from "../../../../lib/helpers";
 
 export const POST: APIRoute = async (context) => {
     const { id } = context.params;
@@ -18,14 +19,19 @@ export const POST: APIRoute = async (context) => {
             status: 401
         });
     }
-    const password = DATA.password;
-    await lucia.invalidateUserSessions(USER_ID);
-    context.cookies.delete(lucia.sessionCookieName);
 
-    const HASH_PASS = await new Argon2id().hash(password);
-    await DB_ADAPTER.update(users).set({
-        hashed_password: HASH_PASS
-    }).where(eq(users.id, USER_ID));
+    const password = DATA.password;
+    if (validPassword(password)) {
+        await lucia.invalidateUserSessions(USER_ID);
+        context.cookies.delete(lucia.sessionCookieName);
+        const HASH_PASS = await new Argon2id().hash(password);
+        await DB_ADAPTER.update(users).set({
+            hashed_password: HASH_PASS
+        }).where(eq(users.id, USER_ID));
+    } else {
+        respStatus = 400;
+        errorMessage = 'Bad Password'
+    }
 
     return new Response(
         JSON.stringify({

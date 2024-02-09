@@ -19,6 +19,20 @@ export function isWithinExpiration(expiryUnixEpoch: number) {
     return Date.now() < expiryUnixEpoch ? true : false
 }
 
+export function validUsername(input: string): boolean {
+    return /^[a-zA-Z0-9_]{4,24}$/.test(input);
+}
+
+export function validPassword(input: string): boolean {
+    if (!/^[a-zA-Z0-9_@$!%*?&#^]+$/.test(input)) return false;
+    // min 8 characters, max 96 characters, at least one uppercase letter, one lowercase letter, one number and one special character
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^]{12,96}$/.test(input);
+}
+
+export function validEmail(input: string): boolean {
+    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input);
+}
+
 export const DUMMY_SESSION = {
     id: 'someUser',
     username: 'DEV',
