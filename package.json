@@ -5,7 +5,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "generate": "npx drizzle-kit generate:mysql",
+    "generate": "npx drizzle-kit generate:pg",
     "preview": "astro preview",
     "astro": "astro",
     "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
@@ -14,19 +14,20 @@
     "@astrojs/node": "^8.2.0",
     "@astrojs/svelte": "^5.0.3",
     "@astrojs/tailwind": "^5.1.0",
-    "@lucia-auth/adapter-mysql": "^3.0.0",
+    "@lucia-auth/adapter-postgresql": "^3.1.0",
     "astro": "^4.3.2",
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.3",
     "lucia": "^3.0.1",
-    "mysql2": "^3.9.1",
     "nodemailer": "^6.9.9",
+    "pg": "^8.11.3",
     "svelte": "^4.2.9",
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.16",
     "@types/nodemailer": "^6.4.14",
+    "@types/pg": "^8.11.0",
     "flowbite-svelte": "^0.44.22",
     "flowbite-svelte-icons": "^1.3.1"
   }

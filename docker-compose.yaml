@@ -14,27 +14,29 @@ services:
     restart: unless-stopped
     profiles:
       - full
-  mariadb:
-    image: mariadb:latest
-    hostname: mariadb
+  postgres:
+    image: postgres:latest
+    hostname: postgres
     environment:
-      MARIADB_DATABASE: 'lucia'
-      MARIADB_ROOT_PASSWORD: 'CHANGEME'
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'CHANGEME'
+      POSTGRES_DB: 'citadel'
       TZ: Europe/Vienna
     volumes:
-      - ./data/mariadb:/var/lib/mysql
+      - ./data/postgres:/var/lib/postgresql/data
     restart: unless-stopped
     profiles:
       - full
-  mariadb-dev:
-    image: mariadb:latest
-    hostname: mariadb
+  postgres-dev:
+    image: postgres:latest
+    hostname: postgres
     environment:
-      MARIADB_DATABASE: 'lucia'
-      MARIADB_ROOT_PASSWORD: 'CHANGEME'
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'CHANGEME'
+      POSTGRES_DB: 'citadel'
       TZ: Europe/Vienna
     ports:
-      - '127.0.0.1:3306:3306'
+      - '127.0.0.1:5432:5432'
     restart: unless-stopped
     profiles:
       - dev
@@ -48,8 +50,8 @@ services:
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
-      DB_HOST: 'mariadb'
-      DB_NAME: 'lucia'
+      DB_HOST: 'postgres'
+      DB_NAME: 'citadel'
       DB_USER: 'root'
       DB_PASS: 'CHANGEME'
       BACKEND_HOST: '127.0.0.1'

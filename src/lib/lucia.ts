@@ -1,21 +1,9 @@
 import { Lucia, TimeSpan } from "lucia";
-import { Mysql2Adapter } from "@lucia-auth/adapter-mysql";
-import mysql from 'mysql2/promise';
-
-// read from env
-const DB_USER = process.env.DB_USER;
-const DB_PASS = process.env.DB_PASS;
-const DB_HOST = process.env.DB_HOST;
-const DB_NAME = process.env.DB_NAME;
+import { NodePostgresAdapter } from "@lucia-auth/adapter-postgresql";
+import { DB_CONN } from "./db";
 
 // init drizzle
-const LUCIA_CONN = mysql.createPool({
-    host: DB_HOST,
-    database: DB_NAME,
-    user: DB_USER,
-    password: DB_PASS
-});
-const LUCIA_ADAPTER = new Mysql2Adapter(LUCIA_CONN, {
+const LUCIA_ADAPTER = new NodePostgresAdapter(DB_CONN, {
 	user: "users",
 	session: "sessions"
 });
