@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import TeamOverview from '../components/TeamOverview.svelte';
 import Header from '../components/Header.svelte';
 import { lucia } from '../lib/lucia';
-import { normalWrapper } from '../lib/backend';
 import { DUMMY_SESSION } from '../lib/helpers';
 
 let session = DUMMY_SESSION;
@@ -21,13 +20,9 @@ if (!import.meta.env.DEV) {
     session = { ...Astro.locals.user };
     sessionID = Astro.locals.session.id;
 }
-
-if (Astro.request.method === 'POST') {
-    return await normalWrapper(Astro.request);
-}
 ---
 
-<Layout title="CTF-Citadel">
+<Layout title="Teams">
     <Header
         username={session.username}
         interactive={true}

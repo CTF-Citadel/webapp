@@ -38,24 +38,24 @@
                 <span class="hidden lg:block self-center text-xl font-semibold whitespace-nowrap dark:text-white">{headerText}</span>
             </a>
             <div class="flex items-center lg:order-2">
+                <DarkMode btnClass="" class="p-1.5 text-2xl text-black dark:text-white" />
                 {#if interactive}
                     <a href="/user">
-                        <button class="p-2.5">
+                        <button class="p-2.5 text-black dark:text-white">
                             <UserCircleOutline />
                         </button>
                     </a>
                 {/if}
                 {#if admin}
                     <a href="/settings">
-                        <button class="p-2.5">
+                        <button class="p-2.5 text-black dark:text-white">
                             <CogOutline />
                         </button>
                     </a>
                 {/if}
-                <DarkMode class="text-2xl hover:bg-surface-900 border-surface-900 focus:ring-surface-900" />
                 {#if interactive}
                     <form method="post" action="/logout">
-                        <button type="submit" class="p-2.5">
+                        <button type="submit" class="p-2.5 text-black dark:text-white">
                             <ArrowLeftToBracketOutline />
                         </button>
                     </form>

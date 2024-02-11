@@ -1,158 +1,100 @@
-import { mysqlTable, varchar, datetime, boolean, bigint, int } from "drizzle-orm/mysql-core";
+import { pgTable, text, timestamp, boolean, bigint } from 'drizzle-orm/pg-core';
 
-export const userTable = mysqlTable("user", {
-	id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    username: varchar("username", {
-        length: 64
-    }).unique(),
-    hashed_password: varchar("hashed_password", {
-        length: 128
-    }),
-    user_role: varchar("user_role", {
-        length: 64
-    }),
-    user_team_id: varchar("user_team_id", {
-        length: 64
-    }),
-    email: varchar("email", {
-        length: 64
-    }).unique(),
-    is_verified: boolean("is_verified"),
-    is_blocked: boolean("is_blocked")
+export const users = pgTable('users', {
+    id: text('id').primaryKey(),
+    username: text('username').unique(),
+    hashed_password: text('hashed_password'),
+    user_role: text('user_role'),
+    user_team_id: text('user_team_id'),
+    email: text('email').unique(),
+    is_verified: boolean('is_verified'),
+    is_blocked: boolean('is_blocked')
 });
 
-export const sessionTable = mysqlTable("session", {
-	id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 64
-	})
-		.notNull()
-		.references(() => userTable.id),
-	expiresAt: datetime("expires_at").notNull()
+export const sessions = pgTable('sessions', {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id),
+    expiresAt: timestamp('expires_at', {
+        precision: 6,
+        withTimezone: true,
+        mode: 'date'
+    }).notNull()
 });
 
-export const resetToken = mysqlTable("password_reset_token", {
-	id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    user_id: varchar("user_id", {
-        length: 64
-    }),
+export const resetTokens = pgTable('password_reset_tokens', {
+    id: text('id').primaryKey(),
+    user_id: text('user_id'),
     expires: bigint('expires', {
         mode: 'number'
     })
 });
 
-export const verificationToken = mysqlTable("email_verification_token", {
-	id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    user_id: varchar("user_id", {
-        length: 64
-    }),
+export const verificationTokens = pgTable('email_verification_tokens', {
+    id: text('id').primaryKey(),
+    user_id: text('user_id'),
     expires: bigint('expires', {
         mode: 'number'
     })
 });
 
-export const events = mysqlTable("events", {
-    id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    event_name: varchar("event_name", {
-		length: 64
-	}),
-    event_description: varchar("event_description", {
-		length: 256
-	}),
-    event_start: int("event_start"),
-    event_end: int("event_end")
+export const events = pgTable('events', {
+    id: text('id').primaryKey(),
+    event_name: text('event_name'),
+    event_description: text('event_description'),
+    event_start: bigint('event_start', {
+        mode: 'number'
+    }),
+    event_end: bigint('event_end', {
+        mode: 'number'
+    })
 });
 
-export const challenges = mysqlTable("challenges", {
-    id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    event_id: varchar("event_id", {
-		length: 64
-	}).references(() => events.id).primaryKey(),
-    challenge_name: varchar("challenge_name", {
-		length: 64
-	}).unique(),
-    challenge_category: varchar("challenge_category", {
-		length: 64
-	}),
-    challenge_difficulty: varchar("challenge_difficulty", {
-		length: 64
-	}),
-    challenge_description: varchar("challenge_description", {
-		length: 256
-	}),
-    container_file: varchar("container_file", {
-		length: 128
-	}),
-    static_file_url: varchar("static_file_url", {
-		length: 256
-	}),
-    needs_container: boolean("needs_container"),
+export const challenges = pgTable('challenges', {
+    id: text('id').primaryKey(),
+    event_id: text('event_id')
+        .references(() => events.id),
+    challenge_name: text('challenge_name').unique(),
+    challenge_category: text('challenge_category'),
+    challenge_difficulty: text('challenge_difficulty'),
+    challenge_description: text('challenge_description'),
+    container_file: text('container_file'),
+    static_file_url: text('static_file_url'),
+    needs_container: boolean('needs_container')
 });
 
-export const teams = mysqlTable("teams", {
-    id: varchar("id", {
-		length: 64
-	}).primaryKey(),
-    team_creator: varchar("team_creator", {
-		length: 64
-	}).references(() => userTable.id),
-    team_name: varchar("team_name", {
-		length: 64
-	}).unique(),
-    team_join_token: varchar("team_join_token", {
-		length: 128
-	}),
-    team_country_code: varchar("team_country_code", {
-		length: 4
-	}),
-    team_description: varchar("team_description", {
-		length: 256
-	}),
+export const teams = pgTable('teams', {
+    id: text('id').primaryKey(),
+    team_creator: text('team_creator').references(() => users.id),
+    team_name: text('team_name').unique(),
+    team_join_token: text('team_join_token'),
+    team_country_code: text('team_country_code'),
+    team_description: text('team_description')
 });
 
-export const team_events = mysqlTable("team_events", {
-    team_id: varchar("team_id", {
-		length: 64
-	}).references(() => teams.id).primaryKey(),
-    event_id: varchar("event_id", {
-		length: 64
-	}).references(() => events.id).primaryKey()
+export const team_events = pgTable('team_events', {
+    team_id: text('team_id')
+        .references(() => teams.id)
+        .primaryKey(),
+    event_id: text('event_id')
+        .references(() => events.id),
+    team_points: bigint('team_points', {
+        mode: 'number'
+    })
 });
 
-export const team_challenges = mysqlTable("team_challenges", {
-    team_id: varchar("team_id", {
-		length: 64
-	}).references(() => teams.id).primaryKey(),
-    challenge_id: varchar("challenge_id", {
-		length: 64
-	}).references(() => challenges.id).primaryKey(),
-    solved_by: varchar("solved_by", {
-		length: 64
-	}),
-    challenge_uuid: varchar("challenge_uuid", {
-		length: 64
-	}),
-    challenge_flag: varchar("challenge_flag", {
-		length: 64
-	}),
-    challenge_host: varchar("challenge_host", {
-		length: 64
-	}),
-    challenge_port: varchar("challenge_port", {
-		length: 32
-	}),
-    is_solved: boolean("is_solved"),
-    is_running: boolean("is_running"),
+export const team_challenges = pgTable('team_challenges', {
+    team_id: text('team_id')
+        .references(() => teams.id)
+        .primaryKey(),
+    challenge_id: text('challenge_id')
+        .references(() => challenges.id),
+    solved_by: text('solved_by'),
+    challenge_uuid: text('challenge_uuid'),
+    challenge_flag: text('challenge_flag'),
+    challenge_host: text('challenge_host'),
+    challenge_port: text('challenge_port'),
+    is_solved: boolean('is_solved'),
+    is_running: boolean('is_running')
 });

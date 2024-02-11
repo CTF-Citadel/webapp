@@ -88,10 +88,3 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
         }
     });
 };
-
-export const isValidEmail = (maybeEmail: unknown): maybeEmail is string => {
-    if (typeof maybeEmail !== "string") return false;
-    if (maybeEmail.length > 255) return false;
-    const emailRegexp = /^.+@.+$/;
-    return emailRegexp.test(maybeEmail);
-};

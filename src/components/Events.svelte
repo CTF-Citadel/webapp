@@ -15,7 +15,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper('/events', { type: 'events', data: { id: userSession.user_team } });
+        const DATA = await requestWrapper(false, { type: 'events', data: { id: userSession.user_team } });
         const JSON = await DATA.json();
         events = JSON.data;
     }
@@ -29,7 +29,7 @@
     {:else}
         {#if events.length > 0}
             {#each events as event}
-                <Card img="/img/scoreboard.webp" class="m-2">
+                <Card img="/img/scoreboard.webp" class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                     <a href="/events/{event.id}">
                         <Button>
                             {event.event_name} <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />            

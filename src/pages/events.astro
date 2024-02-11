@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Event from '../components/Events.svelte';
 import Header from '../components/Header.svelte';
-import { normalWrapper } from '../lib/backend';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
@@ -19,13 +18,9 @@ if (!import.meta.env.DEV) {
     }
     session = { ...Astro.locals.user };
 }
-
-if (Astro.request.method === 'POST') {
-    return await normalWrapper(Astro.request);
-}
 ---
 
-<Layout title="CTF-Citadel">
+<Layout title="Events">
     <Header
         username={session.username}
         interactive={true}

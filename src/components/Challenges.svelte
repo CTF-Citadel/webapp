@@ -20,7 +20,7 @@
     });
 
     async function checkFlag(challenge_id: string, input: string) {
-        const DATA = await requestWrapper('/events/' + uuid, {
+        const DATA = await requestWrapper(false, {
             type: 'check-flag',
             data: { teamID: team, challengeID: challenge_id, flag: input }
         });
@@ -31,14 +31,14 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper('/events/' + uuid, { type: 'challenges', data: { id: uuid } });
+        const DATA = await requestWrapper(false, { type: 'challenges', data: { id: uuid } });
         const JSON = await DATA.json();
         challenges = JSON.data;
     }
 
     async function deployChallenge(challenge_id: string) {
         deploymentStatus = 1;
-        const DATA = await requestWrapper('/events/' + uuid, {
+        const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
             data: { teamID: team, challengeID: challenge_id }
         });
@@ -61,7 +61,7 @@
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card class="flex-1 max-w-[32%] min-w-[32%]">
+            <Card class="flex-1 max-w-[32%] min-w-[32%] bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                 <div class="mb-2">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                     <p id="challenge-name">{challenge.challenge_name}</p>

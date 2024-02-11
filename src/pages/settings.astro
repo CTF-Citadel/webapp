@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import AdminSettings from '../components/Settings.svelte';
 import Header from '../components/Header.svelte';
 import { lucia } from '../lib/lucia';
-import { privilegedWrapper } from '../lib/backend';
 import { DUMMY_SESSION } from '../lib/helpers';
 
 let session = DUMMY_SESSION;
@@ -22,17 +21,9 @@ if (!import.meta.env.DEV) {
     }
     session = { ...Astro.locals.user };
 }
-
-if (Astro.request.method === 'POST') {
-    if (Astro.locals.user.user_role != 'admin') {
-        return new Response('Forbidden', { status: 403 });
-    } else {
-        return await privilegedWrapper(Astro.request);
-    }
-}
 ---
 
-<Layout title="CTF-Citadel">
+<Layout title="Admin">
     <Header
         username={session.username}
         interactive={true}

@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
-import { drizzle } from 'drizzle-orm/mysql2';
-import { migrate } from 'drizzle-orm/mysql2/migrator';
-import * as schema from './schema';
+import pg from "pg";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 
 // read from env
 const DB_USER = process.env.DB_USER;
@@ -10,23 +9,13 @@ const DB_HOST = process.env.DB_HOST;
 const DB_NAME = process.env.DB_NAME;
 
 // connection for normal interaction
-const DB_CONN = await mysql.createPool({
+export const DB_CONN = new pg.Pool({
     host: DB_HOST,
     database: DB_NAME,
     user: DB_USER,
     password: DB_PASS
 });
-export const DB_ADAPTER = drizzle(DB_CONN, { schema: schema, mode: 'default' });
-
-// connection for migrations
-const MIGRATE_CONN = await mysql.createConnection({
-    host: DB_HOST,
-    database: DB_NAME,
-    user: DB_USER,
-    password: DB_PASS
-});
-const MIGRATE_DB = drizzle(MIGRATE_CONN);
+export const DB_ADAPTER = drizzle(DB_CONN);
 
 // run migrate
-await migrate(MIGRATE_DB, { migrationsFolder: './drizzle' });
-await MIGRATE_CONN.end();
+await migrate(DB_ADAPTER, { migrationsFolder: './drizzle' });

@@ -1,22 +1,36 @@
 import type { WrapperFormat } from "./backend";
-const { randomBytes } = await import('node:crypto');
+import { generateId } from 'lucia';
 
-export async function requestWrapper(dest: string, request: WrapperFormat): Promise<Response> {
-    return await fetch(dest, {
+export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
+    const DEST = privileged ? '/admin' : '/user';
+    return await fetch(`/api/v1/${DEST}`, {
         method: 'POST',
         body: JSON.stringify(request)
     });
 }
 
 // generator
-export function generateRandomString(bytes: number) {
-    return randomBytes(bytes).toString('hex');
+export function generateRandomString(length: number) {
+    return generateId(length);
 }
 
 // expiration check
-export function isWithinExpiration(unix_seconds: number) {
-    const CURRENT = new Date().getTime();
-    return CURRENT < unix_seconds ? true : false
+export function isWithinExpiration(expiryUnixEpoch: number) {
+    return Date.now() < expiryUnixEpoch ? true : false
+}
+
+export function validUsername(input: string): boolean {
+    return /^[a-zA-Z0-9_]{4,24}$/.test(input);
+}
+
+export function validPassword(input: string): boolean {
+    if (!/^[a-zA-Z0-9_@$!%*?&#^]+$/.test(input)) return false;
+    // min 8 characters, max 96 characters, at least one uppercase letter, one lowercase letter, one number and one special character
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^]{12,96}$/.test(input);
+}
+
+export function validEmail(input: string): boolean {
+    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input);
 }
 
 export const DUMMY_SESSION = {

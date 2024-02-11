@@ -49,7 +49,7 @@
     });
 
     async function hasCreatedTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'has-created',
             data: {
                 user: userID
@@ -60,19 +60,19 @@
     }
 
     async function refreshTeams() {
-        const DATA = await requestWrapper('/teams', { type: 'teams' });
+        const DATA = await requestWrapper(false, { type: 'teams' });
         const JSON = await DATA.json();
         teams = JSON.data;
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper('/teams', { type: 'team-info', data: { team: teamID } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { team: teamID } });
         const JSON = await DATA.json();
         thisTeam = JSON.data;
     }
 
     async function createTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'create-team',
             data: {
                 session: sessionID,
@@ -90,7 +90,7 @@
     }
 
     async function joinTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'join-team',
             data: { session: sessionID, user: userID, token: inputs.teamToken }
         });
@@ -101,7 +101,7 @@
     }
 
     async function leaveTeam() {
-        const DATA = await requestWrapper('/teams', {
+        const DATA = await requestWrapper(false, {
             type: 'leave-team',
             data: { session: sessionID }
         });
@@ -185,7 +185,7 @@
 
 <div class="flex flex-1 flex-col justify-center items-center">
     {#if !hasTeam}
-        <Card size="sm" padding="sm" img="" class="m-4">
+        <Card size="sm" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
             <p>You are currently not playing for any team!</p>
             <Button size="lg" class="mt-4" on:click={() => modalOpen('Join')}>
                 Join Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
@@ -197,7 +197,7 @@
     {:else}
         <div class="flex flex-col sm:flex-row">
             {#if Object.keys(thisTeam).length > 0}
-                <Card size="lg" padding="sm" img="" class="m-4">
+                <Card size="lg" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                     <h1>You are playing for: {thisTeam.team_name}</h1>
                     <p>Description {thisTeam.team_description}</p>
                     <p>Country: {thisTeam.team_country_code}</p>
