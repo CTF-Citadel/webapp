@@ -546,7 +546,7 @@
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={updateChallenge}>Assign</Button>
+                <Button on:click={() => {}}>Assign</Button>
                 <Button
                     on:click={() => {
                         create.assign = false;
