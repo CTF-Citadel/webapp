@@ -18,6 +18,7 @@
     } from 'flowbite-svelte';
     import { requestWrapper, COUNTRIES } from '../lib/helpers';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
+    import type { TeamsType } from '../lib/schema';
 
     export let sessionID: string = '';
     export let teamID: string = '';
@@ -28,7 +29,7 @@
     let hasTeam = false;
     let hasCreated = false;
     let thisTeam: any = {};
-    let teams: any[] = [];
+    let teams: TeamsType[] = [];
     let selection: 0 | 'Join' | 'Create' = 0;
     let inputs = {
         teamToken: '',

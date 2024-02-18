@@ -20,34 +20,41 @@
         Textarea,
         Select,
         Toggle,
-        MultiSelect
+        MultiSelect,
+        Checkbox
     } from 'flowbite-svelte';
     import { onMount } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
     import UserGroup from 'flowbite-svelte-icons/UsersGroupSolid.svelte';
     import CalendarPlus from 'flowbite-svelte-icons/CalendarMonthSolid.svelte';
-    import EyeSlash from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
+    import EyeSlash from 'flowbite-svelte-icons/EyeSlashSolid.svelte';
+    import AssignTo from 'flowbite-svelte-icons/CodePullRequestSolid.svelte';
+    import type { UsersType, EventsType, TeamsType, ChallengesType } from '../lib/schema';
+
+    let teams: TeamsType[] = [];
+    let events: EventsType[] = [];
+    let users: UsersType[] = [];
+    let challenges: ChallengesType[] = [];
+    let sortedEvents: { value: string; name: string }[] = [];
+    let selectedEvent = '';
+    let selectedDiff = '';
+    let loading: boolean = true;
+    let editUUID: string = '';
+    let editData: any = {};
+    let marked = new Set<string>();
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
         { value: 'Medium', name: 'Medium' },
         { value: 'Hard', name: 'Hard' }
     ];
-    let teams: any[] = [];
-    let events: any[] = [];
-    let users: any[] = [];
-    let challenges: any[] = [];
-    let sortedEvents: { value: string; name: string }[] = [];
-    let selectedEvent = '';
-    let selectedDiff = '';
     let tabStates = {
         users: true,
         teams: false,
         events: false,
         challenges: false
     };
-    let loading: boolean = true;
     let edit = {
         user: false,
         team: false,
@@ -56,7 +63,8 @@
     };
     let create = {
         event: false,
-        challenge: false
+        challenge: false,
+        assign: false
     };
     let eventTemplate = {
         name: '',
@@ -74,8 +82,6 @@
         start: '',
         end: ''
     };
-    let editUUID: string = '';
-    let editData: any = {};
 
     onMount(async () => {
         await refreshEvents();
@@ -85,26 +91,9 @@
         loading = false;
     });
 
-    function editInvocate(type: 'team' | 'event' | 'challenge' | 'user') {
-        switch (type) {
-            case 'user':
-                editData = users.find((item) => item['id'] === editUUID);
-                break;
-            case 'team':
-                editData = teams.find((item) => item['id'] === editUUID);
-                break;
-
-            case 'event':
-                editData = events.find((item) => item['id'] === editUUID);
-                break;
-
-            case 'challenge':
-                editData = challenges.find((item) => item['id'] === editUUID);
-                selectedDiff = editData.challenge_diff;
-                selectedEvent = editData.event_id;
-                break;
-        }
-    }
+    // @TODO:
+    async function updateUser() {}
+    async function updateTeam() {}
 
     async function refreshUsers() {
         const DATA = await requestWrapper(true, { type: 'users' });
@@ -140,8 +129,8 @@
             type: 'create-event',
             data: {
                 ...eventTemplate,
-                start: Math.floor(new Date(tempStart.start).getTime() / 1000),
-                end: Math.floor(new Date(tempStart.end).getTime() / 1000)
+                start: new Date(tempStart.start).getTime(),
+                end: new Date(tempStart.end).getTime()
             }
         });
         if (DATA.ok) {
@@ -162,12 +151,6 @@
             return true;
         } else return false;
     }
-
-    // @TODO: do this with Lucia Intgr
-    async function updateUser() {}
-
-    // @TODO: do user team creation first
-    async function updateTeam() {}
 
     async function updateEvent() {
         const DATA = await requestWrapper(true, {
@@ -263,6 +246,41 @@
             return true;
         } else return false;
     }
+
+    function checkEvent(item: string) {
+        marked.has(item) ? marked.delete(item) : marked.add(item);
+    }
+
+    function checkAll(items: TeamsType[]) {
+        if (marked.size == items.length) {
+            marked.clear();
+        } else {
+            for (let team of items) {
+                marked.add(team.id);
+            }
+        }
+    }
+
+    function editInvocate(type: 'team' | 'event' | 'challenge' | 'user') {
+        switch (type) {
+            case 'user':
+                editData = users.find((item) => item['id'] === editUUID);
+                break;
+            case 'team':
+                editData = teams.find((item) => item['id'] === editUUID);
+                break;
+
+            case 'event':
+                editData = events.find((item) => item['id'] === editUUID);
+                break;
+
+            case 'challenge':
+                editData = challenges.find((item) => item['id'] === editUUID);
+                selectedDiff = editData.challenge_diff;
+                selectedEvent = editData.event_id;
+                break;
+        }
+    }
 </script>
 
 <!--
@@ -270,22 +288,36 @@
 -->
 
 <SpeedDial defaultClass="absolute right-6 bottom-6">
-    <SpeedDialButton
-        name="New Challenge"
-        on:click={() => {
-            create.challenge = create.challenge ? false : true;
-        }}
-    >
-        <CalendarPlus />
-    </SpeedDialButton>
-    <SpeedDialButton
-        name="New Event"
-        on:click={() => {
-            create.event = create.event ? false : true;
-        }}
-    >
-        <UserGroup />
-    </SpeedDialButton>
+    {#if tabStates.challenges}
+        <SpeedDialButton
+            name="New Challenge"
+            on:click={() => {
+                create.challenge = create.challenge ? false : true;
+            }}
+        >
+            <CalendarPlus />
+        </SpeedDialButton>
+    {/if}
+    {#if tabStates.events}
+        <SpeedDialButton
+            name="New Event"
+            on:click={() => {
+                create.event = create.event ? false : true;
+            }}
+        >
+            <UserGroup />
+        </SpeedDialButton>
+    {/if}
+    {#if tabStates.events && marked.size > 0}
+        <SpeedDialButton
+            name="Assign To"
+            on:click={() => {
+                create.assign = create.assign ? false : true;
+            }}
+        >
+            <AssignTo />
+        </SpeedDialButton>
+    {/if}
 </SpeedDial>
 
 <!--
@@ -504,6 +536,32 @@
     </svelte:fragment>
 </Modal>
 
+<Modal bind:open={edit.challenge} title="Assign To">
+    <div class="mb-6">
+        <Label>
+            Select Event
+            <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
+        </Label>
+    </div>
+    <svelte:fragment slot="footer">
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={updateChallenge}>Assign</Button>
+                <Button
+                    on:click={() => {
+                        create.assign = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+        </div>
+    </svelte:fragment>
+</Modal>
+
+<!--
+    Main Tab
+-->
+
 <div class="w-full h-full flex-1">
     {#if loading}
         <div class="text-center">
@@ -544,7 +602,7 @@
                                         {entry.user_role}
                                     </TableBodyCell>
                                     <TableBodyCell>
-                                        {entry.email_verified}
+                                        {entry.is_verified}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.user_team_id}
@@ -579,6 +637,9 @@
                 {#if teams.length > 0}
                     <Table>
                         <TableHead>
+                            <TableHeadCell>
+                                <Checkbox on:change={() => checkAll(teams)} checked={marked.size == teams.length} />
+                            </TableHeadCell>
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Creator ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
@@ -590,6 +651,12 @@
                         <TableBody>
                             {#each teams as entry}
                                 <TableBodyRow>
+                                    <TableBodyCell>
+                                        <Checkbox
+                                            on:change={() => checkEvent(entry.id)}
+                                            checked={marked.has(entry.id)}
+                                        />
+                                    </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.id}
                                     </TableBodyCell>

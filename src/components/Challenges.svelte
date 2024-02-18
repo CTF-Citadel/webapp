@@ -3,6 +3,7 @@
     import { requestWrapper } from '../lib/helpers';
     import { onMount } from 'svelte';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
+    import type { ChallengesType } from '../lib/schema';
 
     export let uuid: string = '';
     export let team: string = '';
@@ -10,7 +11,7 @@
     let loading: boolean = true;
     let successFlag: boolean = false;
     let deploymentStatus: 0 | 1 | 2 | 3 = 0;
-    let challenges: any[] = [];
+    let challenges: ChallengesType[] = [];
     let challengeResponse: any = false;
     let flagInput: string = '';
 
@@ -74,12 +75,12 @@
                 </Accordion>
                 <div class="mb-6 mt-6">
                     <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
-                    {#if challenge.challenge_diff == 'Easy'}
-                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_diff}</p>
-                    {:else if challenge.challenge_diff == 'Medium'}
-                        <p id="challenge-diff" class="text-orange-400">{challenge.challenge_diff}</p>
+                    {#if challenge.challenge_difficulty == 'Easy'}
+                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_difficulty}</p>
+                    {:else if challenge.challenge_difficulty == 'Medium'}
+                        <p id="challenge-diff" class="text-orange-400">{challenge.challenge_difficulty}</p>
                     {:else}
-                        <p id="challenge-diff" class="text-red-400">{challenge.challenge_diff}</p>
+                        <p id="challenge-diff" class="text-red-400">{challenge.challenge_difficulty}</p>
                     {/if}
                 </div>
                 <div class="mb-6">
@@ -129,9 +130,7 @@
                     </div>
                     <div>
                         <Button
-                            on:click={() => {
-                                checkFlag(challenge.challenge_uuid, flagInput);
-                            }}
+                            on:click={() => {}}
                         >
                             Submit
                         </Button>
