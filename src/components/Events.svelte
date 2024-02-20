@@ -3,12 +3,12 @@
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
     import { requestWrapper } from '../lib/helpers';
     import { onMount } from 'svelte';
-    import type { EventsType } from '../lib/schema';
+    import type { EventsType, TeamEventsType } from '../lib/schema';
 
     export let userSession: any = {};
 
     let loading: boolean = true;
-    let events: EventsType[] = [];
+    let events: { events: EventsType; team_events: TeamEventsType }[] = [];
 
     onMount(async () => {
         await refreshEvents();
@@ -16,7 +16,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'events', data: { id: userSession.user_team } });
+        const DATA = await requestWrapper(false, { type: 'events', data: { id: userSession.user_team_id } });
         const JSON = await DATA.json();
         events = JSON.data;
     }
@@ -47,17 +47,17 @@
                 class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
             >
                 <div class="mb-6">
-                    <p>Name: {event.event_name}</p>
-                    <p>Start: {formatToDate(event.event_start)}</p>
-                    <p>End: {formatToDate(event.event_end)}</p>
+                    <p>Name: {event.events.event_name}</p>
+                    <p>Start: {formatToDate(event.events.event_start)}</p>
+                    <p>End: {formatToDate(event.events.event_end)}</p>
                 </div>
-                <Button class="p-0" disabled={validTimerange(event.event_start, event.event_end) != 0}>
-                    {#if validTimerange(event.event_start, event.event_end) == 0}
-                        <a class="p-3" href="/events/{event.id}">Challenges</a>
+                <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) != 0}>
+                    {#if validTimerange(event.events.event_start, event.events.event_end) == 0}
+                        <a class="p-3" href="/events/{event.events.id}">Challenges</a>
                         <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
                     {:else}
                         <p class="p-3">
-                            {validTimerange(event.event_start, event.event_end) == 1 ? 'Upcoming' : 'Expired'}
+                            {validTimerange(event.events.event_start, event.events.event_end) == 1 ? 'Upcoming' : 'Expired'}
                         </p>
                     {/if}
                 </Button>

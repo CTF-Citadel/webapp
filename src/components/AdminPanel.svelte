@@ -9,7 +9,6 @@
         TableHeadCell,
         Tabs,
         TabItem,
-        Alert,
         Button,
         Modal,
         Input,
@@ -21,7 +20,8 @@
         Select,
         Toggle,
         MultiSelect,
-        Checkbox
+        Checkbox,
+        Alert
     } from 'flowbite-svelte';
     import { onMount } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
@@ -30,12 +30,14 @@
     import CalendarPlus from 'flowbite-svelte-icons/CalendarMonthSolid.svelte';
     import EyeSlash from 'flowbite-svelte-icons/EyeSlashSolid.svelte';
     import AssignTo from 'flowbite-svelte-icons/CodePullRequestSolid.svelte';
-    import type { UsersType, EventsType, TeamsType, ChallengesType } from '../lib/schema';
+    import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
+    import type { UsersType, EventsType, TeamsType, ChallengesType, TeamEventsType } from '../lib/schema';
 
     let teams: TeamsType[] = [];
     let events: EventsType[] = [];
     let users: UsersType[] = [];
     let challenges: ChallengesType[] = [];
+    let teamEvents: TeamEventsType[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
     let selectedEvent = '';
     let selectedDiff = '';
@@ -53,7 +55,8 @@
         users: true,
         teams: false,
         events: false,
-        challenges: false
+        challenges: false,
+        assignments: false
     };
     let edit = {
         user: false,
@@ -85,6 +88,7 @@
 
     onMount(async () => {
         await refreshEvents();
+        await refreshTeamEvents();
         await refreshTeams();
         await refreshUsers();
         await refreshChallenges();
@@ -113,6 +117,12 @@
         challenges = JSON.data;
     }
 
+    async function refreshTeamEvents() {
+        const DATA = await requestWrapper(true, { type: 'team-events' });
+        const JSON = await DATA.json();
+        teamEvents = JSON.data;
+    }
+
     async function refreshEvents() {
         const DATA = await requestWrapper(true, { type: 'events' });
         const JSON = await DATA.json();
@@ -136,6 +146,35 @@
         if (DATA.ok) {
             create.event = false;
             await refreshEvents();
+            return true;
+        } else return false;
+    }
+
+    async function assignEvent(eventID: string) {
+        const DATA = await requestWrapper(true, {
+            type: 'assign-event',
+            data: {
+                id: eventID,
+                teams: Array.from(marked)
+            }
+        });
+        if (DATA.ok) {
+            create.assign = false;
+            await refreshTeamEvents();
+            return true;
+        } else return false;
+    }
+
+    async function unassignEvent(eventID: string, teamID: string) {
+        const DATA = await requestWrapper(true, {
+            type: 'unassign-event',
+            data: {
+                event: eventID,
+                team: teamID
+            }
+        });
+        if (DATA.ok) {
+            await refreshTeamEvents();
             return true;
         } else return false;
     }
@@ -249,6 +288,8 @@
 
     function checkEvent(item: string) {
         marked.has(item) ? marked.delete(item) : marked.add(item);
+        // reinstantiate workaround
+        marked = marked;
     }
 
     function checkAll(items: TeamsType[]) {
@@ -259,6 +300,8 @@
                 marked.add(team.id);
             }
         }
+        // reinstantiate workaround
+        marked = marked;
     }
 
     function editInvocate(type: 'team' | 'event' | 'challenge' | 'user') {
@@ -308,7 +351,7 @@
             <UserGroup />
         </SpeedDialButton>
     {/if}
-    {#if tabStates.events && marked.size > 0}
+    {#if tabStates.teams && marked.size > 0}
         <SpeedDialButton
             name="Assign To"
             on:click={() => {
@@ -324,12 +367,12 @@
     Edit Popups
 -->
 
-<Modal bind:open={edit.user} title="Edit User">
+<Modal defaultClass="rounded-none" bind:open={edit.user} title="Edit User">
     <div class="mb-6">
         <Label for="email" class="mb-2">Change Email address</Label>
         <Input type="email" id="email" placeholder="name@example.com" required />
     </div>
-    <div class="mb-6">
+    <div>
         <Label for="password" class="mb-2">Change Password</Label>
         <Input type="password" id="password" placeholder="•••••••••" required />
     </div>
@@ -350,12 +393,12 @@
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={edit.team} title="Edit Team">
+<Modal defaultClass="rounded-none" bind:open={edit.team} title="Edit Team">
     <div class="mb-6">
         <Label for="team_name" class="mb-2">Change Team Name</Label>
         <Input id="team_name" placeholder="name" bind:value={editData.user_name} required />
     </div>
-    <div class="mb-6">
+    <div>
         <Label for="event_select" class="mb-2">Change Team Events</Label>
         <MultiSelect id="event_select" items={sortedEvents} size="lg" />
     </div>
@@ -375,12 +418,12 @@
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={edit.event} title="Edit Event">
+<Modal defaultClass="rounded-none" bind:open={edit.event} title="Edit Event">
     <div class="mb-6">
         <Label for="event_name" class="mb-2">Change Event Name</Label>
         <Input id="event_name" placeholder="name" bind:value={editData.event_name} required />
     </div>
-    <div class="mb-6">
+    <div>
         <Label for="event_textarea" class="mb-2">Change Event Description</Label>
         <Textarea id="event_textarea" placeholder="..." rows="4" bind:value={editData.event_description} />
     </div>
@@ -400,7 +443,7 @@
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={edit.challenge} title="Edit Challenge">
+<Modal defaultClass="rounded-none" bind:open={edit.challenge} title="Edit Challenge">
     <div class="mb-6">
         <Label for="chal_name" class="mb-2">Change Challenge Name</Label>
         <Input id="chal_name" placeholder="name" bind:value={editData.challenge_name} required />
@@ -415,7 +458,7 @@
             <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
         </Label>
     </div>
-    <div class="mb-6">
+    <div>
         <Label>
             Change Event Assignment
             <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
@@ -441,7 +484,7 @@
     Create Popups
 -->
 
-<Modal bind:open={create.event} title="Create Event">
+<Modal defaultClass="rounded-none" bind:open={create.event} title="Create Event">
     <div class="mb-6">
         <Label for="event-name" class="mb-2">Event Name</Label>
         <Input id="event-name" placeholder="myCTF" bind:value={eventTemplate.name} required />
@@ -454,7 +497,7 @@
         <Label class="mb-2">Event Start</Label>
         <input type="datetime-local" bind:value={datePicker.start} />
     </div>
-    <div class="mb-6">
+    <div>
         <Label class="mb-2">Event End</Label>
         <input type="datetime-local" bind:value={datePicker.end} />
     </div>
@@ -475,7 +518,7 @@
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={create.challenge} title="Create Challenge">
+<Modal defaultClass="rounded-none" bind:open={create.challenge} title="Create Challenge">
     <div class="mb-6">
         <Label for="challenge-name" class="mb-2">Challenge Name</Label>
         <Input id="challenge-name" placeholder="Petition" bind:value={challengeTemplate.name} required />
@@ -508,11 +551,21 @@
             required
         />
     </div>
-    <div class="mb-6">
-        <Label>
-            Assign To Event
-            <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-        </Label>
+    <div>
+        {#if events.length > 0}
+            <Label>
+                Assign To Event
+                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
+            </Label>
+        {:else}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-blue-500">No Events created yet.</p>
+            </Alert>
+        {/if}
     </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
@@ -536,17 +589,32 @@
     </svelte:fragment>
 </Modal>
 
-<Modal bind:open={edit.challenge} title="Assign To">
-    <div class="mb-6">
-        <Label>
-            Select Event
-            <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-        </Label>
+<Modal defaultClass="rounded-none" bind:open={create.assign} title="Assign To">
+    <div>
+        {#if events.length > 0}
+            <Label>
+                Select Event
+                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
+            </Label>
+        {:else}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-blue-500">No Events created yet.</p>
+            </Alert>
+        {/if}
     </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={() => {}}>Assign</Button>
+                <Button
+                    on:click={() => {
+                        assignEvent(selectedEvent);
+                    }}
+                    disabled={selectedEvent == ''}>Assign</Button
+                >
                 <Button
                     on:click={() => {
                         create.assign = false;
@@ -635,59 +703,61 @@
             </TabItem>
             <TabItem title="Teams" bind:open={tabStates.teams}>
                 {#if teams.length > 0}
-                    <Table>
-                        <TableHead>
-                            <TableHeadCell>
-                                <Checkbox on:change={() => checkAll(teams)} checked={marked.size == teams.length} />
-                            </TableHeadCell>
-                            <TableHeadCell>ID</TableHeadCell>
-                            <TableHeadCell>Creator ID</TableHeadCell>
-                            <TableHeadCell>Name</TableHeadCell>
-                            <TableHeadCell>Description</TableHeadCell>
-                            <TableHeadCell>Country</TableHeadCell>
-                            <TableHeadCell>Token</TableHeadCell>
-                            <TableHeadCell />
-                        </TableHead>
-                        <TableBody>
-                            {#each teams as entry}
-                                <TableBodyRow>
-                                    <TableBodyCell>
-                                        <Checkbox
-                                            on:change={() => checkEvent(entry.id)}
-                                            checked={marked.has(entry.id)}
-                                        />
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.id}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.team_creator}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.team_name}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.team_description}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.team_country_code}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.team_join_token}
-                                    </TableBodyCell>
-                                    <TableBodyCell>
-                                        <Button
-                                            on:click={() => {
-                                                editUUID = entry.id;
-                                                editInvocate('team');
-                                                edit.team = edit.team ? false : true;
-                                            }}>Edit</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
+                    {#key marked.size}
+                        <Table>
+                            <TableHead>
+                                <TableHeadCell>
+                                    <Checkbox on:change={() => checkAll(teams)} checked={marked.size == teams.length} />
+                                </TableHeadCell>
+                                <TableHeadCell>ID</TableHeadCell>
+                                <TableHeadCell>Creator ID</TableHeadCell>
+                                <TableHeadCell>Name</TableHeadCell>
+                                <TableHeadCell>Description</TableHeadCell>
+                                <TableHeadCell>Country</TableHeadCell>
+                                <TableHeadCell>Token</TableHeadCell>
+                                <TableHeadCell />
+                            </TableHead>
+                            <TableBody>
+                                {#each teams as entry}
+                                    <TableBodyRow>
+                                        <TableBodyCell>
+                                            <Checkbox
+                                                on:change={() => checkEvent(entry.id)}
+                                                checked={marked.has(entry.id)}
+                                            />
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.id}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.team_creator}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.team_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.team_description}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.team_country_code}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            {entry.team_join_token}
+                                        </TableBodyCell>
+                                        <TableBodyCell>
+                                            <Button
+                                                on:click={() => {
+                                                    editUUID = entry.id;
+                                                    editInvocate('team');
+                                                    edit.team = edit.team ? false : true;
+                                                }}>Edit</Button
+                                            >
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {/key}
                 {:else}
                     <Alert class="m-4" color="blue">
                         <span>
@@ -744,6 +814,47 @@
                         <span>
                             <span class="font-bold">Info!</span><br />
                             No Events found.
+                        </span>
+                    </Alert>
+                {/if}
+            </TabItem>
+            <TabItem title="Assigned Events" bind:open={tabStates.assignments}>
+                {#if teamEvents.length > 0}
+                    <Table>
+                        <TableHead>
+                            <TableHeadCell>Team ID</TableHeadCell>
+                            <TableHeadCell>Event ID</TableHeadCell>
+                            <TableHeadCell>Current Score</TableHeadCell>
+                            <TableHeadCell />
+                        </TableHead>
+                        <TableBody>
+                            {#each teamEvents as entry}
+                                <TableBodyRow>
+                                    <TableBodyCell>
+                                        {entry.team_id}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.event_id}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.team_points}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        <Button
+                                            on:click={() => {
+                                                unassignEvent(entry.event_id, entry.team_id);
+                                            }}>Delete</Button
+                                        >
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        </TableBody>
+                    </Table>
+                {:else}
+                    <Alert class="m-4" color="blue">
+                        <span>
+                            <span class="font-bold">Info!</span><br />
+                            No Assigned Events found.
                         </span>
                     </Alert>
                 {/if}

@@ -1,11 +1,23 @@
 <script lang="ts">
-    import { Card, Button, Label, Input } from 'flowbite-svelte';
+    import { onMount } from 'svelte';
+    import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
+    import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
 
     let authResponse: any;
     let inputs = {
         email: '',
         password: ''
     };
+    let showVerifySuccess: boolean = false;
+
+    onMount(() => {
+        let queryString = window.location.search;
+        const PARAMS = new URLSearchParams(queryString);
+
+        if (PARAMS.has('verified')) {
+            Boolean(PARAMS.get('verified')) ? (showVerifySuccess = true) : (showVerifySuccess = false);
+        }
+    });
 
     async function onLogin() {
         authResponse = '';
@@ -16,14 +28,25 @@
         if (RESP) {
             authResponse = await RESP.json();
             if (authResponse.needsRedirect) {
-                window.location.replace("/");
+                window.location.replace('/');
             }
         }
     }
 </script>
 
-<Card class="w-full max-w-md bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
+<Card
+    class="w-full max-w-md bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+>
     <div class="flex flex-col space-y-6">
+        {#if showVerifySuccess}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-green-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-green-500">Verified! Please log in again.</p>
+            </Alert>
+        {/if}
         <h3 class="text-xl font-medium text-gray-900 dark:text-white">Login</h3>
         <Label class="space-y-2">
             <span>Email</span>
@@ -48,9 +71,10 @@
             />
         </Label>
         <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-            <a href="/reset/password" class="text-primary-700 hover:underline dark:text-primary-500">Forgot Password?</a>
+            <a href="/reset/password" class="text-primary-700 hover:underline dark:text-primary-500">Forgot Password?</a
+            >
         </div>
-        {#if authResponse && authResponse.error != "None"}
+        {#if authResponse && authResponse.error != 'None'}
             <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
         {/if}
         <Button on:click={onLogin} class="w-full">Login to your account</Button>
