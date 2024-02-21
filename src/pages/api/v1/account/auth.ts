@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { validEmail, validPassword } from "../../../../lib/helpers";
+import { validEmail } from "../../../../lib/helpers";
 import { lucia } from '../../../../lib/lucia';
 import { Argon2id } from 'oslo/password';
 import { DB_ADAPTER } from '../../../../lib/db';
@@ -15,7 +15,7 @@ export const POST: APIRoute = async (context) => {
     const email = DATA.email;
     const password = DATA.password;
 
-    if (validEmail(email) && validPassword(password)) {
+    if (validEmail(email)) {
         try {
             const EXISTING_USER: UsersType[] = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
             if (EXISTING_USER.length == 0) throw Error('AUTH_NON_EXISTENT');
