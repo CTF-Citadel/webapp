@@ -1,0 +1,41 @@
+version: '3'
+services:
+  nginx:
+    image: docker.io/library/nginx:latest
+    hostname: nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/ssl/private
+    environment:
+      TZ: Europe/Vienna
+    restart: unless-stopped
+  postgres:
+    image: docker.io/library/postgres:latest
+    hostname: postgres
+    environment:
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'CHANGEME'
+      POSTGRES_DB: 'citadel'
+      TZ: Europe/Vienna
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+  astro:
+    image: ghcr.io/ctf-citadel/webapp:main
+    hostname: astro
+    environment:
+      INSTANCE_NAME: 'testCTF'
+      EMAIL_SERVICE: 'hotmail'
+      EMAIL_NAME: 'someone@example.com'
+      EMAIL_PASS: 'CHANGEME'
+      DB_HOST: 'postgres'
+      DB_NAME: 'citadel'
+      DB_USER: 'root'
+      DB_PASS: 'CHANGEME'
+      BACKEND_HOST: '127.0.0.1'
+      BACKEND_PORT: 8080
+      TZ: Europe/Vienna
+    restart: unless-stopped

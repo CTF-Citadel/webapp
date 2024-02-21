@@ -81,6 +81,7 @@
                     <p class="text-red-500">Ensure that these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
                         <li>At least 8 characters (up to 96)</li>
+                        <li>At least one digit</li>
                         <li>At least one lowercase character</li>
                         <li>At least one uppercase character</li>
                         <li>At least one special character</li>

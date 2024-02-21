@@ -133,6 +133,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
         case 'events':
             response = await HANLDER.getAllEvents();
             break;
+        case 'team-events':
+            response = await HANLDER.getAllTeamEvents();
+            break;
         case 'challenges':
             response = await HANLDER.getAllChallenges();
             break;
@@ -154,6 +157,18 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 json.data.description,
                 json.data.start,
                 json.data.end
+            );
+            break;
+        case 'assign-event':
+            response = await HANLDER.createTeamEvent(
+                json.data.id,
+                json.data.teams
+            );
+            break;
+        case 'unassign-event':
+            response = await HANLDER.deleteTeamEvent(
+                json.data.event,
+                json.data.team
             );
             break;
         case 'update-challenge':

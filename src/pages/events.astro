@@ -28,6 +28,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <Event client:visible />
+        <Event userSession={session} client:visible />
     </div>
 </Layout>

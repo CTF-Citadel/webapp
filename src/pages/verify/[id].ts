@@ -21,5 +21,5 @@ export const GET: APIRoute = async (context) => {
         is_verified: true
     }).where(eq(users.id, USER_ID));
 
-    return context.redirect('/login');
+    return context.redirect('/login?verified=true');
 };
