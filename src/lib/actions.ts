@@ -92,11 +92,11 @@ class DatabaseActions {
 
     /**
      * Fetches Team Info with specific ID
-     * @return Team Dict if found, else zero length Dict
+     * @return Team Dict if found, else null
      */
     async getTeamInfo(teamID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
-        return RES.length > 0 ? RES[0] : {};
+        return RES.length > 0 ? RES[0] : null;
     }
 
     /**
