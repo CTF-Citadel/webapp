@@ -5,9 +5,9 @@
     import type { TeamsType } from '../lib/schema';
 
     export let user: any = {};
-    let team: TeamsType | null;
 
-    let loading = false;
+    let team: TeamsType | null;
+    let loading = true;
 
     onMount(async () => {
         await refreshUserTeam();
