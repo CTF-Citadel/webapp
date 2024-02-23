@@ -18,6 +18,7 @@
     onMount(async () => {
         await refreshChallenges();
         loading = false;
+        console.log(challenges)
     });
 
     async function checkFlag(challenge_id: string, input: string) {
@@ -83,14 +84,17 @@
                         <p id="challenge-diff" class="text-red-400">{challenge.challenge_difficulty}</p>
                     {/if}
                 </div>
-                <div class="mb-6">
-                    <Label for="challenge-diff" class="mb-2">Challenge File</Label>
-                    <div class="p-2 bg-primary-500 rounded-lg w-fit">
-                        <a class="text-white" href={challenge.container_file} download
-                            >{challenge.container_file.split('/').pop()}</a
-                        >
+                {#if challenge.static_file_url != ""}
+                    <div class="mb-6">
+                        <Label for="challenge-diff" class="mb-2">Challenge File</Label>
+                        <div class="p-2 bg-primary-500 rounded-lg w-fit">
+                            <a class="text-white" href={challenge.static_file_url} download
+                                >{challenge.static_file_url.split('/').pop()}</a
+                            >
+                        </div>
                     </div>
-                </div>
+                {/if}
+
                 <Label for="flag-submit" class="mb-2">Submit Flag</Label>
                 <div class="mb-6 flex">
                     <Input id="flag-submit" placeholder="TH ..." />

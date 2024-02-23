@@ -214,7 +214,7 @@
                 id: editUUID,
                 name: editData.challenge_name,
                 description: editData.challenge_description,
-                category: '',
+                category: editData.challenge_category,
                 difficulty: selectedDiff,
                 event: selectedEvent
             }
@@ -330,7 +330,7 @@
     Action Button
 -->
 
-<SpeedDial defaultClass="absolute right-6 bottom-6">
+<SpeedDial defaultClass="absolute right-6 bottom-6" class="z-20">
     {#if tabStates.challenges}
         <SpeedDialButton
             name="New Challenge"
@@ -458,6 +458,10 @@
             <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
         </Label>
     </div>
+    <div class="mb-6">
+        <Label for="chal_name" class="mb-2">Change Challenge Category</Label>
+        <Input id="chal_name" placeholder="Linux/Web/OSINT/..." bind:value={editData.challenge_category} required />
+    </div>
     <div>
         <Label>
             Change Event Assignment
@@ -518,7 +522,7 @@
     </svelte:fragment>
 </Modal>
 
-<Modal defaultClass="rounded-none" bind:open={create.challenge} title="Create Challenge">
+<Modal defaultClass="rounded-none" class="max-h-full" bind:open={create.challenge} title="Create Challenge">
     <div class="mb-6">
         <Label for="challenge-name" class="mb-2">Challenge Name</Label>
         <Input id="challenge-name" placeholder="Petition" bind:value={challengeTemplate.name} required />
@@ -532,6 +536,10 @@
             Challenge Difficulty
             <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
         </Label>
+    </div>
+    <div class="mb-6">
+        <Label for="challenge-textarea" class="mb-2">Challenge Category</Label>
+        <Input id="challenge-name" placeholder="Linux/Web/OSINT/..." bind:value={challengeTemplate.category} required />
     </div>
     <div class="mb-6">
         <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
@@ -866,6 +874,7 @@
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Description</TableHeadCell>
+                            <TableHeadCell>Category</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
                         <TableBody>
@@ -879,6 +888,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         {entry.challenge_description}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.challenge_category}
                                     </TableBodyCell>
                                     <TableBodyCell>
                                         <Button
