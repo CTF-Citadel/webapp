@@ -55,14 +55,14 @@
     }
 </script>
 
-<div class="flex flex-wrap gap-4 ml-4 mt-3 overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center">
     {#if loading}
         <div class="flex-1 text-center justify-center">
             <Spinner size={'16'} />
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card class="flex-1 max-w-[32%] min-w-[32%] bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
+            <Card class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                 <div class="mb-2">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                     <p id="challenge-name">{challenge.challenge_name}</p>
