@@ -455,7 +455,7 @@
     <div class="mb-6">
         <Label>
             Change Challenge Difficulty
-            <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
+            <Select class="mt-2" items={DIFFICULTIES} bind:value={editData.challenge_difficulty} />
         </Label>
     </div>
     <div class="mb-6">
@@ -471,7 +471,10 @@
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={updateChallenge}>Update</Button>
+                <Button on:click={updateChallenge} disabled={
+                    editData.challenge_difficulty == '' ||
+                    editData.challenge_category == '' ||
+                    editData.challenge_name == ''}>Update</Button>
                 <Button
                     on:click={() => {
                         edit.challenge = false;
@@ -584,6 +587,8 @@
                         selectedEvent == '' ||
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
+                        challengeTemplate.category == '' ||
+                        selectedDiff == '' ||
                         (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button

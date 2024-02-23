@@ -75,13 +75,15 @@
                     </AccordionItem>
                 </Accordion>
                 <div class="mb-6 mt-6">
-                    <Label for="challenge-diff" class="mb-2">Challenge Difficulty</Label>
+                    <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
                     {#if challenge.challenge_difficulty == 'Easy'}
-                        <p id="challenge-diff" class="text-green-400">{challenge.challenge_difficulty}</p>
+                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-green-400">Difficulty: {challenge.challenge_difficulty}</p>
                     {:else if challenge.challenge_difficulty == 'Medium'}
-                        <p id="challenge-diff" class="text-orange-400">{challenge.challenge_difficulty}</p>
+                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-orange-400">Difficulty: {challenge.challenge_difficulty}</p>
+                    {:else if challenge.challenge_difficulty == 'Hard'}
+                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-red-400">Difficulty: {challenge.challenge_difficulty}</p>
                     {:else}
-                        <p id="challenge-diff" class="text-red-400">{challenge.challenge_difficulty}</p>
+                        <p id="challenge-diff">Unknown</p>
                     {/if}
                 </div>
                 {#if challenge.static_file_url != ""}
