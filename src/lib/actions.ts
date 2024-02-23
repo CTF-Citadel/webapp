@@ -332,6 +332,17 @@ class DatabaseActions {
     }
 
     /**
+     * Updates a Users properties
+     * @return void
+     */
+    async updateUser(id: string, new_email: string, verified: boolean) {
+        await DB_ADAPTER.update(users).set({
+            email: new_email,
+            is_verified: verified
+        }).where(eq(users.id, id));
+    }
+
+    /**
      * Deletes a Team Event per ID
      * @return void
      */

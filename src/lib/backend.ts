@@ -41,7 +41,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
             break;
         case 'team-info':
             response = await HANLDER.getTeamInfo(
-                json.data.team
+                json.data.id
             );
             break;
         case 'create-team':
@@ -172,6 +172,16 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             );
             break;
         case 'update-challenge':
+            response = await HANLDER.updateChallenge(
+                json.data.id,
+                json.data.name,
+                json.data.description,
+                json.data.category,
+                json.data.difficulty,
+                json.data.event
+            );
+            break;
+        case 'update-user':
             response = await HANLDER.updateChallenge(
                 json.data.id,
                 json.data.name,
