@@ -18,7 +18,7 @@
     onMount(async () => {
         await refreshChallenges();
         loading = false;
-        console.log(challenges)
+        console.log(challenges);
     });
 
     async function checkFlag(challenge_id: string, input: string) {
@@ -63,7 +63,9 @@
         </div>
     {:else if challenges.length > 0}
         {#each challenges as challenge}
-            <Card class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
+            <Card
+                class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+            >
                 <div class="mb-2">
                     <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                     <p id="challenge-name">{challenge.challenge_name}</p>
@@ -77,16 +79,19 @@
                 <div class="mb-6 mt-6">
                     <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
                     {#if challenge.challenge_difficulty == 'Easy'}
-                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-green-400">Difficulty: {challenge.challenge_difficulty}</p>
+                        <p>Category: {challenge.challenge_category}</p>
+                        <p id="challenge-diff" class="text-green-400">Difficulty: {challenge.challenge_difficulty}</p>
                     {:else if challenge.challenge_difficulty == 'Medium'}
-                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-orange-400">Difficulty: {challenge.challenge_difficulty}</p>
+                        <p>Category: {challenge.challenge_category}</p>
+                        <p id="challenge-diff" class="text-orange-400">Difficulty: {challenge.challenge_difficulty}</p>
                     {:else if challenge.challenge_difficulty == 'Hard'}
-                        <p>Category: {challenge.challenge_category}</p><p id="challenge-diff" class="text-red-400">Difficulty: {challenge.challenge_difficulty}</p>
+                        <p>Category: {challenge.challenge_category}</p>
+                        <p id="challenge-diff" class="text-red-400">Difficulty: {challenge.challenge_difficulty}</p>
                     {:else}
                         <p id="challenge-diff">Unknown</p>
                     {/if}
                 </div>
-                {#if challenge.static_file_url != ""}
+                {#if challenge.static_file_url != ''}
                     <div class="mb-6">
                         <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                         <div class="p-2 bg-primary-500 rounded-lg w-fit">
@@ -135,11 +140,7 @@
                         <Input id="flag" placeholder="TH..." bind:value={flagInput} required />
                     </div>
                     <div>
-                        <Button
-                            on:click={() => {}}
-                        >
-                            Submit
-                        </Button>
+                        <Button on:click={() => {}}>Submit</Button>
                     </div>
                     {#if successFlag}
                         <Alert class="my-2" color="green">
