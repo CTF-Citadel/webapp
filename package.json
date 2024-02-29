@@ -19,7 +19,7 @@
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.3",
     "lucia": "^3.0.1",
-    "nodemailer": "^6.9.9",
+    "nodemailer": "^6.9.11",
     "pg": "^8.11.3",
     "svelte": "^4.2.11",
     "tailwindcss": "^3.4.1"
