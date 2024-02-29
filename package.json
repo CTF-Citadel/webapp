@@ -28,7 +28,7 @@
     "@types/node": "^20.11.19",
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.11.2",
-    "flowbite-svelte": "^0.44.23",
+    "flowbite-svelte": "^0.44.24",
     "flowbite-svelte-icons": "^1.4.0"
   }
 }
