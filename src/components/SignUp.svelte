@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { validEmail, validPassword, validUsername } from '../lib/helpers'
+    import { validEmail, validPassword, validUsername } from '../lib/helpers';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
 
@@ -10,6 +10,18 @@
         password: ''
     };
 
+    async function onEnterKey(event: any) {
+        if (
+            event.key === 'Enter' &&
+            validPassword(inputs.password) &&
+            validEmail(inputs.email) &&
+            validUsername(inputs.username) &&
+            inputs.username.length >= 4
+        ) {
+            await onSignup();
+        }
+    }
+
     async function onSignup() {
         const RESP = await fetch('/api/v1/account/new', {
             method: 'POST',
@@ -19,8 +31,6 @@
             authResponse = await RESP.json();
         }
     }
-
-    
 </script>
 
 <Card
@@ -52,6 +62,7 @@
                 <span>Email</span>
                 <Input
                     bind:value={inputs.email}
+                    on:keydown={onEnterKey}
                     type="email"
                     name="email"
                     placeholder="name@example.com"
@@ -70,7 +81,14 @@
             {/if}
             <Label class="space-y-2">
                 <span>Your password</span>
-                <Input bind:value={inputs.password} type="password" name="password" placeholder="••••••••••" required />
+                <Input
+                    bind:value={inputs.password}
+                    on:keydown={onEnterKey}
+                    type="password"
+                    name="password"
+                    placeholder="••••••••••"
+                    required
+                />
             </Label>
             {#if inputs.password.length > 0 && !validPassword(inputs.password)}
                 <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
