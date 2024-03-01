@@ -27,3 +27,10 @@ drizzle/*
 
 # vscode gen files
 .vscode/
+
+# data folder
+examples/data/
+
+# ssl certs
+*.crt
+*.key
