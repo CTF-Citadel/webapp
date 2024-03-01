@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import { pgTable, text, timestamp, boolean, bigint } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, bigint, primaryKey } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
@@ -79,14 +79,16 @@ export const teams = pgTable('teams', {
 
 export const team_events = pgTable('team_events', {
     team_id: text('team_id')
-        .references(() => teams.id)
-        .primaryKey(),
+        .references(() => teams.id),
     event_id: text('event_id')
-        .references(() => events.id)
-        .notNull(),
+        .references(() => events.id),
     team_points: bigint('team_points', {
         mode: 'number'
-    }).notNull()
+    }).notNull(),
+}, (table) => {
+    return {
+        pk: primaryKey({ columns: [table.team_id, table.event_id] })
+    };
 });
 
 export const team_challenges = pgTable('team_challenges', {

@@ -265,7 +265,7 @@ class DatabaseActions {
         await DB_ADAPTER.insert(teams).values({
             id: crypto.randomUUID(),
             team_creator: userID,
-            team_join_token: 'CTD-' + generateRandomString(16),
+            team_join_token: 'CTD-' + generateRandomString(16).toUpperCase(),
             team_name: name,
             team_description: desc,
             team_country_code: country
