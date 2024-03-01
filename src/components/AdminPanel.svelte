@@ -590,7 +590,6 @@
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
                         challengeTemplate.category == '' ||
-                        selectedDiff == '' ||
                         (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button
