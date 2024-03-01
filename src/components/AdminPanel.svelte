@@ -84,7 +84,7 @@
     let teamTemplate = {
         email: '',
         verified: false
-    }
+    };
     let datePicker = {
         start: '',
         end: ''
@@ -349,7 +349,7 @@
     Action Button
 -->
 
-{#if tabStates.challenges || tabStates.events || (tabStates.teams && marked.size > 0) }
+{#if tabStates.challenges || tabStates.events || (tabStates.teams && marked.size > 0)}
     <SpeedDial defaultClass="absolute right-6 bottom-6">
         {#if tabStates.challenges}
             <SpeedDialButton
