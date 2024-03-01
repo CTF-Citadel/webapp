@@ -110,11 +110,13 @@
                         <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
                         <p>Category: {challenge.challenge_category}</p>
                         <p
-                            style="color: {challenge.challenge_difficulty === 'Easy' ? '#28a745'
-                                    : challenge.challenge_difficulty === 'Medium'
-                                    ? '#FF9800'
-                                    : '#dc3545'
-                            };">Difficulty: {challenge.challenge_difficulty}
+                            style="color: {challenge.challenge_difficulty === 'Easy'
+                                ? '#28a745'
+                                : challenge.challenge_difficulty === 'Medium'
+                                  ? '#FF9800'
+                                  : '#dc3545'};"
+                        >
+                            Difficulty: {challenge.challenge_difficulty}
                         </p>
                     </div>
                     {#if challenge.static_file_url != ''}
