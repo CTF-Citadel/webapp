@@ -108,22 +108,14 @@
                     </Accordion>
                     <div class="mb-6 mt-6">
                         <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
-                        {#if challenge.challenge_difficulty == 'Easy'}
-                            <p>Category: {challenge.challenge_category}</p>
-                            <p id="challenge-diff" class="text-green-400">
-                                Difficulty: {challenge.challenge_difficulty}
-                            </p>
-                        {:else if challenge.challenge_difficulty == 'Medium'}
-                            <p>Category: {challenge.challenge_category}</p>
-                            <p id="challenge-diff" class="text-orange-400">
-                                Difficulty: {challenge.challenge_difficulty}
-                            </p>
-                        {:else if challenge.challenge_difficulty == 'Hard'}
-                            <p>Category: {challenge.challenge_category}</p>
-                            <p id="challenge-diff" class="text-red-400">Difficulty: {challenge.challenge_difficulty}</p>
-                        {:else}
-                            <p id="challenge-diff">Unknown</p>
-                        {/if}
+                        <p>Category: {challenge.challenge_category}</p>
+                        <p
+                            style="color: {challenge.challenge_difficulty === 'Easy' ? '#28a745'
+                                    : challenge.challenge_difficulty === 'Medium'
+                                    ? '#FF9800'
+                                    : '#dc3545'
+                            };">Difficulty: {challenge.challenge_difficulty}
+                        </p>
                     </div>
                     {#if challenge.static_file_url != ''}
                         <div class="mb-6">
