@@ -90,7 +90,6 @@
         {#each sortedData as category}
             <h1 class="text-3xl text-center mt-8">Category: {category[0].challenge_category}</h1>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center">
-
             {#each category as challenge}
                 <Card
                     class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
