@@ -12,11 +12,11 @@
     "dist-win":"set NODE_ENV=production&& set HOST=0.0.0.0&& set PORT=8085&& node .\\dist\\server\\entry.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^8.2.1",
+    "@astrojs/node": "^8.2.3",
     "@astrojs/svelte": "^5.2.0",
     "@astrojs/tailwind": "^5.1.0",
     "@lucia-auth/adapter-drizzle": "^1.0.1",
-    "astro": "^4.4.6",
+    "astro": "^4.4.9",
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.4",
     "lucia": "^3.0.1",
@@ -30,6 +30,6 @@
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.11.2",
     "flowbite-svelte": "^0.44.24",
-    "flowbite-svelte-icons": "^1.4.0"
+    "flowbite-svelte-icons": "^1.4.1"
   }
 }
