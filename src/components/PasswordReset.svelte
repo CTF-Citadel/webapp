@@ -80,7 +80,7 @@
                     required
                 />
             </Label>
-            {#if inputs.password_repeat.length > 0 && checkInput()}
+            {#if inputs.password_repeat.length > 0 && !checkInput()}
                 <p class="text-primary-700 dark:text-primary-500">Passwords do not match!</p>
             {/if}
             {#if authResponse && authResponse.error != 'None'}

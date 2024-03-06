@@ -19,6 +19,16 @@
         }
     });
 
+    async function onEnterKey(event: any) {
+        if (
+            event.key === 'Enter' &&
+            inputs.email.length > 0 &&
+            inputs.password.length > 0
+        ) {
+            await onLogin();
+        }
+    }
+
     async function onLogin() {
         authResponse = '';
         const RESP = await fetch('/api/v1/account/auth', {
@@ -52,6 +62,7 @@
             <span>Email</span>
             <Input
                 bind:value={inputs.email}
+                on:keydown={onEnterKey}
                 type="email"
                 name="email"
                 autocomplete="email"
@@ -63,6 +74,7 @@
             <span>Your password</span>
             <Input
                 bind:value={inputs.password}
+                on:keydown={onEnterKey}
                 type="password"
                 name="password"
                 autocomplete="password"
@@ -77,7 +89,7 @@
         {#if authResponse && authResponse.error != 'None'}
             <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
         {/if}
-        <Button on:click={onLogin} class="w-full">Login to your account</Button>
+        <Button on:click={onLogin} disabled={inputs.email.length == 0 || inputs.password.length == 0} class="w-full">Login to your account</Button>
         <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
             Not registered?
             <a href="/signup" class="text-primary-700 hover:underline dark:text-primary-500">Create account</a>

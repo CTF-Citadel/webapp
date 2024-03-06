@@ -81,6 +81,10 @@
         filePath: '',
         fileURL: ''
     };
+    let teamTemplate = {
+        email: '',
+        verified: false
+    };
     let datePicker = {
         start: '',
         end: ''
@@ -96,8 +100,23 @@
     });
 
     // @TODO:
-    async function updateUser() {}
     async function updateTeam() {}
+
+    async function updateUser() {
+        const DATA = await requestWrapper(true, {
+            type: 'update-user',
+            data: {
+                id: editUUID,
+                email: teamTemplate.email,
+                verified: teamTemplate.verified
+            }
+        });
+        if (DATA.ok) {
+            edit.user = false;
+            await refreshUsers();
+            return true;
+        } else return false;
+    }
 
     async function refreshUsers() {
         const DATA = await requestWrapper(true, { type: 'users' });
@@ -330,38 +349,40 @@
     Action Button
 -->
 
-<SpeedDial defaultClass="absolute right-6 bottom-6" class="z-20">
-    {#if tabStates.challenges}
-        <SpeedDialButton
-            name="New Challenge"
-            on:click={() => {
-                create.challenge = create.challenge ? false : true;
-            }}
-        >
-            <CalendarPlus />
-        </SpeedDialButton>
-    {/if}
-    {#if tabStates.events}
-        <SpeedDialButton
-            name="New Event"
-            on:click={() => {
-                create.event = create.event ? false : true;
-            }}
-        >
-            <UserGroup />
-        </SpeedDialButton>
-    {/if}
-    {#if tabStates.teams && marked.size > 0}
-        <SpeedDialButton
-            name="Assign To"
-            on:click={() => {
-                create.assign = create.assign ? false : true;
-            }}
-        >
-            <AssignTo />
-        </SpeedDialButton>
-    {/if}
-</SpeedDial>
+{#if tabStates.challenges || tabStates.events || (tabStates.teams && marked.size > 0)}
+    <SpeedDial defaultClass="absolute right-6 bottom-6 z-30">
+        {#if tabStates.challenges}
+            <SpeedDialButton
+                name="New Challenge"
+                on:click={() => {
+                    create.challenge = create.challenge ? false : true;
+                }}
+            >
+                <CalendarPlus />
+            </SpeedDialButton>
+        {/if}
+        {#if tabStates.events}
+            <SpeedDialButton
+                name="New Event"
+                on:click={() => {
+                    create.event = create.event ? false : true;
+                }}
+            >
+                <UserGroup />
+            </SpeedDialButton>
+        {/if}
+        {#if tabStates.teams && marked.size > 0}
+            <SpeedDialButton
+                name="Assign To"
+                on:click={() => {
+                    create.assign = create.assign ? false : true;
+                }}
+            >
+                <AssignTo />
+            </SpeedDialButton>
+        {/if}
+    </SpeedDial>
+{/if}
 
 <!--
     Edit Popups
@@ -370,11 +391,11 @@
 <Modal defaultClass="rounded-none" bind:open={edit.user} title="Edit User">
     <div class="mb-6">
         <Label for="email" class="mb-2">Change Email address</Label>
-        <Input type="email" id="email" placeholder="name@example.com" required />
+        <Input type="email" id="email" bind:value={teamTemplate.email} placeholder="name@example.com" required />
     </div>
     <div>
-        <Label for="password" class="mb-2">Change Password</Label>
-        <Input type="password" id="password" placeholder="•••••••••" required />
+        <Label for="verify-check" class="mb-2">Verified</Label>
+        <Toggle id="verify-check" bind:checked={teamTemplate.verified}></Toggle>
     </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">

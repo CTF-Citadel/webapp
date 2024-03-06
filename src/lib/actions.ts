@@ -8,6 +8,9 @@ import { generateRandomString } from './helpers';
 const BACKEND_HOST = process.env.BACKEND_HOST;
 const BACKEND_PORT = process.env.BACKEND_PORT;
 
+/**
+ * Handler for Database related actions
+ */
 class DatabaseActions {
     #BACKEND_URL: string;
     constructor() {
@@ -265,7 +268,7 @@ class DatabaseActions {
         await DB_ADAPTER.insert(teams).values({
             id: crypto.randomUUID(),
             team_creator: userID,
-            team_join_token: 'CTD-' + generateRandomString(16),
+            team_join_token: 'CTD-' + generateRandomString(16).toUpperCase(),
             team_name: name,
             team_description: desc,
             team_country_code: country
@@ -329,6 +332,17 @@ class DatabaseActions {
                 event_id: event
             })
             .where(eq(challenges.id, id));
+    }
+
+    /**
+     * Updates a Users properties
+     * @return void
+     */
+    async updateUser(id: string, new_email: string, verified: boolean) {
+        await DB_ADAPTER.update(users).set({
+            email: new_email,
+            is_verified: verified
+        }).where(eq(users.id, id));
     }
 
     /**

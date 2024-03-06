@@ -5,9 +5,9 @@
     import type { TeamsType } from '../lib/schema';
 
     export let user: any = {};
-    let team: TeamsType | null;
 
-    let loading = false;
+    let team: TeamsType | null;
+    let loading = true;
 
     onMount(async () => {
         await refreshUserTeam();
@@ -32,8 +32,9 @@
                 <Avatar size="xl" src="/img/avatars/default.webp" />
                 <h1 class="mt-2 text-xl font-medium text-gray-900 dark:text-white">{user.username}</h1>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{user.user_role}</span>
-                {#if team != null}
-                    <h2 class="mt-4 font-medium text-gray-900 dark:text-white">{team.team_name}</h2>
+                {#if team !== null}
+                    <h2 class="mt-4 font-medium text-gray-900 dark:text-white">Currently playing for:</h2>
+                    <h3 class="mt-2 font-medium text-gray-900 dark:text-white">{team.team_name}</h3>
                 {:else}
                     <h2 class="mt-4 font-medium text-gray-900 dark:text-white">Currently not in a Team.</h2>
                 {/if}

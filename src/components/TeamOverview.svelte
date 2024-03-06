@@ -67,7 +67,7 @@
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { team: teamID } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: teamID } });
         const JSON = await DATA.json();
         thisTeam = JSON.data;
     }
