@@ -8,6 +8,9 @@ import { generateRandomString } from './helpers';
 const BACKEND_HOST = process.env.BACKEND_HOST;
 const BACKEND_PORT = process.env.BACKEND_PORT;
 
+/**
+ * Handler for Database related actions
+ */
 class DatabaseActions {
     #BACKEND_URL: string;
     constructor() {
