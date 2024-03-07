@@ -1,6 +1,6 @@
-import DatabaseActions from "./actions";
+import DatabaseActions from './actions';
 
-const HANLDER = new DatabaseActions()
+const HANLDER = new DatabaseActions();
 
 export type WrapperFormat = {
     type: string;
@@ -19,7 +19,7 @@ export type WrapperFormat = {
  */
 export async function normalWrapper(request: Request): Promise<Response> {
     let json: WrapperFormat;
-    let response: any = "";
+    let response: any = '';
     let errorStatus: boolean = false;
     // evaluate base request
     try {
@@ -27,9 +27,9 @@ export async function normalWrapper(request: Request): Promise<Response> {
     } catch (e: unknown) {
         errorStatus = true;
         if (e instanceof Error) {
-            response = e.message
+            response = e.message;
         } else {
-            response = (e as Error).message
+            response = (e as Error).message;
         }
         return new Response(
             JSON.stringify({
@@ -51,22 +51,20 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getEventChallenges(json.data.id);
                 break;
             case 'deploy-challenge':
-                response = await HANLDER.deployTeamChallenge(json.data.teamID, json.data.challengeID);
+                response = await HANLDER.deployTeamChallenge(
+                    json.data.teamID,
+                    json.data.challengeID,
+                    json.data.eventID
+                );
                 break;
             case 'has-created':
-                response = await HANLDER.checkHasCreatedTeam(
-                    json.data.user
-                );
+                response = await HANLDER.checkHasCreatedTeam(json.data.user);
                 break;
             case 'team-info':
-                response = await HANLDER.getTeamInfo(
-                    json.data.id
-                );
+                response = await HANLDER.getTeamInfo(json.data.id);
                 break;
             case 'create-team':
-                const HAS_CREATED = await HANLDER.checkHasCreatedTeam(
-                    json.data.creator
-                )
+                const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
                 if (!HAS_CREATED) {
                     response = await HANLDER.createTeam(
                         json.data.creator,
@@ -74,57 +72,43 @@ export async function normalWrapper(request: Request): Promise<Response> {
                         json.data.description,
                         json.data.country
                     );
-                    const TEAM_ID = await HANLDER.checkTeamNameExist(
-                        json.data.name
-                    )
+                    const TEAM_ID = await HANLDER.checkTeamNameExist(json.data.name);
                     if (TEAM_ID != false) {
-                        response = await HANLDER.joinTeam(
-                            json.data.session,
-                            TEAM_ID
-                        );
+                        response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
                     }
                 }
                 break;
             case 'join-team':
-                const IS_JOINED = await HANLDER.checkUserInTeam(
-                    json.data.user,
-                )
+                const IS_JOINED = await HANLDER.checkUserInTeam(json.data.user);
                 if (!IS_JOINED) {
-                    const TEAM_ID = await HANLDER.checkTeamToken(
-                        json.data.token,
-                    )
+                    const TEAM_ID = await HANLDER.checkTeamToken(json.data.token);
                     if (TEAM_ID != false) {
-                        response = await HANLDER.joinTeam(
-                            json.data.session,
-                            TEAM_ID
-                        );
+                        response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
                     }
                 }
                 break;
             case 'leave-team':
-                response = await HANLDER.leaveTeam(
-                    json.data.session
-                );
+                response = await HANLDER.leaveTeam(json.data.session);
                 break;
             case 'check-flag':
                 response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
                 if (response == true) {
                     response = {
                         correct: true
-                    }
+                    };
                 } else {
                     response = {
                         correct: false
-                    }
+                    };
                 }
                 break;
         }
     } catch (e: unknown) {
         errorStatus = true;
         if (e instanceof Error) {
-            response = e.message
+            response = e.message;
         } else {
-            response = (e as Error).message
+            response = (e as Error).message;
         }
     }
     return new Response(
@@ -137,7 +121,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
 
 /**
  * Wrapper for privileged backend actions
- * @return 
+ * @return
  * ```
  * body: {
  *    data: any{} | string
@@ -147,7 +131,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
  */
 export async function privilegedWrapper(request: Request): Promise<Response> {
     let json: WrapperFormat;
-    let response: any = "";
+    let response: any = '';
     let errorStatus: boolean = false;
 
     try {
@@ -155,9 +139,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
     } catch (e: unknown) {
         errorStatus = true;
         if (e instanceof Error) {
-            response = e.message
+            response = e.message;
         } else {
-            response = (e as Error).message
+            response = (e as Error).message;
         }
         return new Response(
             JSON.stringify({
@@ -191,9 +175,10 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.category,
                     json.data.difficulty,
                     json.data.isContainer,
-                    json.data.filePath,
+                    json.data.path,
                     json.data.fileURL,
-                    json.data.event
+                    json.data.event,
+                    json.data.points
                 );
                 break;
             case 'create-event':
@@ -205,16 +190,10 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 );
                 break;
             case 'assign-event':
-                response = await HANLDER.createTeamEvent(
-                    json.data.id,
-                    json.data.teams
-                );
+                response = await HANLDER.createTeamEvent(json.data.id, json.data.teams);
                 break;
             case 'unassign-event':
-                response = await HANLDER.deleteTeamEvent(
-                    json.data.event,
-                    json.data.team
-                );
+                response = await HANLDER.deleteTeamEvent(json.data.event, json.data.team);
                 break;
             case 'update-challenge':
                 response = await HANLDER.updateChallenge(
@@ -223,58 +202,38 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.description,
                     json.data.category,
                     json.data.difficulty,
+                    json.data.points,
                     json.data.event
                 );
                 break;
             case 'update-user':
-                response = await HANLDER.updateChallenge(
-                    json.data.id,
-                    json.data.name,
-                    json.data.description,
-                    json.data.category,
-                    json.data.difficulty,
-                    json.data.event
-                );
+                response = await HANLDER.updateUser(json.data.id, json.data.email, json.data.verified);
                 break;
             case 'update-event':
-                response = await HANLDER.updateEvent(
-                    json.data.id,
-                    json.data.name,
-                    json.data.description
-                );
+                response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description);
                 break;
             case 'delete-event':
-                response = await HANLDER.deleteEvent(
-                    json.data.id
-                );
+                response = await HANLDER.deleteEvent(json.data.id);
                 break;
             case 'delete-challenge':
-                response = await HANLDER.deleteChallenge(
-                    json.data.id
-                );
+                response = await HANLDER.deleteChallenge(json.data.id);
                 break;
             case 'delete-user':
-                response = await HANLDER.deleteUser(
-                    json.data.id
-                );
+                response = await HANLDER.deleteUser(json.data.id);
                 break;
             case 'block-user':
-                response = await HANLDER.blockUser(
-                    json.data.id
-                );
+                response = await HANLDER.blockUser(json.data.id);
                 break;
             case 'delete-team':
-                response = await HANLDER.deleteTeam(
-                    json.data.id
-                );
+                response = await HANLDER.deleteTeam(json.data.id);
                 break;
         }
     } catch (e: unknown) {
         errorStatus = true;
         if (e instanceof Error) {
-            response = e.message
+            response = e.message;
         } else {
-            response = (e as Error).message
+            response = (e as Error).message;
         }
     }
     return new Response(

@@ -45,7 +45,7 @@
     let editUUID: string = '';
     let editData: any = {};
     let marked = new Set<string>();
-
+    let challengeNeedsFile: boolean = false;
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
         { value: 'Medium', name: 'Medium' },
@@ -77,9 +77,10 @@
         name: '',
         description: '',
         category: '',
-        isContainer: false,
-        filePath: '',
-        fileURL: ''
+        path: '',
+        fileURL: '',
+        points: 0,
+        isContainer: false
     };
     let teamTemplate = {
         email: '',
@@ -235,7 +236,8 @@
                 description: editData.challenge_description,
                 category: editData.challenge_category,
                 difficulty: selectedDiff,
-                event: selectedEvent
+                event: selectedEvent,
+                points: editData.base_points
             }
         });
         if (DATA.ok) {
@@ -483,6 +485,10 @@
         <Label for="chal_name" class="mb-2">Change Challenge Category</Label>
         <Input id="chal_name" placeholder="Linux/Web/OSINT/..." bind:value={editData.challenge_category} required />
     </div>
+    <div class="mb-6">
+        <Label for="challenge-textarea" class="mb-2">Change Base Points</Label>
+        <Input id="challenge-name" type="number" bind:value={editData.base_points} required />
+    </div>
     <div>
         <Label>
             Change Event Assignment
@@ -496,6 +502,7 @@
                     on:click={updateChallenge}
                     disabled={editData.challenge_difficulty == '' ||
                         editData.challenge_category == '' ||
+                        editData.points == 0 ||
                         editData.challenge_name == ''}>Update</Button
                 >
                 <Button
@@ -534,8 +541,12 @@
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
-                <Button on:click={createEvent} disabled={eventTemplate.name == '' || eventTemplate.description == ''}
-                    >Create</Button
+                <Button
+                    on:click={createEvent}
+                    disabled={eventTemplate.name == '' ||
+                        eventTemplate.description == '' ||
+                        datePicker.end == '' ||
+                        datePicker.start == ''}>Create</Button
                 >
                 <Button
                     on:click={() => {
@@ -568,23 +579,32 @@
         <Input id="challenge-name" placeholder="Linux/Web/OSINT/..." bind:value={challengeTemplate.category} required />
     </div>
     <div class="mb-6">
+        <Label for="challenge-textarea" class="mb-2">Challenge Base Points</Label>
+        <Input id="challenge-name" type="number" bind:value={challengeTemplate.points} required />
+    </div>
+    <div class="mb-6">
         <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
     </div>
     {#if challengeTemplate.isContainer}
         <div class="mb-6">
             <Label for="challenge-file" class="mb-2">Compose File</Label>
-            <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.filePath} required />
+            <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.path} required />
         </div>
     {/if}
     <div class="mb-6">
-        <Label for="opt-file" class="mb-2">Optional File</Label>
-        <Input
-            id="opt-file"
-            placeholder="https://example.com/path/to/file.txt"
-            bind:value={challengeTemplate.fileURL}
-            required
-        />
+        <Toggle bind:checked={challengeNeedsFile}>Needs File</Toggle>
     </div>
+    {#if challengeNeedsFile}
+        <div class="mb-6">
+            <Label for="opt-file" class="mb-2">Optional File</Label>
+            <Input
+                id="opt-file"
+                placeholder="https://example.com/path/to/file.txt"
+                bind:value={challengeTemplate.fileURL}
+                required
+            />
+        </div>
+    {/if}
     <div>
         {#if events.length > 0}
             <Label>
@@ -611,7 +631,9 @@
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
                         challengeTemplate.category == '' ||
-                        (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
+                        challengeTemplate.points == 0 ||
+                        (challengeTemplate.fileURL == '' && challengeNeedsFile) ||
+                        (challengeTemplate.path == '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button
                     on:click={() => {

@@ -17,10 +17,7 @@
     let sortedData: any = false;
 
     onMount(async () => {
-        //Fetch Challenges
         await refreshChallenges();
-
-        //Sort Challenges by Category and Difficulty
         await sortByCategory(challenges);
         loading = false;
     });
@@ -70,7 +67,7 @@
         deploymentStatus = 1;
         const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
-            data: { teamID: team, challengeID: challenge_id }
+            data: { teamID: team, challengeID: challenge_id, eventID: uuid }
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
@@ -163,19 +160,22 @@
                             <Label for="challenge-port" class="mb-2">Port</Label>
                             <p id="challenge-port">{challengeResponse.details.PORT}</p>
                         </div>
-                        <div class="mb-6">
-                            <Label for="flag" class="mb-2">Flag</Label>
-                            <Input id="flag" placeholder="TH..." bind:value={flagInput} required />
-                        </div>
-                        <div>
-                            <Button on:click={() => {}}>Submit</Button>
-                        </div>
-                        {#if successFlag}
-                            <Alert class="my-2" color="green">
-                                <span class="font-bold">Correct Flag!</span><br />
-                                Congratulations.
-                            </Alert>
-                        {/if}
+                    {/if}
+                    <div class="mb-6">
+                        <Label for="flag" class="mb-2">Flag</Label>
+                        <Input id="flag" placeholder="TH..." bind:value={flagInput} required />
+                    </div>
+                    <div>
+                        <Button
+                            disabled={flagInput == '' || (challenge.needs_container && deploymentStatus != 3)}
+                            on:click={() => {}}>Submit</Button
+                        >
+                    </div>
+                    {#if successFlag}
+                        <Alert class="my-2" color="green">
+                            <span class="font-bold">Correct Flag!</span><br />
+                            Congratulations.
+                        </Alert>
                     {/if}
                 </Card>
             {/each}

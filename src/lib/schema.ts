@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import { pgTable, text, timestamp, boolean, bigint, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, bigint, integer, primaryKey } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
@@ -61,6 +61,7 @@ export const challenges = pgTable('challenges', {
     challenge_category: text('challenge_category').notNull(),
     challenge_difficulty: text('challenge_difficulty').notNull(),
     challenge_description: text('challenge_description').notNull(),
+    base_points: integer('base_points').notNull(),
     container_file: text('container_file').notNull(),
     static_file_url: text('static_file_url').notNull(),
     needs_container: boolean('needs_container').notNull()
@@ -77,21 +78,25 @@ export const teams = pgTable('teams', {
     team_description: text('team_description').notNull()
 });
 
-export const team_events = pgTable('team_events', {
-    team_id: text('team_id')
-        .references(() => teams.id)
-        .notNull(),
-    event_id: text('event_id')
-        .references(() => events.id)
-        .notNull(),
-    team_points: bigint('team_points', {
-        mode: 'number'
-    }).notNull(),
-}, (table) => {
-    return {
-        pk: primaryKey({ columns: [table.team_id, table.event_id] })
-    };
-});
+export const team_events = pgTable(
+    'team_events',
+    {
+        team_id: text('team_id')
+            .references(() => teams.id)
+            .notNull(),
+        event_id: text('event_id')
+            .references(() => events.id)
+            .notNull(),
+        team_points: bigint('team_points', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return {
+            pk: primaryKey({ columns: [table.team_id, table.event_id] })
+        };
+    }
+);
 
 export const team_challenges = pgTable('team_challenges', {
     team_id: text('team_id')
@@ -100,11 +105,17 @@ export const team_challenges = pgTable('team_challenges', {
     challenge_id: text('challenge_id')
         .references(() => challenges.id)
         .notNull(),
-    solved_by: text('solved_by').notNull(),
+    event_id: text('event_id')
+        .references(() => events.id)
+        .notNull(),
     challenge_uuid: text('challenge_uuid').notNull(),
     challenge_flag: text('challenge_flag').notNull(),
     challenge_host: text('challenge_host').notNull(),
     challenge_port: text('challenge_port').notNull(),
+    solved_by: text('solved_by').notNull(),
+    solved_at: bigint('solved_at', {
+        mode: 'number'
+    }).notNull(),
     is_solved: boolean('is_solved').notNull(),
     is_running: boolean('is_running').notNull()
 });
