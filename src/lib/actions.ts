@@ -161,7 +161,7 @@ class DatabaseActions {
      * }[]
      * ```
      */
-    async getAllPointsByEvent(event_id: string) {
+    async getTeamPointsByEvent(event_id: string) {
         const RES = await DB_ADAPTER.select({
             id: team_challenges.team_id,
             name: teams.team_name,
@@ -172,6 +172,32 @@ class DatabaseActions {
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id);
+        return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
+    }
+
+    /**
+     * Fetches Points per User based on Event ID
+     * @return
+     * ```
+     * {
+     *     id: string | null;
+     *     name: string | null;
+     *     points: number | null;
+     * }[]
+     * ```
+     */
+    async getUserPointsByEvent(event_id: string) {
+        const RES = await DB_ADAPTER.select({
+            id: team_challenges.team_id,
+            name: users.username,
+            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+        })
+            .from(team_challenges)
+            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
+            .fullJoin(teams, eq(team_challenges.solved_by, users.id))
+            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .groupBy(team_challenges.solved_by);
         return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
     }
 
@@ -206,7 +232,7 @@ class DatabaseActions {
      * Fetches Points for a single Team based on Event ID
      * @return Number of points or zero
      */
-    async getTeamPointsByEvent(team_id: string, event_id: string) {
+    async getSingleTeamPointsByEvent(team_id: string, event_id: string) {
         const RES = await DB_ADAPTER.select({
             points: sql<number>`cast(sum(${challenges.base_points}) as int)`
         })

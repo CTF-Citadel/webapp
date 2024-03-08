@@ -1,72 +1,166 @@
-<script>
+<script lang="ts">
+    import {
+        Tabs,
+        TabItem,
+        Table,
+        TableBody,
+        TableBodyCell,
+        TableBodyRow,
+        TableHead,
+        TableHeadCell,
+        Spinner
+    } from 'flowbite-svelte';
     import Chart from 'flowbite-svelte/Chart.svelte';
-    import Button from 'flowbite-svelte/Button.svelte';
-    import FileLinesSolid from 'flowbite-svelte-icons/FileLinesSolid.svelte';
+    import type ApexCharts from 'apexcharts';
+    import { requestWrapper } from '../lib/helpers';
+    import type { EventsType } from '../lib/schema';
     import { onMount } from 'svelte';
 
-    let uhrzeit = [
-        '08:00',
-        '08:30',
-        '09:00',
-        '09:30',
-        '10:00',
-        '10:30',
-        '11:00',
-        '11:30',
-        '12:00',
-        '12:30',
-        '13:00',
-        '13:30',
-        '14:00',
-        '14:30',
-        '15:00'
-    ];
+    let loading: boolean = true;
+    let events: EventsType[] = [];
+    let teamScores: { id: string; name: string; points: number }[] = [];
+    let userScores: { id: string; name: string; points: number }[] = [];
+    let tabs = {
+        users: false,
+        teams: true
+    };
 
-    //Testdata
-    let teams = [
+    onMount(async () => {
+        await refreshEvents();
+        loading = false;
+    });
+
+    teamScores = [
         {
-            name: 'Team Adler',
-            data: [0, 400, 600, 700, 800, 900],
-            color: '#ffff00'
+            id: 'some-id-3',
+            name: 'Team3',
+            points: 1000
         },
         {
-            name: 'Team Bär',
-            data: [0, 250, 350, 550, 650, 750],
-            color: '#ff00ff'
+            id: 'some-id-2',
+            name: 'Team2',
+            points: 500
         },
         {
-            name: 'Team Cocktail',
-            data: [0, 200, 250, 300, 400, 500],
-            color: '#6600ff'
-        },
-        {
-            name: 'Team Decline ',
-            data: [0, 200, 300, 320, 420, 520],
-            color: '#00ffff'
+            id: 'some-id-1',
+            name: 'Team1',
+            points: 250
         }
     ];
 
-    onMount(() => {
-        //Sorts for the Ranking
-        //TODO: After a valid team layout is established this will be adjusted
-    });
+    userScores = [
+        {
+            id: 'some-id-2',
+            name: 'User2',
+            points: 1000
+        },
+        {
+            id: 'some-id-1',
+            name: 'User1',
+            points: 500
+        },
+        {
+            id: 'some-id-3',
+            name: 'User3',
+            points: 250
+        }
+    ];
 
-    let options = {
+    let points = [
+        {
+            id: 'some-id-1',
+            name: 'Team1',
+            timestamp: Date.now() + 3600000,
+            points_gained: 250
+        },
+        {
+            id: 'some-id-1',
+            name: 'Team1',
+            timestamp: Date.now() + 3600000 * 2,
+            points_gained: 500
+        },
+        {
+            id: 'some-id-1',
+            name: 'Team1',
+            timestamp: Date.now() + 3600000 * 3,
+            points_gained: 1000
+        },
+        {
+            id: 'some-id-2',
+            name: 'Team2',
+            timestamp: Date.now() + 3600000,
+            points_gained: 1000
+        },
+        {
+            id: 'some-id-2',
+            name: 'Team2',
+            timestamp: Date.now() + 3600000 * 2,
+            points_gained: 250
+        },
+        {
+            id: 'some-id-2',
+            name: 'Team2',
+            timestamp: Date.now() + 3600000 * 3,
+            points_gained: 500
+        },
+        {
+            id: 'some-id-3',
+            name: 'Team3',
+            timestamp: Date.now() + 3600000,
+            points_gained: 500
+        },
+        {
+            id: 'some-id-3',
+            name: 'Team3',
+            timestamp: Date.now() + 3600000 * 2,
+            points_gained: 1000
+        },
+        {
+            id: 'some-id-3',
+            name: 'Team3',
+            timestamp: Date.now() + 3600000 * 3,
+            points_gained: 250
+        }
+    ];
+
+    let seriesData: { x: number; y: number }[];
+    let dataAggregator: { [key: string]: typeof seriesData } = {};
+    let plotData: { name: string; data: typeof seriesData }[] = [];
+
+    for (let entry of points) {
+        if (entry.name in dataAggregator) {
+            let currentData = dataAggregator[entry.name];
+            currentData.push({
+                x: entry.timestamp,
+                y: entry.points_gained
+            });
+            dataAggregator[entry.name] = currentData;
+        } else {
+            dataAggregator[entry.name] = [
+                {
+                    x: entry.timestamp,
+                    y: entry.points_gained
+                }
+            ];
+        }
+    }
+
+    for (const [key, value] of Object.entries(dataAggregator)) {
+        plotData.push({
+            name: key,
+            data: value
+        });
+    }
+
+    let options: ApexCharts.ApexOptions = {
+        series: plotData,
         chart: {
-            height: '100%',
-            maxWidth: '100%',
+            height: 400,
             type: 'line',
-            fontFamily: 'Inter, sans-serif',
             dropShadow: {
-                enabled: true
+                enabled: false
             },
             toolbar: {
-                show: false
-            }
-        },
-        tooltip: {
-            enabled: true,
-            x: {
                 show: false
             }
         },
@@ -74,82 +168,112 @@
             enabled: false
         },
         stroke: {
-            width: 3
-            //curve: 'smooth'
+            curve: 'straight'
         },
         grid: {
+            show: true
+        },
+        legend: {
             show: true,
-            strokeDashArray: 4,
-            padding: {
-                left: 5,
-                right: 2,
-                top: -26
+            labels: {
+                colors: '#000'
             }
         },
-        series: teams,
-        legend: {
-            show: true
+        tooltip: {
+            enabled: true
         },
         xaxis: {
-            categories: uhrzeit,
-            labels: {
-                show: true,
-                style: {
-                    fontFamily: 'Inter, sans-serif',
-                    cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
-                }
-            },
-            axisBorder: {
-                show: true
-            },
-            axisTicks: {
-                show: true
-            }
+            type: 'datetime'
         },
         yaxis: {
-            show: true
+            title: {
+                text: 'Score',
+                style: {
+                    color: '#000'
+                }
+            },
+            min: 0
+        },
+        theme: {
+            mode: 'light'
         }
     };
 
-    async function handleReportDownload() {
-        //CHANGEME FOR lATER
-        console.log('Output');
+    async function refreshEvents() {
+        const DATA = await requestWrapper(false, { type: 'events' });
+        const JSON = await DATA.json();
+        events = JSON.data;
+    }
 
+    async function refreshTimeScores() {
+        const DATA = await requestWrapper(false, { type: 'events' });
+        const JSON = await DATA.json();
+        events = JSON.data;
+    }
+
+    async function refreshScores() {
+        const DATA = await requestWrapper(false, { type: 'events' });
+        const JSON = await DATA.json();
+        events = JSON.data;
     }
 </script>
 
 <div style="width: 80%;">
-    <div class="flex justify-between border-gray-200 border-b dark:border-gray-700 pb-3">
-        <h1 class=" text-gray-800 font-bold">Scoreboard</h1>
-    </div>
-
-    <Chart {options} />
-    <div class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between mt-2.5">
-        <div class="pt-5">
-            <Button
-                on:click={() => {
-                    handleReportDownload();
-                }}
-                class="px-4 py-2.5 text-sm font-medium text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-            >
-                <FileLinesSolid class="w-3.5 h-3.5 text-white mr-2" />
-                View full report
-            </Button>
+    {#if loading}
+        <div class="text-center mt-10">
+            <Spinner size={'16'} />
         </div>
-    </div>
-
-    <!--
-    <div class="flex justify-between border-gray-200 border-b dark:border-gray-700 pb-3">
-        <h1 class=" text-gray-800 font-bold">Leaderboard</h1>
-    </div>
-    {#if leader}
-        {#each leader as lead, index}
-            <div style="margin-bottom: 2rem;">
-                <h1>{index + 1}'s Team</h1>
-                <div>Team Name: {lead.name}</div>
-                <div>Team Points: {lead.data[lead.data.length - 1]}</div>
-            </div>
-        {/each}
+    {:else}
+        <div class="bg-neutral-100 mt-10">
+            <Chart bind:options></Chart>
+        </div>
+        <div class="my-10">
+            <Tabs
+                contentClass=""
+                activeClasses="p-4 text-primary-600 bg-gray-100 dark:bg-gray-800 dark:text-primary-500"
+                inactiveClasses="p-4 text-gray-500 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            >
+                <TabItem title="Teams" bind:open={tabs.teams}>
+                    <Table>
+                        <TableHead>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>Points</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {#each teamScores as entry}
+                                <TableBodyRow color="custom">
+                                    <TableBodyCell>
+                                        {entry.name}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.points}
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        </TableBody>
+                    </Table>
+                </TabItem>
+                <TabItem title="Users" bind:open={tabs.users}>
+                    <Table>
+                        <TableHead>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>Points</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {#each userScores as entry}
+                                <TableBodyRow color="custom">
+                                    <TableBodyCell>
+                                        {entry.name}
+                                    </TableBodyCell>
+                                    <TableBodyCell>
+                                        {entry.points}
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        </TableBody>
+                    </Table>
+                </TabItem>
+            </Tabs>
+        </div>
     {/if}
-    -->
 </div>

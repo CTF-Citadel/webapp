@@ -16,7 +16,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'events', data: { id: userSession.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-events', data: { id: userSession.user_team_id } });
         const JSON = await DATA.json();
         events = JSON.data;
     }
