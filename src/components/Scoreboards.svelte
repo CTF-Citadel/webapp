@@ -18,8 +18,12 @@
 
     let loading: boolean = true;
     let events: EventsType[] = [];
+    let sortedEvents: { value: string, name: string }[];
     let teamScores: { id: string; name: string; points: number }[] = [];
     let userScores: { id: string; name: string; points: number }[] = [];
+    let seriesData: { x: number; y: number }[];
+    let dataAggregator: { [key: string]: typeof seriesData } = {};
+    let plotData: { name: string; data: typeof seriesData }[] = [];
     let tabs = {
         users: false,
         teams: true
@@ -29,6 +33,8 @@
         await refreshEvents();
         loading = false;
     });
+
+    // BEGIN TEMP DATA
 
     teamScores = [
         {
@@ -123,33 +129,35 @@
         }
     ];
 
-    let seriesData: { x: number; y: number }[];
-    let dataAggregator: { [key: string]: typeof seriesData } = {};
-    let plotData: { name: string; data: typeof seriesData }[] = [];
+    // END TEMP DATA
 
-    for (let entry of points) {
-        if (entry.name in dataAggregator) {
-            let currentData = dataAggregator[entry.name];
-            currentData.push({
-                x: entry.timestamp,
-                y: entry.points_gained
-            });
-            dataAggregator[entry.name] = currentData;
-        } else {
-            dataAggregator[entry.name] = [
-                {
+    function prepareForPlot() {
+        // first aggregate Scores by entity
+        for (let entry of points) {
+            if (entry.name in dataAggregator) {
+                let currentData = dataAggregator[entry.name];
+                currentData.push({
                     x: entry.timestamp,
                     y: entry.points_gained
-                }
-            ];
+                });
+                dataAggregator[entry.name] = currentData;
+            } else {
+                dataAggregator[entry.name] = [
+                    {
+                        x: entry.timestamp,
+                        y: entry.points_gained
+                    }
+                ];
+            }
         }
-    }
 
-    for (const [key, value] of Object.entries(dataAggregator)) {
-        plotData.push({
-            name: key,
-            data: value
-        });
+        // then push to plotData
+        for (const [key, value] of Object.entries(dataAggregator)) {
+            plotData.push({
+                name: key,
+                data: value
+            });
+        }
     }
 
     let options: ApexCharts.ApexOptions = {
@@ -203,18 +211,21 @@
         const DATA = await requestWrapper(false, { type: 'events' });
         const JSON = await DATA.json();
         events = JSON.data;
+        sortedEvents = [];
+        events.forEach((element: any) => {
+            sortedEvents.push({ value: element.id, name: element.event_name });
+        });
     }
 
-    async function refreshTimeScores() {
-        const DATA = await requestWrapper(false, { type: 'events' });
-        const JSON = await DATA.json();
-        events = JSON.data;
-    }
+    async function refreshEventScoring(eventID: string) {
+        const SOLVES = await requestWrapper(false, { type: 'event-solves', data: eventID });
+        events = (await SOLVES.json()).data;
 
-    async function refreshScores() {
-        const DATA = await requestWrapper(false, { type: 'events' });
-        const JSON = await DATA.json();
-        events = JSON.data;
+        const USER = await requestWrapper(false, { type: 'user-scores', data: eventID });
+        events = (await USER.json()).data;
+
+        const TEAM = await requestWrapper(false, { type: 'team-scores', data: eventID });
+        events = (await TEAM.json()).data;
     }
 </script>
 
