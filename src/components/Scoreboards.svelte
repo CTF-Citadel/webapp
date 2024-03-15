@@ -31,6 +31,7 @@
 
     onMount(async () => {
         await refreshEvents();
+        prepareForPlot();
         loading = false;
     });
 

@@ -87,10 +87,22 @@
     </div>
 {:else if challenges.length > 0}
     {#each Object.entries(categories) as [key, value]}
-        <h1 class="text-3xl text-center font-bold italic my-2 dark:text-neutral-100 text-neutral-900">{key}</h1>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start py-4 mx-4 border-neutral-600 dark:border-neutral-400 border-t-2">
+        <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
+            <span class="italic text-neutral-500 opacity-50">#</span>
+            {key}
+        </h1>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start m-4">
             {#each value as challenge}
                 <Card
+                    style="border-color: {challenge.challenge_difficulty === 'Easy'
+                        ? '#28a745'
+                        : challenge.challenge_difficulty === 'Medium'
+                          ? '#FF9800'
+                          : '#dc3545'}; filter: drop-shadow(8px 8px 4px {challenge.challenge_difficulty === 'Easy'
+                        ? '#28a745'
+                        : challenge.challenge_difficulty === 'Medium'
+                          ? '#FF9800'
+                          : '#dc3545'});"
                     class="bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl my-2"
                 >
                     <div class="mb-2">
