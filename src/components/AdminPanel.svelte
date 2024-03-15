@@ -39,7 +39,9 @@
     let challenges: ChallengesType[] = [];
     let teamEvents: TeamEventsType[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
+    let selectchallenges: {value: string; name: string}[] = [];
     let selectedEvent = '';
+    let dependsOnChallenge = '';
     let selectedDiff = '';
     let loading: boolean = true;
     let editUUID: string = '';
@@ -134,6 +136,10 @@
         const DATA = await requestWrapper(true, { type: 'challenges' });
         const JSON = await DATA.json();
         challenges = JSON.data;
+        selectchallenges = [];
+        challenges.forEach((element: any) => {
+            selectchallenges.push({ value: element.id, name: element.challenge_name });
+        });
     }
 
     async function refreshTeamEvents() {
@@ -201,7 +207,7 @@
     async function createChallenge() {
         const DATA = await requestWrapper(true, {
             type: 'create-challenge',
-            data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent }
+            data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent, dependon: dependsOnChallenge }
         });
         if (DATA.ok) {
             create.challenge = false;
@@ -356,6 +362,7 @@
                 name="New Challenge"
                 on:click={() => {
                     create.challenge = create.challenge ? false : true;
+                    dependsOnChallenge = '';
                 }}
             >
                 <CalendarPlus />
@@ -619,6 +626,22 @@
             required
         />
     </div>
+    {#if challenges.length > 0}
+        <div class="mb-6">
+            <Label>
+                Depends on Challenge
+                <Select class="mt-2" items={selectchallenges} bind:value={dependsOnChallenge} />
+            </Label>
+        </div>
+        {:else}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-blue-500">No other Challenges created yet.</p>
+            </Alert>
+        {/if}
     <div>
         {#if events.length > 0}
             <Label>
@@ -644,8 +667,7 @@
                         selectedEvent == '' ||
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
-                        challengeTemplate.category == '' ||
-                        (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
+                        challengeTemplate.category == ''}>Create</Button
                 >
                 <Button
                     on:click={() => {

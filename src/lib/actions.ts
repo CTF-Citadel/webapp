@@ -162,7 +162,8 @@ class DatabaseActions {
         isContainer: boolean,
         filePath: string,
         fileURL: string,
-        toEvent: string
+        toEvent: string,
+        dependon: string,
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
@@ -173,7 +174,8 @@ class DatabaseActions {
             challenge_difficulty: diff,
             needs_container: isContainer,
             container_file: filePath,
-            static_file_url: fileURL
+            static_file_url: fileURL,
+            depends_on: dependon
         });
     }
 
@@ -322,14 +324,15 @@ class DatabaseActions {
      * Updates a Challenge's properties
      * @return void
      */
-    async updateChallenge(id: string, name: string, desc: string, cat: string, diff: string, event: string) {
+    async updateChallenge(id: string, name: string, desc: string, cat: string, diff: string, event: string, children: string) {
         await DB_ADAPTER.update(challenges)
             .set({
                 challenge_name: name,
                 challenge_description: desc,
                 challenge_category: cat,
                 challenge_difficulty: diff,
-                event_id: event
+                event_id: event,
+                hasChildren: children
             })
             .where(eq(challenges.id, id));
     }
