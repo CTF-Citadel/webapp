@@ -141,8 +141,6 @@
         challenges.forEach((element: any) => {
             selectchallenges.push({ value: element.id, name: element.challenge_name });
         });
-        console.log(challenges);
-        console.log(selectchallenges);
     }
 
     async function refreshTeamEvents() {
@@ -237,7 +235,6 @@
 
     async function checkChildDepends(dependAmount: any) {
         disableDependDelete = false;
-        console.log(disableDependDelete);
         const checkDepend = await requestWrapper(true, {
             type: 'check-children',
             data: {
