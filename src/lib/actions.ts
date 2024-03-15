@@ -151,6 +151,16 @@ class DatabaseActions {
     }
 
     /**
+         * Fetches Challenges assigned to Event ID
+         * @return List of Challenges
+         */
+    async checkChildChallenges(id: string) {
+        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
+        return RES.length > 0 ? RES : [];
+    }
+
+
+    /**
      * Creates a new Challenge
      * @return void
      */
@@ -331,9 +341,8 @@ class DatabaseActions {
                 challenge_description: desc,
                 challenge_category: cat,
                 challenge_difficulty: diff,
-                event_id: event,
-                hasChildren: children
-            })
+                event_id: event
+                })
             .where(eq(challenges.id, id));
     }
 
