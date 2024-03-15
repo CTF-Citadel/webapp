@@ -151,14 +151,13 @@ class DatabaseActions {
     }
 
     /**
-         * Fetches Challenges assigned to Event ID
-         * @return List of Challenges
-         */
+     * Fetches Challenges assigned to Event ID
+     * @return List of Challenges
+     */
     async checkChildChallenges(id: string) {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
         return RES.length > 0 ? RES : [];
     }
-
 
     /**
      * Creates a new Challenge
@@ -173,7 +172,7 @@ class DatabaseActions {
         filePath: string,
         fileURL: string,
         toEvent: string,
-        dependon: string,
+        dependOn: string
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
@@ -185,7 +184,7 @@ class DatabaseActions {
             needs_container: isContainer,
             container_file: filePath,
             static_file_url: fileURL,
-            depends_on: dependon
+            depends_on: dependOn
         });
     }
 
@@ -334,7 +333,15 @@ class DatabaseActions {
      * Updates a Challenge's properties
      * @return void
      */
-    async updateChallenge(id: string, name: string, desc: string, cat: string, diff: string, event: string, children: string) {
+    async updateChallenge(
+        id: string,
+        name: string,
+        desc: string,
+        cat: string,
+        diff: string,
+        event: string,
+        children: string
+    ) {
         await DB_ADAPTER.update(challenges)
             .set({
                 challenge_name: name,
@@ -342,7 +349,7 @@ class DatabaseActions {
                 challenge_category: cat,
                 challenge_difficulty: diff,
                 event_id: event
-                })
+            })
             .where(eq(challenges.id, id));
     }
 
@@ -351,10 +358,12 @@ class DatabaseActions {
      * @return void
      */
     async updateUser(id: string, new_email: string, verified: boolean) {
-        await DB_ADAPTER.update(users).set({
-            email: new_email,
-            is_verified: verified
-        }).where(eq(users.id, id));
+        await DB_ADAPTER.update(users)
+            .set({
+                email: new_email,
+                is_verified: verified
+            })
+            .where(eq(users.id, id));
     }
 
     /**

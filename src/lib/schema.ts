@@ -64,7 +64,7 @@ export const challenges = pgTable('challenges', {
     container_file: text('container_file').notNull(),
     static_file_url: text('static_file_url').notNull(),
     needs_container: boolean('needs_container').notNull(),
-    depends_on: text('depends_on').notNull(),
+    depends_on: text('depends_on').notNull()
 });
 
 export const teams = pgTable('teams', {
@@ -78,21 +78,25 @@ export const teams = pgTable('teams', {
     team_description: text('team_description').notNull()
 });
 
-export const team_events = pgTable('team_events', {
-    team_id: text('team_id')
-        .references(() => teams.id)
-        .notNull(),
-    event_id: text('event_id')
-        .references(() => events.id)
-        .notNull(),
-    team_points: bigint('team_points', {
-        mode: 'number'
-    }).notNull(),
-}, (table) => {
-    return {
-        pk: primaryKey({ columns: [table.team_id, table.event_id] })
-    };
-});
+export const team_events = pgTable(
+    'team_events',
+    {
+        team_id: text('team_id')
+            .references(() => teams.id)
+            .notNull(),
+        event_id: text('event_id')
+            .references(() => events.id)
+            .notNull(),
+        team_points: bigint('team_points', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return {
+            pk: primaryKey({ columns: [table.team_id, table.event_id] })
+        };
+    }
+);
 
 export const team_challenges = pgTable('team_challenges', {
     team_id: text('team_id')
