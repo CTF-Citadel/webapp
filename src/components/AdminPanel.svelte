@@ -39,7 +39,10 @@
     let challenges: ChallengesType[] = [];
     let teamEvents: TeamEventsType[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
+    let selectchallenges: { value: string; name: string }[] = [];
     let selectedEvent = '';
+    let dependsOnChallenge = '';
+    let disableDependDelete = false;
     let selectedDiff = '';
     let loading: boolean = true;
     let editUUID: string = '';
@@ -134,6 +137,10 @@
         const DATA = await requestWrapper(true, { type: 'challenges' });
         const JSON = await DATA.json();
         challenges = JSON.data;
+        selectchallenges = [];
+        challenges.forEach((element: any) => {
+            selectchallenges.push({ value: element.id, name: element.challenge_name });
+        });
     }
 
     async function refreshTeamEvents() {
@@ -201,7 +208,7 @@
     async function createChallenge() {
         const DATA = await requestWrapper(true, {
             type: 'create-challenge',
-            data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent }
+            data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent, dependon: dependsOnChallenge }
         });
         if (DATA.ok) {
             create.challenge = false;
@@ -224,6 +231,20 @@
             await refreshEvents();
             return true;
         } else return false;
+    }
+
+    async function checkChildDepends(dependAmount: any) {
+        disableDependDelete = false;
+        const checkDepend = await requestWrapper(true, {
+            type: 'check-children',
+            data: {
+                id: editUUID
+            }
+        });
+        if (checkDepend.ok) {
+            let depens = await checkDepend.json();
+            disableDependDelete = depens.data.length > 0 ? true : false;
+        }
     }
 
     async function updateChallenge() {
@@ -356,6 +377,7 @@
                 name="New Challenge"
                 on:click={() => {
                     create.challenge = create.challenge ? false : true;
+                    dependsOnChallenge = '';
                 }}
             >
                 <CalendarPlus />
@@ -505,7 +527,9 @@
                     color="alternative">Cancel</Button
                 >
             </div>
-            <Button on:click={deleteChallenge} color="red"><TrashBinOutline class="w-4" /></Button>
+            <Button on:click={deleteChallenge} disabled={disableDependDelete == true} color="red"
+                ><TrashBinOutline class="w-4" /></Button
+            >
         </div>
     </svelte:fragment>
 </Modal>
@@ -523,14 +547,66 @@
         <Label for="event-textarea" class="mb-2">Event Description</Label>
         <Textarea id="event-textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
     </div>
+
     <div class="mb-6">
         <Label class="mb-2">Event Start</Label>
-        <input type="datetime-local" bind:value={datePicker.start} />
+        <div class="relative">
+            <input
+                type="datetime-local"
+                class="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300 transition duration-150 ease-in-out"
+                bind:value={datePicker.start}
+            />
+            <!-- Optional: Add an icon for visual appeal -->
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <!-- You can replace the calendar icon with any other suitable icon -->
+                <svg
+                    class="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0z"
+                    >
+                    </path>
+                </svg>
+            </div>
+        </div>
     </div>
-    <div>
+    <div class="mb-6">
         <Label class="mb-2">Event End</Label>
-        <input type="datetime-local" bind:value={datePicker.end} />
+        <div class="relative">
+            <input
+                type="datetime-local"
+                class="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300 transition duration-150 ease-in-out"
+                bind:value={datePicker.end}
+            />
+            <!-- Optional: Add an icon for visual appeal -->
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <!-- You can replace the calendar icon with any other suitable icon -->
+                <svg
+                    class="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0z"
+                    >
+                    </path>
+                </svg>
+            </div>
+        </div>
     </div>
+
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
@@ -585,6 +661,22 @@
             required
         />
     </div>
+    {#if challenges.length > 0}
+        <div class="mb-6">
+            <Label>
+                Depends on Challenge
+                <Select class="mt-2" items={selectchallenges} bind:value={dependsOnChallenge} />
+            </Label>
+        </div>
+    {:else}
+        <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+            <span slot="icon">
+                <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                <span class="sr-only">Info</span>
+            </span>
+            <p class="text-blue-500">No other Challenges created yet.</p>
+        </Alert>
+    {/if}
     <div>
         {#if events.length > 0}
             <Label>
@@ -610,8 +702,7 @@
                         selectedEvent == '' ||
                         challengeTemplate.name == '' ||
                         challengeTemplate.description == '' ||
-                        challengeTemplate.category == '' ||
-                        (challengeTemplate.filePath == '' && challengeTemplate.isContainer)}>Create</Button
+                        challengeTemplate.category == ''}>Create</Button
                 >
                 <Button
                     on:click={() => {
@@ -925,6 +1016,7 @@
                                                 editUUID = entry.id;
                                                 editInvocate('challenge');
                                                 edit.challenge = edit.challenge ? false : true;
+                                                checkChildDepends(editUUID);
                                             }}>Edit</Button
                                         >
                                     </TableBodyCell>
