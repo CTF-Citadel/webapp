@@ -50,7 +50,11 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'event-solves':
                 response = await HANLDER.getAllSolvesByEvent(json.data.event_id);
                 break;
+<<<<<<< Updated upstream
             case 'team-scores':
+=======
+            case 'event-scores':
+>>>>>>> Stashed changes
                 response = await HANLDER.getTeamPointsByEvent(json.data.event_id);
                 break;
             case 'user-scores':
