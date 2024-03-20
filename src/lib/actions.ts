@@ -225,6 +225,15 @@ class DatabaseActions {
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id);
+            return RES.length > 0 ? RES : [];
+    }
+
+    /**
+     * Fetches Challenges assigned to Event ID
+     * @return List of Challenges
+     */
+    async checkChildChallenges(id: string) {
+        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
         return RES.length > 0 ? RES : [];
     }
 
@@ -262,7 +271,8 @@ class DatabaseActions {
         filePath: string,
         fileURL: string,
         toEvent: string,
-        points: number
+        points: number,
+        dependOn: string
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
@@ -274,7 +284,8 @@ class DatabaseActions {
             needs_container: isContainer,
             container_file: filePath,
             static_file_url: fileURL,
-            base_points: points
+            base_points: points,
+            depends_on: dependOn
         });
     }
 
@@ -433,7 +444,8 @@ class DatabaseActions {
         cat: string,
         diff: string,
         points: number,
-        event: string
+        event: string,
+        children: string
     ) {
         await DB_ADAPTER.update(challenges)
             .set({

@@ -64,7 +64,8 @@ export const challenges = pgTable('challenges', {
     base_points: integer('base_points').notNull(),
     container_file: text('container_file').notNull(),
     static_file_url: text('static_file_url').notNull(),
-    needs_container: boolean('needs_container').notNull()
+    needs_container: boolean('needs_container').notNull(),
+    depends_on: text('depends_on').notNull()
 });
 
 export const teams = pgTable('teams', {

@@ -190,7 +190,8 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.path,
                     json.data.fileURL,
                     json.data.event,
-                    json.data.points
+                    json.data.points,
+                    json.data.dependon
                 );
                 break;
             case 'create-event':
@@ -215,8 +216,12 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.category,
                     json.data.difficulty,
                     json.data.points,
-                    json.data.event
+                    json.data.event,
+                    json.data.children
                 );
+                break;
+            case 'check-children':
+                response = await HANLDER.checkChildChallenges(json.data.id);
                 break;
             case 'update-user':
                 response = await HANLDER.updateUser(json.data.id, json.data.email, json.data.verified);
