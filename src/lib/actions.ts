@@ -225,7 +225,7 @@ class DatabaseActions {
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id);
-            return RES.length > 0 ? RES : [];
+        return RES.length > 0 ? RES : [];
     }
 
     /**
@@ -290,10 +290,31 @@ class DatabaseActions {
     }
 
     /**
-     * Deploys a new Challenge
-     * @return void
+     * Checks if a specific Challenge is deployed and running
+     * @return true if deployed, false if not
      */
-    async deployTeamChallenge(team_id: string, challenge_id: string, event_id: string) {
+    async checkDeployedChallenge(team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
+        const RES = await DB_ADAPTER.select()
+            .from(team_challenges)
+            .where(
+                and(
+                    eq(team_challenges.challenge_id, challenge_id),
+                    eq(team_challenges.team_id, team_id),
+                    eq(team_challenges.event_id, event_id),
+                    eq(team_challenges.is_running, true),
+                    eq(team_challenges.is_solved, false)
+                )
+            );
+        return RES.length > 0 ? true : false;
+        // @TODO: Check if still running by fetching backend
+        // fetch(BACKEND) ...
+    }
+
+    /**
+     * Deploys a new Challenge
+     * @return true if deployed, false if not
+     */
+    async deployTeamChallenge(team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
@@ -319,6 +340,7 @@ class DatabaseActions {
                     is_running: true,
                     is_solved: false
                 });
+                return true;
             } catch {
                 return false;
             }
