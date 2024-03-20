@@ -2,6 +2,7 @@
   "name": "webapp",
   "type": "module",
   "scripts": {
+    "test": "vitest",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
@@ -30,6 +31,7 @@
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.11.2",
     "flowbite-svelte": "^0.44.24",
-    "flowbite-svelte-icons": "^1.4.5"
+    "flowbite-svelte-icons": "^1.4.5",
+    "vitest": "^1.4.0"
   }
 }
