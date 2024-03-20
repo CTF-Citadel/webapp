@@ -45,13 +45,29 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getAllTeams(true);
                 break;
             case 'events':
+                response = await HANLDER.getAllEvents();
+                break;
+            case 'event-solves':
+                response = await HANLDER.getAllSolvesByEvent(json.data.event_id);
+                break;
+            case 'team-scores':
+                response = await HANLDER.getTeamPointsByEvent(json.data.event_id);
+                break;
+            case 'user-scores':
+                response = await HANLDER.getUserPointsByEvent(json.data.event_id);
+                break;
+            case 'team-events':
                 response = await HANLDER.getTeamEvents(json.data.id);
                 break;
             case 'challenges':
                 response = await HANLDER.getEventChallenges(json.data.id);
                 break;
             case 'deploy-challenge':
-                response = await HANLDER.deployTeamChallenge(json.data.teamID, json.data.challengeID);
+                response = await HANLDER.deployTeamChallenge(
+                    json.data.teamID,
+                    json.data.challengeID,
+                    json.data.eventID
+                );
                 break;
             case 'has-created':
                 response = await HANLDER.checkHasCreatedTeam(json.data.user);
@@ -171,9 +187,10 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.category,
                     json.data.difficulty,
                     json.data.isContainer,
-                    json.data.filePath,
+                    json.data.path,
                     json.data.fileURL,
                     json.data.event,
+                    json.data.points,
                     json.data.dependon
                 );
                 break;
@@ -198,6 +215,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.description,
                     json.data.category,
                     json.data.difficulty,
+                    json.data.points,
                     json.data.event,
                     json.data.children
                 );
@@ -206,15 +224,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.checkChildChallenges(json.data.id);
                 break;
             case 'update-user':
-                response = await HANLDER.updateChallenge(
-                    json.data.id,
-                    json.data.name,
-                    json.data.description,
-                    json.data.category,
-                    json.data.difficulty,
-                    json.data.event,
-                    json.data.children
-                );
+                response = await HANLDER.updateUser(json.data.id, json.data.email, json.data.verified);
                 break;
             case 'update-event':
                 response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description);

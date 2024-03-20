@@ -1,6 +1,6 @@
 import { DB_ADAPTER } from './db';
-import { events, teams, team_events, team_challenges, users, challenges } from './schema';
-import { eq, and } from 'drizzle-orm';
+import { challenges, events, team_challenges, team_events, teams, users } from './schema';
+import { and, eq, sql } from 'drizzle-orm';
 import { lucia } from './lucia';
 import { generateRandomString } from './helpers';
 
@@ -151,12 +151,111 @@ class DatabaseActions {
     }
 
     /**
+     * Fetches Points per Team based on Event ID
+     * @return
+     * ```
+     * {
+     *     id: string | null;
+     *     name: string | null;
+     *     points: number | null;
+     * }[]
+     * ```
+     */
+    async getTeamPointsByEvent(event_id: string) {
+        const RES = await DB_ADAPTER.select({
+            id: team_challenges.team_id,
+            name: teams.team_name,
+            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+        })
+            .from(team_challenges)
+            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
+            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .groupBy(team_challenges.team_id);
+        return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
+    }
+
+    /**
+     * Fetches Points per User based on Event ID
+     * @return
+     * ```
+     * {
+     *     id: string | null;
+     *     name: string | null;
+     *     points: number | null;
+     * }[]
+     * ```
+     */
+    async getUserPointsByEvent(event_id: string) {
+        const RES = await DB_ADAPTER.select({
+            id: team_challenges.team_id,
+            name: users.username,
+            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+        })
+            .from(team_challenges)
+            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
+            .fullJoin(teams, eq(team_challenges.solved_by, users.id))
+            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .groupBy(team_challenges.solved_by);
+        return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
+    }
+
+    /**
+     * Fetches Solves per Team based on Event ID
+     * @return
+     * ```
+     * {
+     *     id: string | null;
+     *     name: string | null;
+     *     timestamp: number | null;
+     *     points_gained: number | null;
+     * }[]
+     * ```
+     */
+    async getAllSolvesByEvent(event_id: string) {
+        const RES = await DB_ADAPTER.select({
+            id: team_challenges.team_id,
+            name: teams.team_name,
+            timestamp: team_challenges.solved_at,
+            points_gained: challenges.base_points
+        })
+            .from(team_challenges)
+            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
+            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .groupBy(team_challenges.team_id);
+            return RES.length > 0 ? RES : [];
+    }
+
+    /**
      * Fetches Challenges assigned to Event ID
      * @return List of Challenges
      */
     async checkChildChallenges(id: string) {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
         return RES.length > 0 ? RES : [];
+    }
+
+    /**
+     * Fetches Points for a single Team based on Event ID
+     * @return Number of points or zero
+     */
+    async getSingleTeamPointsByEvent(team_id: string, event_id: string) {
+        const RES = await DB_ADAPTER.select({
+            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+        })
+            .from(team_challenges)
+            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .where(
+                and(
+                    eq(team_challenges.event_id, event_id),
+                    eq(team_challenges.team_id, team_id),
+                    eq(team_challenges.is_solved, true)
+                )
+            )
+            .groupBy(team_challenges.team_id);
+        return RES.length > 0 ? RES[0].points : 0;
     }
 
     /**
@@ -172,6 +271,7 @@ class DatabaseActions {
         filePath: string,
         fileURL: string,
         toEvent: string,
+        points: number,
         dependOn: string
     ) {
         await DB_ADAPTER.insert(challenges).values({
@@ -184,6 +284,7 @@ class DatabaseActions {
             needs_container: isContainer,
             container_file: filePath,
             static_file_url: fileURL,
+            base_points: points,
             depends_on: dependOn
         });
     }
@@ -192,7 +293,7 @@ class DatabaseActions {
      * Deploys a new Challenge
      * @return void
      */
-    async deployTeamChallenge(team_id: string, challenge_id: string) {
+    async deployTeamChallenge(team_id: string, challenge_id: string, event_id: string) {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
@@ -208,7 +309,9 @@ class DatabaseActions {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: team_id,
                     challenge_id: challenge_id,
+                    event_id: event_id,
                     solved_by: '',
+                    solved_at: 0,
                     challenge_uuid: DEPLOY_DATA.instance_id,
                     challenge_flag: DEPLOY_DATA.details.FLAG,
                     challenge_host: DEPLOY_DATA.details.IP,
@@ -235,6 +338,7 @@ class DatabaseActions {
             // fetch(BACKEND) ...
             await DB_ADAPTER.update(team_challenges)
                 .set({
+                    solved_at: Date.now(),
                     is_solved: true
                 })
                 .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
@@ -339,6 +443,7 @@ class DatabaseActions {
         desc: string,
         cat: string,
         diff: string,
+        points: number,
         event: string,
         children: string
     ) {
@@ -348,6 +453,7 @@ class DatabaseActions {
                 challenge_description: desc,
                 challenge_category: cat,
                 challenge_difficulty: diff,
+                base_points: points,
                 event_id: event
             })
             .where(eq(challenges.id, id));

@@ -31,7 +31,7 @@
 </script>
 
 <header class="sticky top-0 w-screen z-30 min-w-screen h-16">
-    <nav class="bg-neutral-100 dark:bg-neutral-900 lg:bg-[#0000001f] lg:dark:bg-[#0000004f] backdrop-blur-3xl border-b-4 border-neutral-700 dark:border-neutral-300 px-4 lg:px-6 py-2.5">
+    <nav class="bg-neutral-100 dark:bg-neutral-900 lg:bg-[#0000001f] lg:dark:bg-[#0000004f] backdrop-blur-3xl border-b-4 border-neutral-600 dark:border-neutral-400 px-4 lg:px-6 py-2.5">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
             <a href="/" class="items-center flex">
                 <img src="/favicon.svg" class="mr-3 h-6 sm:h-9 brightness-0 dark:brightness-[300%]" alt="Logo" />
