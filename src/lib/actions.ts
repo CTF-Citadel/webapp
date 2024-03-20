@@ -314,14 +314,14 @@ class DatabaseActions {
      * Deploys a new Challenge
      * @return true if deployed, false if not
      */
-    async deployTeamChallenge(team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
+    async deployTeamChallenge(genFlag: string, team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
                 body: JSON.stringify({
                     challenge: RES[0].container_file,
                     environment_variables: {
-                        FLAG: crypto.randomUUID()
+                        FLAG: genFlag
                     }
                 })
             });
@@ -345,13 +345,14 @@ class DatabaseActions {
                 return false;
             }
         }
+        return false;
     }
 
     /**
      * Checks a Flag for its validity
      * @return true if the flag matches, false if it doesnt
      */
-    async checkChallengeFlag(teamID: string, challengeID: string, flag: string): Promise<boolean> {
+    async checkChallengeFlag(teamID: string, challengeID: string, flag: string, userID: string, timestamp: number): Promise<boolean> {
         const RES = await DB_ADAPTER.select()
             .from(team_challenges)
             .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
@@ -360,7 +361,8 @@ class DatabaseActions {
             // fetch(BACKEND) ...
             await DB_ADAPTER.update(team_challenges)
                 .set({
-                    solved_at: Date.now(),
+                    solved_by: userID,
+                    solved_at: timestamp,
                     is_solved: true
                 })
                 .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));

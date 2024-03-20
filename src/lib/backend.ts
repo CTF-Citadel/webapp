@@ -1,5 +1,8 @@
 import DatabaseActions from './actions';
+import AntiCheatHandler from './anticheat';
 
+const AC_ENABLE = Boolean(process.env.AC_ENABLE) || false;
+const AC = new AntiCheatHandler();
 const HANLDER = new DatabaseActions();
 
 export type WrapperFormat = {
@@ -63,11 +66,16 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getEventChallenges(json.data.id);
                 break;
             case 'deploy-challenge':
+                const GEN_FLAG = crypto.randomUUID();
                 response = await HANLDER.deployTeamChallenge(
                     json.data.teamID,
                     json.data.challengeID,
-                    json.data.eventID
+                    json.data.eventID,
+                    GEN_FLAG
                 );
+                if (response === true && AC_ENABLE === true) {
+                    AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
+                }
                 break;
             case 'has-created':
                 response = await HANLDER.checkHasCreatedTeam(json.data.user);
@@ -103,8 +111,24 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.leaveTeam(json.data.session);
                 break;
             case 'check-flag':
-                response = await HANLDER.checkChallengeFlag(json.data.teamID, json.data.challengeID, json.data.flag);
+                const TIMESTAMP = Date.now();
+                response = await HANLDER.checkChallengeFlag(
+                    json.data.teamID,
+                    json.data.challengeID,
+                    json.data.flag,
+                    json.data.user,
+                    TIMESTAMP
+                );
                 if (response == true) {
+                    if (AC_ENABLE === true) {
+                        AC.flagSubmit(
+                            json.data.flag,
+                            json.data.teamID,
+                            json.data.userID,
+                            json.data.challengeID,
+                            TIMESTAMP
+                        );
+                    }
                     response = {
                         correct: true
                     };
@@ -162,7 +186,6 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             })
         );
     }
-
     try {
         switch (json.type) {
             case 'users':

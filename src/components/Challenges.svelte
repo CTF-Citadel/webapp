@@ -7,6 +7,7 @@
 
     export let uuid: string = '';
     export let team: string = '';
+    export let user: string = '';
 
     let loading: boolean = true;
     let successFlag: boolean = false;
@@ -29,7 +30,7 @@
     async function checkFlag(challenge_id: string, input: string) {
         const DATA = await requestWrapper(false, {
             type: 'check-flag',
-            data: { teamID: team, challengeID: challenge_id, flag: input }
+            data: { userID: user, teamID: team, challengeID: challenge_id, flag: input }
         });
         const JSON = await DATA.json();
         if (JSON.data.correct == true) {
