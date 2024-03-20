@@ -13,17 +13,18 @@
     let deploymentStatus: 0 | 1 | 2 | 3 = 0;
     let challenges: ChallengesType[] = [];
     let challengeResponse: any = false;
-    let flagInput: string = '';
-    let sortedData: any = false;
+    let challengeInputs: { [key: string]: string } = {};
+    let categories: { [key: string]: ChallengesType[] } = {};
 
     onMount(async () => {
-        //Fetch Challenges
         await refreshChallenges();
-
-        //Sort Challenges by Category and Difficulty
         await sortByCategory(challenges);
         loading = false;
     });
+
+    function checkFlagInput(input: string): boolean {
+        return /^TH{.*}$/.test(input);
+    }
 
     async function checkFlag(challenge_id: string, input: string) {
         const DATA = await requestWrapper(false, {
@@ -36,10 +37,9 @@
         }
     }
 
-    async function sortByCategory(data: any[]) {
+    async function sortByCategory(data: ChallengesType[]) {
         // Category Sorting
-        const categories: any = {};
-        data.forEach((item: { challenge_category: any }) => {
+        data.forEach((item) => {
             if (!categories[item.challenge_category]) {
                 categories[item.challenge_category] = [];
             }
@@ -55,9 +55,6 @@
                 );
             });
         }
-
-        // 2. Convert the grouped object to an array of arrays
-        sortedData = Object.values(categories);
     }
 
     async function refreshChallenges() {
@@ -70,7 +67,7 @@
         deploymentStatus = 1;
         const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
-            data: { teamID: team, challengeID: challenge_id }
+            data: { teamID: team, challengeID: challenge_id, eventID: uuid }
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
@@ -89,12 +86,24 @@
         <Spinner size={'16'} />
     </div>
 {:else if challenges.length > 0}
-    {#each sortedData as category}
-        <h1 class="text-3xl text-center mt-8">Category: {category[0].challenge_category}</h1>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center">
-            {#each category as challenge}
+    {#each Object.entries(categories) as [key, value]}
+        <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
+            <span class="italic text-neutral-500 opacity-50">#</span>
+            {key}
+        </h1>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start m-4">
+            {#each value as challenge}
                 <Card
-                    class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+                    style="border-color: {challenge.challenge_difficulty === 'Easy'
+                        ? '#28a745'
+                        : challenge.challenge_difficulty === 'Medium'
+                          ? '#FF9800'
+                          : '#dc3545'}; filter: drop-shadow(8px 8px 4px {challenge.challenge_difficulty === 'Easy'
+                        ? '#28a745'
+                        : challenge.challenge_difficulty === 'Medium'
+                          ? '#FF9800'
+                          : '#dc3545'});"
+                    class="bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl my-2"
                 >
                     <div class="mb-2">
                         <Label for="challenge-name" class="mb-2">Challenge Name</Label>
@@ -129,12 +138,6 @@
                             </div>
                         </div>
                     {/if}
-
-                    <Label for="flag-submit" class="mb-2">Submit Flag</Label>
-                    <div class="mb-6 flex">
-                        <Input id="flag-submit" placeholder="TH ..." />
-                        <Button type="submit" class="text-white px-4 py-2">Submit</Button>
-                    </div>
                     <div>
                         {#if challenge.needs_container}
                             <Button
@@ -163,19 +166,29 @@
                             <Label for="challenge-port" class="mb-2">Port</Label>
                             <p id="challenge-port">{challengeResponse.details.PORT}</p>
                         </div>
-                        <div class="mb-6">
-                            <Label for="flag" class="mb-2">Flag</Label>
-                            <Input id="flag" placeholder="TH..." bind:value={flagInput} required />
-                        </div>
-                        <div>
-                            <Button on:click={() => {}}>Submit</Button>
-                        </div>
-                        {#if successFlag}
-                            <Alert class="my-2" color="green">
-                                <span class="font-bold">Correct Flag!</span><br />
-                                Congratulations.
-                            </Alert>
-                        {/if}
+                    {/if}
+                    <div class="mb-6">
+                        <Label for="flag-submit" class="mb-2">Submit Flag</Label>
+                        <Input
+                            id="flag-submit"
+                            placeholder="TH&lcub;&rcub;"
+                            bind:value={challengeInputs[challenge.id]}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <Button
+                            disabled={challengeInputs[challenge.id] == '' ||
+                                !checkFlagInput(challengeInputs[challenge.id]) ||
+                                (challenge.needs_container && deploymentStatus != 3)}
+                            on:click={() => checkFlag(challenge.id, challengeInputs[challenge.id])}>Submit</Button
+                        >
+                    </div>
+                    {#if successFlag}
+                        <Alert class="my-2" color="green">
+                            <span class="font-bold">Correct Flag!</span><br />
+                            Congratulations.
+                        </Alert>
                     {/if}
                 </Card>
             {/each}
