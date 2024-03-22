@@ -668,7 +668,7 @@
     {#if challengeTemplate.isContainer}
         <div class="mb-6" transition:slide>
             <Label for="challenge-file" class="mb-2">Compose File</Label>
-            <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.path} required />
+            <Input id="challenge-file" placeholder="some" bind:value={challengeTemplate.path} required />
         </div>
     {/if}
     <div class="mb-6">
@@ -740,6 +740,7 @@
                         (challengeTemplate.staticFlag == '' && challengeTemplate.flagStatic) ||
                         (dependsOnChallenge == '' && challengeNeedsDepend) ||
                         (challengeTemplate.fileURL == '' && challengeNeedsFile) ||
+                        (challengeTemplate.path == '' && challengeTemplate.staticFlag == '') ||
                         (challengeTemplate.path == '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button

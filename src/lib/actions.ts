@@ -636,12 +636,8 @@ class DatabaseActions {
      * @return void
      */
     async deleteChallenge(id: string) {
+        await DB_ADAPTER.delete(team_challenges).where(eq(team_challenges.challenge_id, id));
         await DB_ADAPTER.delete(challenges).where(eq(challenges.id, id));
-        // @TODO: Think about if we need this or not
-        // Would make handling deletion in active events a lot easier
-        // because we might count points by checking what we have in here:
-        //
-        // await DB_ADAPTER.delete(team_challenges).where(eq(team_challenges.challenge_id, id))
     }
 
     /**

@@ -29,7 +29,7 @@
     {:else}
         <Card class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
             <div class="flex flex-col items-center p-6">
-                <Avatar size="xl" src="/img/avatars/default.webp" />
+                <Avatar size="xl" src="/img/avatars/wolf.webp" />
                 <h1 class="mt-2 text-xl font-medium text-gray-900 dark:text-white">{user.username}</h1>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{user.user_role}</span>
                 {#if team !== null}

@@ -5,6 +5,7 @@
     import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
     import type { ChallengesType } from '../lib/schema';
+    import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte'
 
     export let uuid: string = '';
     export let team: string = '';
@@ -20,9 +21,10 @@
     let categories: { [key: string]: ChallengesType[] } = {};
 
     onMount(async () => {
-        await refreshChallenges();
+        await refreshChallenges().finally(() => {
+            sortByCategory(challenges);
+        });
         await refreshSolvedChallenges();
-        await sortByCategory(challenges);
         loading = false;
     });
 
@@ -41,12 +43,13 @@
         if (JSON.data.correct == true) {
             successFlag[challenge_id] = 0;
         } else successFlag[challenge_id] = 1;
-        setTimeout(() => {
+        setTimeout(async () => {
             successFlag[challenge_id] = -1;
-        }, 3000);
+            await refreshSolvedChallenges();
+        }, 2000);
     }
 
-    async function sortByCategory(data: ChallengesType[]) {
+    function sortByCategory(data: ChallengesType[]) {
         // Category Sorting
         data.forEach((item) => {
             if (!categories[item.challenge_category]) {
@@ -152,9 +155,10 @@
                         {#if challenge.static_file_url != ''}
                             <div class="mb-6">
                                 <Label for="challenge-diff" class="mb-2">Challenge File</Label>
-                                <div class="p-2 bg-primary-500 rounded-lg w-fit">
+                                <div class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center">
+                                    <DownloadSolid size="md" color="#fff" />
                                     <a class="text-white" href={challenge.static_file_url} download
-                                        >{challenge.static_file_url.split('/').pop()}</a
+                                        >{challenge.static_file_url.split('/')[(challenge.static_file_url.split('/')).length - 1].split('?')[0]}</a
                                     >
                                 </div>
                             </div>
@@ -206,7 +210,8 @@
                             <Button
                                 disabled={challengeInputs[challenge.id] == '' ||
                                     !checkFlagInput(challengeInputs[challenge.id]) ||
-                                    (challenge.needs_container && deploymentStatus[challenge.id] != 3)}
+                                    (challenge.needs_container && deploymentStatus[challenge.id] != 3 ||
+                                    successFlag[challenge.id] === 0)}
                                 on:click={() =>
                                     checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
                                 >Submit</Button

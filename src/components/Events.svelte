@@ -43,7 +43,7 @@
     {:else if events.length > 0}
         {#each events as event}
             <Card
-                img="/img/scoreboard.webp"
+                img="/img/banners/04.webp"
                 class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
             >
                 <div class="mb-6">
