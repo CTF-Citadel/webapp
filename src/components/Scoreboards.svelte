@@ -18,7 +18,8 @@
 
     let loading: boolean = true;
     let events: EventsType[] = [];
-    let sortedEvents: { value: string, name: string }[];
+    let sortedEvents: { value: EventsType, name: string }[];
+    let teamSolves: { id: string; name: string; timestamp: number; points_gained: number; }[] = [];
     let teamScores: { id: string; name: string; points: number }[] = [];
     let userScores: { id: string; name: string; points: number }[] = [];
     let seriesData: { x: number; y: number }[];
@@ -30,13 +31,18 @@
     };
 
     onMount(async () => {
-        await refreshEvents();
-        prepareForPlot();
+        await refreshEvents().finally(async () => {
+            console.log(events);
+            await refreshEventScoring(sortedEvents[0].value.id).finally(async () => {
+                prepareForPlot(sortedEvents[0].value.event_start);
+            });
+        });
+        
         loading = false;
     });
 
     // BEGIN TEMP DATA
-
+    /*
     teamScores = [
         {
             id: 'some-id-3',
@@ -73,7 +79,7 @@
         }
     ];
 
-    let points = [
+    teamSolves = [
         {
             id: 'some-id-1',
             name: 'Team1',
@@ -129,24 +135,49 @@
             points_gained: 250
         }
     ];
-
+    */
     // END TEMP DATA
 
-    function prepareForPlot() {
+    function prepareForPlot(start: number) {
+        // sort and sum
+        let actualSolves: { id: string; name: string; timestamp: number; points: number; }[] = [];
+        teamSolves.sort((a, b) => a.timestamp - b.timestamp)
+        let prevPoints: { [id: string]: { points: number; name: string; } } = {};
+        teamSolves.forEach((entry, _) => {
+            const POINTS = (Object.hasOwn(prevPoints, entry.id) ? prevPoints[entry.id].points : 0) + entry.points_gained;
+            actualSolves.push({
+                id: entry.id,
+                name: entry.name,
+                timestamp: entry.timestamp,
+                points: POINTS
+            });
+            prevPoints[entry.id] = { points: POINTS, name: entry.name };
+        });
+        // append zero because yes
+        for (const [key, value] of Object.entries(prevPoints)) {
+            actualSolves.push({
+                id: key,
+                name: value.name,
+                timestamp: start,
+                points: 0
+            });
+        }
+        actualSolves.sort((a, b) => a.timestamp - b.timestamp)
+
         // first aggregate Scores by entity
-        for (let entry of points) {
+        for (let entry of actualSolves) {
             if (entry.name in dataAggregator) {
                 let currentData = dataAggregator[entry.name];
                 currentData.push({
                     x: entry.timestamp,
-                    y: entry.points_gained
+                    y: entry.points
                 });
                 dataAggregator[entry.name] = currentData;
             } else {
                 dataAggregator[entry.name] = [
                     {
                         x: entry.timestamp,
-                        y: entry.points_gained
+                        y: entry.points
                     }
                 ];
             }
@@ -164,6 +195,17 @@
     let options: ApexCharts.ApexOptions = {
         series: plotData,
         chart: {
+            animations: {
+                enabled: true,
+                easing: 'easein',
+                speed: 150,
+                animateGradually: {
+                    enabled: false
+                },
+                dynamicAnimation: {
+                    enabled: false
+                }
+            },
             height: 400,
             type: 'line',
             dropShadow: {
@@ -171,7 +213,8 @@
             },
             toolbar: {
                 show: false
-            }
+            },
+            background: '#00000000'
         },
         dataLabels: {
             enabled: false
@@ -185,23 +228,33 @@
         legend: {
             show: true,
             labels: {
-                colors: '#000'
+                colors: '#555'
             }
         },
         tooltip: {
             enabled: true
         },
         xaxis: {
-            type: 'datetime'
+            type: 'datetime',
+            labels: {
+                style: {
+                    colors: '#555'
+                }
+            }
         },
         yaxis: {
             title: {
                 text: 'Score',
                 style: {
-                    color: '#000'
+                    color: '#555'
                 }
             },
-            min: 0
+            min: 0,
+            labels: {
+                style: {
+                    colors: '#555'
+                }
+            }
         },
         theme: {
             mode: 'light'
@@ -209,24 +262,26 @@
     };
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'events' });
-        const JSON = await DATA.json();
-        events = JSON.data;
+        const EVENTS = await requestWrapper(false, { type: 'events' });
+        events = (await EVENTS.json()).data;
         sortedEvents = [];
-        events.forEach((element: any) => {
-            sortedEvents.push({ value: element.id, name: element.event_name });
+        events.forEach((element) => {
+            sortedEvents.push({ value: element, name: element.event_name });
         });
     }
 
-    async function refreshEventScoring(eventID: string) {
-        const SOLVES = await requestWrapper(false, { type: 'event-solves', data: eventID });
-        events = (await SOLVES.json()).data;
+    async function refreshEventScoring(id: string) {
+        const SOLVES = await requestWrapper(false, { type: 'event-solves', data: { eventID: id } });
+        teamSolves = (await SOLVES.json()).data;
+        console.log(teamSolves)
 
-        const USER = await requestWrapper(false, { type: 'user-scores', data: eventID });
-        events = (await USER.json()).data;
+        const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
+        userScores = (await USER.json()).data;
+        console.log(userScores)
 
-        const TEAM = await requestWrapper(false, { type: 'team-scores', data: eventID });
-        events = (await TEAM.json()).data;
+        const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
+        teamScores = (await TEAM.json()).data;
+        console.log(teamScores)
     }
 </script>
 
@@ -236,7 +291,7 @@
             <Spinner size={'16'} />
         </div>
     {:else}
-        <div class="bg-neutral-100 mt-10">
+        <div class="bg-neutral-100 dark:bg-neutral-900 mt-10">
             <Chart bind:options></Chart>
         </div>
         <div class="my-10">

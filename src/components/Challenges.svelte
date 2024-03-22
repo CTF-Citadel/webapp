@@ -2,6 +2,7 @@
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
     import { requestWrapper } from '../lib/helpers';
     import { onMount } from 'svelte';
+    import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
     import type { ChallengesType } from '../lib/schema';
 
@@ -10,15 +11,17 @@
     export let user: string = '';
 
     let loading: boolean = true;
-    let successFlag: boolean = false;
-    let deploymentStatus: 0 | 1 | 2 | 3 = 0;
+    let successFlag: { [key: string]: -1 | 0 | 1 } = {};
+    let deploymentStatus: { [key: string]: 0 | 1 | 2 | 3 } = {};
     let challenges: ChallengesType[] = [];
-    let challengeResponse: any = false;
+    let solvedChallenges: string[] = [];
+    let challengeResponse: { [key: string]: any } = {};
     let challengeInputs: { [key: string]: string } = {};
     let categories: { [key: string]: ChallengesType[] } = {};
 
     onMount(async () => {
         await refreshChallenges();
+        await refreshSolvedChallenges();
         await sortByCategory(challenges);
         loading = false;
     });
@@ -27,15 +30,20 @@
         return /^TH{.*}$/.test(input);
     }
 
-    async function checkFlag(challenge_id: string, input: string) {
+    async function checkFlag(challenge_id: string, input: string, staticFlag: boolean) {
+        successFlag[challenge_id] = -1;
+        const TYPE = staticFlag ? 'check-flag-static' : 'check-flag';
         const DATA = await requestWrapper(false, {
-            type: 'check-flag',
-            data: { userID: user, teamID: team, challengeID: challenge_id, flag: input }
+            type: TYPE,
+            data: { userID: user, teamID: team, eventID: uuid, challengeID: challenge_id, flag: input }
         });
         const JSON = await DATA.json();
         if (JSON.data.correct == true) {
-            successFlag = true;
-        }
+            successFlag[challenge_id] = 0;
+        } else successFlag[challenge_id] = 1;
+        setTimeout(() => {
+            successFlag[challenge_id] = -1;
+        }, 3000);
     }
 
     async function sortByCategory(data: ChallengesType[]) {
@@ -64,20 +72,31 @@
         challenges = JSON.data;
     }
 
+    async function refreshSolvedChallenges() {
+        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { id: team } });
+        const JSON = await DATA.json();
+        solvedChallenges = [];
+        for (let entry of JSON.data) {
+            solvedChallenges.push(entry.id);
+        }
+    }
+
     async function deployChallenge(challenge_id: string) {
-        deploymentStatus = 1;
+        deploymentStatus[challenge_id] = 1;
         const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
             data: { teamID: team, challengeID: challenge_id, eventID: uuid }
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
-            challengeResponse = TEMP.data;
-            deploymentStatus = 3;
-            return true;
+            if (TEMP.error == false) {
+                challengeResponse[challenge_id] = TEMP.data;
+                deploymentStatus[challenge_id] = 3;
+            } else {
+                deploymentStatus[challenge_id] = 2;
+            }
         } else {
-            deploymentStatus = 2;
-            return false;
+            deploymentStatus[challenge_id] = 2;
         }
     }
 </script>
@@ -129,67 +148,92 @@
                             Difficulty: {challenge.challenge_difficulty}
                         </p>
                     </div>
-                    {#if challenge.static_file_url != ''}
-                        <div class="mb-6">
-                            <Label for="challenge-diff" class="mb-2">Challenge File</Label>
-                            <div class="p-2 bg-primary-500 rounded-lg w-fit">
-                                <a class="text-white" href={challenge.static_file_url} download
-                                    >{challenge.static_file_url.split('/').pop()}</a
-                                >
+                    {#if !solvedChallenges.includes(challenge.id)}
+                        {#if challenge.static_file_url != ''}
+                            <div class="mb-6">
+                                <Label for="challenge-diff" class="mb-2">Challenge File</Label>
+                                <div class="p-2 bg-primary-500 rounded-lg w-fit">
+                                    <a class="text-white" href={challenge.static_file_url} download
+                                        >{challenge.static_file_url.split('/').pop()}</a
+                                    >
+                                </div>
                             </div>
-                        </div>
-                    {/if}
-                    <div>
-                        {#if challenge.needs_container}
-                            <Button
-                                on:click={() => {
-                                    deployChallenge(challenge.id);
-                                }}
-                            >
-                                {#if deploymentStatus == 1}
-                                    <Spinner class="mr-3" size="4" />Starting ..
-                                {:else}
-                                    Start
-                                {/if}
-                            </Button>
                         {/if}
-                    </div>
-                    {#if challengeResponse && deploymentStatus == 3}
-                        <Alert class="my-2" color="green">
-                            <span class="font-bold">Started!</span><br />
-                            Infos below.
-                        </Alert>
-                        <div class="mb-2">
-                            <Label for="challenge-ip" class="mb-2">IP</Label>
-                            <p id="challenge-ip">{challengeResponse.details.IP}</p>
+                        {#if challenge.needs_container}
+                            <div class="mb-6">
+                                <Button
+                                    on:click={() => {
+                                        deployChallenge(challenge.id);
+                                    }}
+                                >
+                                    {#if deploymentStatus[challenge.id] == 1}
+                                        <Spinner class="mr-3" size="4" />Starting ..
+                                    {:else}
+                                        Start
+                                    {/if}
+                                </Button>
+                            </div>
+                        {/if}
+                        {#if challengeResponse[challenge.id] && deploymentStatus[challenge.id] == 3}
+                            <div class="mb-6" transition:slide>
+                                <Alert class="my-2" color="green">
+                                    <span class="font-bold">Started!</span><br />
+                                    Infos below.
+                                </Alert>
+                            </div>
+                            <div class="mb-6">
+                                <Label for="challenge-ip" class="mb-2">Host</Label>
+                                <a href="http://{challengeResponse[challenge.id].details.IP}/"><p id="challenge-ip">{challengeResponse[challenge.id].details.IP}</p></a>
+                            </div>
+                        {:else if deploymentStatus[challenge.id] == 2}
+                            <div class="mb-6" transition:slide>
+                                <Alert class="my-2" color="red">
+                                    <span class="font-bold">Failed!</span><br />
+                                    Contact Admin if this repeats.
+                                </Alert>
+                            </div>
+                        {/if}
+                        <div class="mb-6">
+                            <Label for="flag-submit" class="mb-2">Submit Flag</Label>
+                            <Input
+                                id="flag-submit"
+                                placeholder="TH&lcub;&rcub;"
+                                bind:value={challengeInputs[challenge.id]}
+                                required
+                            />
                         </div>
-                        <div class="mb-2">
-                            <Label for="challenge-port" class="mb-2">Port</Label>
-                            <p id="challenge-port">{challengeResponse.details.PORT}</p>
+                        <div>
+                            <Button
+                                disabled={challengeInputs[challenge.id] == '' ||
+                                    !checkFlagInput(challengeInputs[challenge.id]) ||
+                                    (challenge.needs_container && deploymentStatus[challenge.id] != 3)}
+                                on:click={() =>
+                                    checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
+                                >Submit</Button
+                            >
                         </div>
-                    {/if}
-                    <div class="mb-6">
-                        <Label for="flag-submit" class="mb-2">Submit Flag</Label>
-                        <Input
-                            id="flag-submit"
-                            placeholder="TH&lcub;&rcub;"
-                            bind:value={challengeInputs[challenge.id]}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <Button
-                            disabled={challengeInputs[challenge.id] == '' ||
-                                !checkFlagInput(challengeInputs[challenge.id]) ||
-                                (challenge.needs_container && deploymentStatus != 3)}
-                            on:click={() => checkFlag(challenge.id, challengeInputs[challenge.id])}>Submit</Button
-                        >
-                    </div>
-                    {#if successFlag}
-                        <Alert class="my-2" color="green">
-                            <span class="font-bold">Correct Flag!</span><br />
-                            Congratulations.
-                        </Alert>
+                        {#if successFlag[challenge.id] === 0}
+                            <div transition:slide class="mt-6">
+                                <Alert class="my-2" color="green">
+                                    <span class="font-bold">Correct Flag!</span><br />
+                                    Congratulations.
+                                </Alert>
+                            </div>
+                        {:else if successFlag[challenge.id] === 1}
+                            <div transition:slide class="mt-6">
+                                <Alert class="my-2" color="red">
+                                    <span class="font-bold">Incorrect!</span><br />
+                                    Try again.
+                                </Alert>
+                            </div>
+                        {/if}
+                    {:else}
+                        <div transition:slide class="mt-6">
+                            <Alert class="my-2" color="green">
+                                <span class="font-bold">Already Solved!</span><br />
+                                Try some other Challenges!
+                            </Alert>
+                        </div>
                     {/if}
                 </Card>
             {/each}

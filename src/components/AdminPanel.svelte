@@ -24,6 +24,7 @@
         Alert
     } from 'flowbite-svelte';
     import { onMount } from 'svelte';
+    import { slide } from 'svelte/transition';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
     import UserGroup from 'flowbite-svelte-icons/UsersGroupSolid.svelte';
@@ -49,6 +50,7 @@
     let editData: any = {};
     let marked = new Set<string>();
     let challengeNeedsFile: boolean = false;
+    let challengeNeedsDepend: boolean = false;
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
         { value: 'Medium', name: 'Medium' },
@@ -83,7 +85,9 @@
         path: '',
         fileURL: '',
         points: 0,
-        isContainer: false
+        isContainer: false,
+        flagStatic: false,
+        staticFlag: ''
     };
     let teamTemplate = {
         email: '',
@@ -662,7 +666,7 @@
         <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
     </div>
     {#if challengeTemplate.isContainer}
-        <div class="mb-6">
+        <div class="mb-6" transition:slide>
             <Label for="challenge-file" class="mb-2">Compose File</Label>
             <Input id="challenge-file" placeholder="/path/to/file" bind:value={challengeTemplate.path} required />
         </div>
@@ -670,11 +674,47 @@
     <div class="mb-6">
         <Toggle bind:checked={challengeNeedsFile}>Needs File</Toggle>
     </div>
-    {#if challenges.length > 0}
-        <div class="mb-6">
+    {#if challengeNeedsFile}
+        <div class="mb-6" transition:slide>
+            <Label for="challenge-url" class="mb-2">File URL</Label>
+            <Input id="challenge-url" placeholder="https://example.com/source.zip" bind:value={challengeTemplate.fileURL} required />
+        </div>
+    {/if}
+    <div class="mb-6">
+        <Toggle bind:checked={challengeTemplate.flagStatic}>Needs Static Flag</Toggle>
+    </div>
+    {#if challengeTemplate.flagStatic}
+        <div class="mb-6" transition:slide>
+            <Label for="challenge-static" class="mb-2">Static Flag</Label>
+            <Input id="challenge-static" placeholder="3asy-r3v3rs1ng" bind:value={challengeTemplate.staticFlag} required />
+        </div>
+    {/if}
+    <div class="mb-6">
+        <Toggle bind:checked={challengeNeedsDepend}>Depends On</Toggle>
+    </div>
+    {#if challengeNeedsDepend}
+        {#if challenges.length > 0}
+            <div class="mb-6">
+                <Label>
+                    Parent Challenge
+                    <Select class="mt-2" items={selectchallenges} bind:value={dependsOnChallenge} />
+                </Label>
+            </div>
+        {:else}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-blue-500">No other Challenges created yet.</p>
+            </Alert>
+        {/if}
+    {/if}
+    {#if events.length > 0}
+        <div class="mb-6" transition:slide>
             <Label>
-                Depends on Challenge
-                <Select class="mt-2" items={selectchallenges} bind:value={dependsOnChallenge} />
+                Assign To Event
+                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
             </Label>
         </div>
     {:else}
@@ -683,25 +723,9 @@
                 <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
                 <span class="sr-only">Info</span>
             </span>
-            <p class="text-blue-500">No other Challenges created yet.</p>
+            <p class="text-blue-500">No Events created yet.</p>
         </Alert>
     {/if}
-    <div>
-        {#if events.length > 0}
-            <Label>
-                Assign To Event
-                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-            </Label>
-        {:else}
-            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
-                <span slot="icon">
-                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
-                    <span class="sr-only">Info</span>
-                </span>
-                <p class="text-blue-500">No Events created yet.</p>
-            </Alert>
-        {/if}
-    </div>
     <svelte:fragment slot="footer">
         <div class="flex flex-row justify-between w-full">
             <div>
@@ -713,6 +737,8 @@
                         challengeTemplate.description == '' ||
                         challengeTemplate.category == '' ||
                         challengeTemplate.points == 0 ||
+                        (challengeTemplate.staticFlag == '' && challengeTemplate.flagStatic) ||
+                        (dependsOnChallenge == '' && challengeNeedsDepend) ||
                         (challengeTemplate.fileURL == '' && challengeNeedsFile) ||
                         (challengeTemplate.path == '' && challengeTemplate.isContainer)}>Create</Button
                 >

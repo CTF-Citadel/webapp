@@ -51,13 +51,13 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getAllEvents();
                 break;
             case 'event-solves':
-                response = await HANLDER.getAllSolvesByEvent(json.data.event_id);
+                response = await HANLDER.getAllSolvesByEvent(json.data.eventID);
                 break;
             case 'team-scores':
-                response = await HANLDER.getTeamPointsByEvent(json.data.event_id);
+                response = await HANLDER.getTeamPointsByEvent(json.data.eventID);
                 break;
             case 'user-scores':
-                response = await HANLDER.getUserPointsByEvent(json.data.event_id);
+                response = await HANLDER.getUserPointsByEvent(json.data.eventID);
                 break;
             case 'team-events':
                 response = await HANLDER.getTeamEvents(json.data.id);
@@ -65,15 +65,18 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'challenges':
                 response = await HANLDER.getEventChallenges(json.data.id);
                 break;
+            case 'solved-challenges':
+                response = await HANLDER.getTeamSolvedChallenges(json.data.id);
+                break;
             case 'deploy-challenge':
                 const GEN_FLAG = crypto.randomUUID();
                 response = await HANLDER.deployTeamChallenge(
+                    GEN_FLAG,
                     json.data.teamID,
                     json.data.challengeID,
                     json.data.eventID,
-                    GEN_FLAG
                 );
-                if (response === true && AC_ENABLE === true) {
+                if (response != false && AC_ENABLE === true) {
                     AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
                 }
                 break;
@@ -109,6 +112,35 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 break;
             case 'leave-team':
                 response = await HANLDER.leaveTeam(json.data.session);
+                break;
+            case 'check-flag-static':
+                const TIMESTAMP_STATIC = Date.now();
+                response = await HANLDER.checkStaticChallengeFlag(
+                    json.data.teamID,
+                    json.data.eventID,
+                    json.data.challengeID,
+                    json.data.flag,
+                    json.data.userID,
+                    TIMESTAMP_STATIC
+                );
+                if (response == true) {
+                    if (AC_ENABLE === true) {
+                        AC.flagSubmit(
+                            json.data.flag,
+                            json.data.teamID,
+                            json.data.userID,
+                            json.data.challengeID,
+                            TIMESTAMP_STATIC
+                        );
+                    }
+                    response = {
+                        correct: true
+                    };
+                } else {
+                    response = {
+                        correct: false
+                    };
+                }
                 break;
             case 'check-flag':
                 const TIMESTAMP = Date.now();
@@ -146,6 +178,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
         } else {
             response = (e as Error).message;
         }
+        console.log(response);
     }
     return new Response(
         JSON.stringify({
@@ -214,7 +247,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.fileURL,
                     json.data.event,
                     json.data.points,
-                    json.data.dependon
+                    json.data.dependon,
+                    json.data.flagStatic,
+                    json.data.staticFlag
                 );
                 break;
             case 'create-event':
@@ -275,6 +310,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
         } else {
             response = (e as Error).message;
         }
+        console.log(response);
     }
     return new Response(
         JSON.stringify({

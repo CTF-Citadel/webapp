@@ -142,12 +142,32 @@ class DatabaseActions {
     }
 
     /**
+     * Fetches solved Challenges assigned to a Team ID
+     * @return List of Challenge ID's
+     */
+    async getTeamSolvedChallenges(teamID: string) {
+        const RES = await DB_ADAPTER.select({
+            id: team_challenges.challenge_id
+        })
+            .from(team_challenges)
+            .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.is_solved, true)));
+        return RES.length > 0 ? RES : [];
+    }
+
+    /**
      * Fetches Challenges assigned to Event ID
      * @return List of Challenges
      */
     async getEventChallenges(id: string) {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, id));
-        return RES.length > 0 ? RES : [];
+        let resSanitized: any[] = [];
+        if (RES.length > 0) {
+            for (let challenge of RES) {
+                challenge.static_flag = '';
+                resSanitized.push(challenge);
+            }
+        }
+        return RES.length > 0 ? resSanitized : [];
     }
 
     /**
@@ -171,7 +191,7 @@ class DatabaseActions {
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.team_id);
+            .groupBy(team_challenges.team_id, teams.team_name);
         return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
     }
 
@@ -188,16 +208,15 @@ class DatabaseActions {
      */
     async getUserPointsByEvent(event_id: string) {
         const RES = await DB_ADAPTER.select({
-            id: team_challenges.team_id,
+            id: users.id,
             name: users.username,
             points: sql<number>`cast(sum(${challenges.base_points}) as int)`
         })
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
-            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
-            .fullJoin(teams, eq(team_challenges.solved_by, users.id))
+            .fullJoin(users, eq(team_challenges.solved_by, users.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.solved_by);
+            .groupBy(users.id);
         return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
     }
 
@@ -218,13 +237,14 @@ class DatabaseActions {
             id: team_challenges.team_id,
             name: teams.team_name,
             timestamp: team_challenges.solved_at,
-            points_gained: challenges.base_points
+            points_gained: challenges.base_points,
+            total_points: sql<number>`cast(sum(${challenges.base_points}) as int)`
         })
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.team_id);
+            .groupBy(team_challenges.team_id, teams.team_name, challenges.base_points, team_challenges.solved_at);
         return RES.length > 0 ? RES : [];
     }
 
@@ -234,7 +254,14 @@ class DatabaseActions {
      */
     async checkChildChallenges(id: string) {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
-        return RES.length > 0 ? RES : [];
+        let resSanitized: any[] = [];
+        if (RES.length > 0) {
+            for (let challenge of RES) {
+                challenge.static_flag = '';
+                resSanitized.push(challenge);
+            }
+        }
+        return RES.length > 0 ? resSanitized : [];
     }
 
     /**
@@ -272,7 +299,9 @@ class DatabaseActions {
         fileURL: string,
         toEvent: string,
         points: number,
-        dependOn: string
+        dependOn: string,
+        needsStatic: boolean,
+        staticFlag: string
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
@@ -285,7 +314,9 @@ class DatabaseActions {
             container_file: filePath,
             static_file_url: fileURL,
             base_points: points,
-            depends_on: dependOn
+            depends_on: dependOn,
+            flag_static: needsStatic,
+            static_flag: staticFlag
         });
     }
 
@@ -314,36 +345,50 @@ class DatabaseActions {
      * Deploys a new Challenge
      * @return true if deployed, false if not
      */
-    async deployTeamChallenge(genFlag: string, team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
+    async deployTeamChallenge(
+        genFlag: string,
+        team_id: string,
+        challenge_id: string,
+        event_id: string
+    ): Promise<boolean> {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
+            console.log(JSON.stringify({
+                challenge: RES[0].container_file,
+                environment_variables: JSON.stringify({
+                    FLAG: genFlag
+                })
+            }))
+            console.log(RES[0].container_file);
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     challenge: RES[0].container_file,
-                    environment_variables: {
+                    environment_variables: JSON.stringify({
                         FLAG: genFlag
-                    }
+                    })
                 })
             });
-            try {
-                const DEPLOY_DATA = await REQ.json();
-                await DB_ADAPTER.insert(team_challenges).values({
-                    team_id: team_id,
-                    challenge_id: challenge_id,
-                    event_id: event_id,
-                    solved_by: '',
-                    solved_at: 0,
-                    challenge_uuid: DEPLOY_DATA.instance_id,
-                    challenge_flag: DEPLOY_DATA.details.FLAG,
-                    challenge_host: DEPLOY_DATA.details.IP,
-                    challenge_port: DEPLOY_DATA.details.PORT,
-                    is_running: true,
-                    is_solved: false
-                });
-                return true;
-            } catch {
-                return false;
-            }
+            const DEPLOY_DATA = await REQ.json();
+            await DB_ADAPTER.insert(team_challenges).values({
+                team_id: team_id,
+                challenge_id: challenge_id,
+                event_id: event_id,
+                solved_by: '',
+                solved_at: 0,
+                challenge_uuid: DEPLOY_DATA.instance_id,
+                challenge_flag: DEPLOY_DATA.details.FLAG,
+                challenge_host: `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`, // @TODO: implement this correctly
+                challenge_port: "0", // @TODO: implement this correctly
+                is_running: true,
+                is_solved: false
+            });
+            DEPLOY_DATA.details.IP = `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`;
+            console.log(DEPLOY_DATA);
+            return DEPLOY_DATA;
         }
         return false;
     }
@@ -352,20 +397,72 @@ class DatabaseActions {
      * Checks a Flag for its validity
      * @return true if the flag matches, false if it doesnt
      */
-    async checkChallengeFlag(teamID: string, challengeID: string, flag: string, userID: string, timestamp: number): Promise<boolean> {
+    async checkChallengeFlag(
+        teamID: string,
+        challengeID: string,
+        flag: string,
+        userID: string,
+        timestamp: number
+    ): Promise<boolean> {
         const RES = await DB_ADAPTER.select()
             .from(team_challenges)
             .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
-        if (RES.length > 0 && RES[0].challenge_flag === flag) {
+        if (
+            RES.length > 0 &&
+            /^TH{.*}$/.test(flag) &&
+            RES[0].is_running === true &&
+            RES[0].challenge_flag === flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'))
+        ) {
             // @TODO: Maybe close the container here
             // fetch(BACKEND) ...
             await DB_ADAPTER.update(team_challenges)
                 .set({
                     solved_by: userID,
                     solved_at: timestamp,
-                    is_solved: true
+                    is_solved: true,
+                    is_running: false
                 })
                 .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks a static Flag for its validity
+     * @return true if the flag matches, false if it doesnt
+     */
+    async checkStaticChallengeFlag(
+        teamID: string,
+        eventID: string,
+        challengeID: string,
+        flag: string,
+        userID: string,
+        timestamp: number
+    ): Promise<boolean> {
+        const RES = await DB_ADAPTER.select()
+            .from(challenges)
+            .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)));
+        if (
+            RES.length > 0 &&
+            /^TH{.*}$/.test(flag) &&
+            RES[0].flag_static === true &&
+            RES[0].static_flag === flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'))
+        ) {
+            // insert new since static
+            await DB_ADAPTER.insert(team_challenges).values({
+                team_id: teamID,
+                challenge_id: challengeID,
+                event_id: eventID,
+                solved_by: userID,
+                solved_at: timestamp,
+                challenge_uuid: '',
+                challenge_flag: flag,
+                challenge_host: '',
+                challenge_port: '',
+                is_running: false,
+                is_solved: true
+            });
             return true;
         }
         return false;

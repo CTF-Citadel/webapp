@@ -65,6 +65,8 @@ export const challenges = pgTable('challenges', {
     container_file: text('container_file').notNull(),
     static_file_url: text('static_file_url').notNull(),
     needs_container: boolean('needs_container').notNull(),
+    static_flag: text('static_flag').notNull(),
+    flag_static: boolean('flag_static').notNull(),
     depends_on: text('depends_on').notNull()
 });
 
@@ -102,7 +104,7 @@ export const team_events = pgTable(
 export const team_challenges = pgTable('team_challenges', {
     team_id: text('team_id')
         .references(() => teams.id)
-        .primaryKey(),
+        .notNull(),
     challenge_id: text('challenge_id')
         .references(() => challenges.id)
         .notNull(),
@@ -119,7 +121,13 @@ export const team_challenges = pgTable('team_challenges', {
     }).notNull(),
     is_solved: boolean('is_solved').notNull(),
     is_running: boolean('is_running').notNull()
-});
+},
+    (table) => {
+        return {
+            pk: primaryKey({ columns: [table.team_id, table.challenge_id, table.event_id] })
+        };
+    }
+);
 
 export type UsersType = InferSelectModel<typeof users>;
 export type EventsType = InferSelectModel<typeof events>;
