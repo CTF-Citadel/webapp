@@ -353,13 +353,6 @@ class DatabaseActions {
     ): Promise<boolean> {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
-            console.log(JSON.stringify({
-                challenge: RES[0].container_file,
-                environment_variables: JSON.stringify({
-                    FLAG: genFlag
-                })
-            }))
-            console.log(RES[0].container_file);
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
                 method: "POST",
                 headers: {
@@ -387,7 +380,6 @@ class DatabaseActions {
                 is_solved: false
             });
             DEPLOY_DATA.details.IP = `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`;
-            console.log(DEPLOY_DATA);
             return DEPLOY_DATA;
         }
         return false;

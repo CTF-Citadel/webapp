@@ -32,7 +32,6 @@
 
     onMount(async () => {
         await refreshEvents().finally(async () => {
-            console.log(events);
             await refreshEventScoring(sortedEvents[0].value.id).finally(async () => {
                 prepareForPlot(sortedEvents[0].value.event_start);
             });
@@ -273,15 +272,10 @@
     async function refreshEventScoring(id: string) {
         const SOLVES = await requestWrapper(false, { type: 'event-solves', data: { eventID: id } });
         teamSolves = (await SOLVES.json()).data;
-        console.log(teamSolves)
-
         const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
         userScores = (await USER.json()).data;
-        console.log(userScores)
-
         const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
         teamScores = (await TEAM.json()).data;
-        console.log(teamScores)
     }
 </script>
 
