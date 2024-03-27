@@ -278,9 +278,6 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.children
                 );
                 break;
-            case 'check-children':
-                response = await HANLDER.checkChildChallenges(json.data.id);
-                break;
             case 'update-user':
                 response = await HANLDER.updateUser(json.data.id, json.data.email, json.data.verified);
                 break;

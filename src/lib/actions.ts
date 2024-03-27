@@ -249,22 +249,6 @@ class DatabaseActions {
     }
 
     /**
-     * Fetches Challenges assigned to Event ID
-     * @return List of Challenges
-     */
-    async checkChildChallenges(id: string) {
-        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.depends_on, id));
-        let resSanitized: any[] = [];
-        if (RES.length > 0) {
-            for (let challenge of RES) {
-                challenge.static_flag = '';
-                resSanitized.push(challenge);
-            }
-        }
-        return RES.length > 0 ? resSanitized : [];
-    }
-
-    /**
      * Fetches Points for a single Team based on Event ID
      * @return Number of points or zero
      */

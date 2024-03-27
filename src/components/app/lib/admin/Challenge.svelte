@@ -28,7 +28,8 @@
     // dispatcher
     const DISPATCH = createEventDispatcher();
 
-    $: editData = challenges.find((item) => item['id'] === editUUID);
+    $: editData = challenges.find((item) => item.id === editUUID);
+    $: dependants = challenges.filter((item) => item.depends_on != '').map((match) => match.depends_on);
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
@@ -38,7 +39,6 @@
     let selectchallenges: { value: string; name: string }[] = [];
     let selectedEvent = '';
     let dependsOnChallenge = '';
-    let disableDependDelete = false;
     let selectedDiff = '';
 
     let challengeNeedsFile: boolean = false;
@@ -63,20 +63,6 @@
         if (DATA.ok) {
             create = false;
             DISPATCH('refresh');
-        }
-    }
-
-    async function checkChildDepends(dependAmount: any) {
-        disableDependDelete = false;
-        const checkDepend = await requestWrapper(true, {
-            type: 'check-children',
-            data: {
-                id: editUUID
-            }
-        });
-        if (checkDepend.ok) {
-            let depens = await checkDepend.json();
-            disableDependDelete = depens.data.length > 0 ? true : false;
         }
     }
 
@@ -164,7 +150,7 @@
                         color="alternative">Cancel</Button
                     >
                 </div>
-                <Button on:click={deleteChallenge} disabled={disableDependDelete == true} color="red"
+                <Button on:click={deleteChallenge} disabled={dependants.includes(editData.id)} color="red"
                     ><TrashBinOutline class="w-4" /></Button
                 >
             </div>

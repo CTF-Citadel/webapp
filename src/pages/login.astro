@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LoginPage from '../components/app/pages/Login.svelte';
-import Header from '../components/app/Header.svelte';
+import Header from '../components/app/lib/Header.svelte';
 
 if (Astro.locals.user) {
     if (!Astro.locals.user.is_verified) {

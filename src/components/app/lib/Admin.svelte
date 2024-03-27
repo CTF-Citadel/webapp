@@ -37,7 +37,6 @@
     let sortedEvents: { value: string; name: string }[] = [];
     let selectchallenges: { value: string; name: string }[] = [];
     let loading: boolean = true;
-    let disableDependDelete = false;
     let editUUID: string = '';
     let marked = new Set<string>();
     let tabStates = {
@@ -118,20 +117,6 @@
             await refreshTeamEvents();
             return true;
         } else return false;
-    }
-
-    async function refreshChildDepends() {
-        disableDependDelete = false;
-        const checkDepend = await requestWrapper(true, {
-            type: 'check-children',
-            data: {
-                id: editUUID
-            }
-        });
-        if (checkDepend.ok) {
-            let depens = await checkDepend.json();
-            disableDependDelete = depens.data.length > 0 ? true : false;
-        }
     }
 
     function checkEvent(item: string) {
@@ -217,7 +202,6 @@
     on:refresh={async () => {
         await refreshEvents();
         await refreshChallenges();
-        await refreshChildDepends();
     }}
 ></SubChallenge>
 
