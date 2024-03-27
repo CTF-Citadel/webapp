@@ -3,13 +3,13 @@ import { pgTable, text, timestamp, boolean, bigint, integer, primaryKey } from '
 
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
-    username: text('username').unique(),
-    hashed_password: text('hashed_password'),
-    user_role: text('user_role'),
-    user_team_id: text('user_team_id'),
-    email: text('email').unique(),
-    is_verified: boolean('is_verified'),
-    is_blocked: boolean('is_blocked')
+    username: text('username').unique().notNull(),
+    hashed_password: text('hashed_password').notNull(),
+    user_role: text('user_role').notNull(),
+    user_team_id: text('user_team_id').notNull(),
+    email: text('email').unique().notNull(),
+    is_verified: boolean('is_verified').notNull(),
+    is_blocked: boolean('is_blocked').notNull()
 });
 
 export const sessions = pgTable('sessions', {
@@ -101,27 +101,29 @@ export const team_events = pgTable(
     }
 );
 
-export const team_challenges = pgTable('team_challenges', {
-    team_id: text('team_id')
-        .references(() => teams.id)
-        .notNull(),
-    challenge_id: text('challenge_id')
-        .references(() => challenges.id)
-        .notNull(),
-    event_id: text('event_id')
-        .references(() => events.id)
-        .notNull(),
-    challenge_uuid: text('challenge_uuid').notNull(),
-    challenge_flag: text('challenge_flag').notNull(),
-    challenge_host: text('challenge_host').notNull(),
-    challenge_port: text('challenge_port').notNull(),
-    solved_by: text('solved_by').notNull(),
-    solved_at: bigint('solved_at', {
-        mode: 'number'
-    }).notNull(),
-    is_solved: boolean('is_solved').notNull(),
-    is_running: boolean('is_running').notNull()
-},
+export const team_challenges = pgTable(
+    'team_challenges',
+    {
+        team_id: text('team_id')
+            .references(() => teams.id)
+            .notNull(),
+        challenge_id: text('challenge_id')
+            .references(() => challenges.id)
+            .notNull(),
+        event_id: text('event_id')
+            .references(() => events.id)
+            .notNull(),
+        challenge_uuid: text('challenge_uuid').notNull(),
+        challenge_flag: text('challenge_flag').notNull(),
+        challenge_host: text('challenge_host').notNull(),
+        challenge_port: text('challenge_port').notNull(),
+        solved_by: text('solved_by').notNull(),
+        solved_at: bigint('solved_at', {
+            mode: 'number'
+        }).notNull(),
+        is_solved: boolean('is_solved').notNull(),
+        is_running: boolean('is_running').notNull()
+    },
     (table) => {
         return {
             pk: primaryKey({ columns: [table.team_id, table.challenge_id, table.event_id] })

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import AdminSettings from '../components/Settings.svelte';
-import Header from '../components/Header.svelte';
+import GeneralSettings from '../components/app/pages/Settings.svelte';
+import Header from '../components/app/Header.svelte';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
@@ -31,6 +31,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1">
-        <AdminSettings userSession={session} client:visible />
+        <GeneralSettings user={session} client:visible />
     </div>
 </Layout>

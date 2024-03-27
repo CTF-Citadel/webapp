@@ -1,9 +1,9 @@
 <script lang="ts">
     import { Card, Button, Spinner } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
-    import { requestWrapper } from '../lib/helpers';
+    import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
-    import type { EventsType, TeamEventsType } from '../lib/schema';
+    import type { EventsType, TeamEventsType } from '../../../lib/schema';
 
     export let userSession: any = {};
 

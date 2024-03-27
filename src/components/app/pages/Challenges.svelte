@@ -1,10 +1,10 @@
 <script lang="ts">
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
-    import { requestWrapper } from '../lib/helpers';
+    import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
-    import type { ChallengesType } from '../lib/schema';
+    import type { ChallengesType } from '../../../lib/schema';
     import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte'
 
     export let uuid: string = '';

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import UserPage from '../components/User.svelte';
-import Header from '../components/Header.svelte';
+import UserProfile from '../components/app/pages/Profile.svelte';
+import Header from '../components/app/Header.svelte';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
@@ -28,6 +28,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center items-center">
-        <UserPage user={session} client:visible />
+        <UserProfile user={session} client:visible />
     </div>
 </Layout>

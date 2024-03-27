@@ -16,9 +16,9 @@
         TableHead,
         TableHeadCell
     } from 'flowbite-svelte';
-    import { requestWrapper, COUNTRIES } from '../lib/helpers';
+    import { requestWrapper, COUNTRIES } from '../../../lib/helpers';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
-    import type { TeamsType } from '../lib/schema';
+    import type { TeamsType } from '../../../lib/schema';
 
     export let sessionID: string = '';
     export let teamID: string = '';

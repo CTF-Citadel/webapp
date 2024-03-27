@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { requestWrapper } from '../lib/helpers';
+    import { requestWrapper } from '../../../lib/helpers';
     import { Card, Spinner, Avatar } from 'flowbite-svelte';
-    import type { TeamsType } from '../lib/schema';
+    import type { TeamsType } from '../../../lib/schema';
 
     export let user: any = {};
 

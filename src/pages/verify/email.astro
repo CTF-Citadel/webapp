@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.svelte';
-import EmailVerify from '../../components/EmailVerifyToken.svelte';
+import Header from '../../components/app/Header.svelte';
+import EmailVerify from '../../components/app/pages/EmailToken.svelte';
 import { lucia } from '../../lib/lucia';
 
 if (!Astro.locals.user) return Astro.redirect('/login');

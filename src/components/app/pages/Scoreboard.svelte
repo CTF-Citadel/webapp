@@ -12,8 +12,8 @@
     } from 'flowbite-svelte';
     import Chart from 'flowbite-svelte/Chart.svelte';
     import type ApexCharts from 'apexcharts';
-    import { requestWrapper } from '../lib/helpers';
-    import type { EventsType } from '../lib/schema';
+    import { requestWrapper } from '../../../lib/helpers';
+    import type { EventsType } from '../../../lib/schema';
     import { onMount } from 'svelte';
 
     let loading: boolean = true;

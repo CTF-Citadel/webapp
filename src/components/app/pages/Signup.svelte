@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { validEmail, validPassword, validUsername } from '../lib/helpers';
+    import { validEmail, validPassword, validUsername } from '../../../lib/helpers';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
 
