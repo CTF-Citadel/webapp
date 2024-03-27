@@ -69,5 +69,9 @@
                 </div>
             </Card>
         {/each}
+    {:else}
+        <div class="text-center">
+            <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Events found.</h1>
+        </div>
     {/if}
 </div>

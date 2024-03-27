@@ -244,4 +244,8 @@
             {/each}
         </div>
     {/each}
+{:else}
+    <div class="text-center">
+        <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Challenges found.</h1>
+    </div>
 {/if}

@@ -37,7 +37,7 @@ if (!exists) {
         admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide">
+    <div transition:animate="fade">
         <Challenge uuid={uuid} team={session.user_team_id} user={session.id} client:visible />
     </div>
 </Layout>
