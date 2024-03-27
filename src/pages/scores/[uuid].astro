@@ -1,10 +1,12 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Scoreboard from '../components/app/pages/Scoreboard.svelte';
-import Header from '../components/app/lib/Header.svelte';
-import { lucia } from '../lib/lucia';
-import { DUMMY_SESSION } from '../lib/helpers';
+import DatabaseActions from '../../lib/actions';
+import Layout from '../../layouts/Layout.astro';
+import Scoreboard from '../../components/app/pages/Scoreboard.svelte';
+import Header from '../../components/app/lib/Header.svelte';
+import { lucia } from '../../lib/lucia';
+import { DUMMY_SESSION } from '../../lib/helpers';
 
+const { uuid } = Astro.params;
 let session = DUMMY_SESSION;
 
 if (!import.meta.env.DEV) {
@@ -18,6 +20,14 @@ if (!import.meta.env.DEV) {
     }
     session = { ...Astro.locals.user };
 }
+
+// check if we access a non-existing challenge
+const ACTION = new DatabaseActions();
+let exists = await ACTION.checkEventExist(uuid || '');
+if (!exists) {
+    // early exit to 404
+    return Astro.redirect('/404');
+}
 ---
 
 <Layout title="Scoreboard">
@@ -28,6 +38,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="slide" class="flex flex-1 justify-center">
-        <Scoreboard client:visible />
+        <Scoreboard uuid={uuid} client:visible />
     </div>
 </Layout>

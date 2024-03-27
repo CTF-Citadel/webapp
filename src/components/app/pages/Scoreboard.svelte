@@ -16,10 +16,12 @@
     import type { EventsType } from '../../../lib/schema';
     import { onMount } from 'svelte';
 
+    // from parent
+    export let uuid: string = '';
+
     let loading: boolean = true;
     let events: EventsType[] = [];
-    let sortedEvents: { value: EventsType, name: string }[];
-    let teamSolves: { id: string; name: string; timestamp: number; points_gained: number; }[] = [];
+    let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
     let teamScores: { id: string; name: string; points: number }[] = [];
     let userScores: { id: string; name: string; points: number }[] = [];
     let seriesData: { x: number; y: number }[];
@@ -32,118 +34,26 @@
 
     onMount(async () => {
         await refreshEvents().finally(async () => {
-            await refreshEventScoring(sortedEvents[0].value.id).finally(async () => {
-                prepareForPlot(sortedEvents[0].value.event_start);
-            });
+            let eventData = events.find((event) => event.id === uuid);
+            if (eventData) {
+                await refreshEventScoring(eventData.id).finally(async () => {
+                    if (eventData) {
+                        prepareForPlot(eventData.event_start);
+                    }
+                });
+            }
         });
-        
         loading = false;
     });
 
-    // BEGIN TEMP DATA
-    /*
-    teamScores = [
-        {
-            id: 'some-id-3',
-            name: 'Team3',
-            points: 1000
-        },
-        {
-            id: 'some-id-2',
-            name: 'Team2',
-            points: 500
-        },
-        {
-            id: 'some-id-1',
-            name: 'Team1',
-            points: 250
-        }
-    ];
-
-    userScores = [
-        {
-            id: 'some-id-2',
-            name: 'User2',
-            points: 1000
-        },
-        {
-            id: 'some-id-1',
-            name: 'User1',
-            points: 500
-        },
-        {
-            id: 'some-id-3',
-            name: 'User3',
-            points: 250
-        }
-    ];
-
-    teamSolves = [
-        {
-            id: 'some-id-1',
-            name: 'Team1',
-            timestamp: Date.now() + 3600000,
-            points_gained: 250
-        },
-        {
-            id: 'some-id-1',
-            name: 'Team1',
-            timestamp: Date.now() + 3600000 * 2,
-            points_gained: 500
-        },
-        {
-            id: 'some-id-1',
-            name: 'Team1',
-            timestamp: Date.now() + 3600000 * 3,
-            points_gained: 1000
-        },
-        {
-            id: 'some-id-2',
-            name: 'Team2',
-            timestamp: Date.now() + 3600000,
-            points_gained: 1000
-        },
-        {
-            id: 'some-id-2',
-            name: 'Team2',
-            timestamp: Date.now() + 3600000 * 2,
-            points_gained: 250
-        },
-        {
-            id: 'some-id-2',
-            name: 'Team2',
-            timestamp: Date.now() + 3600000 * 3,
-            points_gained: 500
-        },
-        {
-            id: 'some-id-3',
-            name: 'Team3',
-            timestamp: Date.now() + 3600000,
-            points_gained: 500
-        },
-        {
-            id: 'some-id-3',
-            name: 'Team3',
-            timestamp: Date.now() + 3600000 * 2,
-            points_gained: 1000
-        },
-        {
-            id: 'some-id-3',
-            name: 'Team3',
-            timestamp: Date.now() + 3600000 * 3,
-            points_gained: 250
-        }
-    ];
-    */
-    // END TEMP DATA
-
     function prepareForPlot(start: number) {
         // sort and sum
-        let actualSolves: { id: string; name: string; timestamp: number; points: number; }[] = [];
-        teamSolves.sort((a, b) => a.timestamp - b.timestamp)
-        let prevPoints: { [id: string]: { points: number; name: string; } } = {};
+        let actualSolves: { id: string; name: string; timestamp: number; points: number }[] = [];
+        teamSolves.sort((a, b) => a.timestamp - b.timestamp);
+        let prevPoints: { [id: string]: { points: number; name: string } } = {};
         teamSolves.forEach((entry, _) => {
-            const POINTS = (Object.hasOwn(prevPoints, entry.id) ? prevPoints[entry.id].points : 0) + entry.points_gained;
+            const POINTS =
+                (Object.hasOwn(prevPoints, entry.id) ? prevPoints[entry.id].points : 0) + entry.points_gained;
             actualSolves.push({
                 id: entry.id,
                 name: entry.name,
@@ -161,7 +71,7 @@
                 points: 0
             });
         }
-        actualSolves.sort((a, b) => a.timestamp - b.timestamp)
+        actualSolves.sort((a, b) => a.timestamp - b.timestamp);
 
         // first aggregate Scores by entity
         for (let entry of actualSolves) {
@@ -263,10 +173,6 @@
     async function refreshEvents() {
         const EVENTS = await requestWrapper(false, { type: 'events' });
         events = (await EVENTS.json()).data;
-        sortedEvents = [];
-        events.forEach((element) => {
-            sortedEvents.push({ value: element, name: element.event_name });
-        });
     }
 
     async function refreshEventScoring(id: string) {
