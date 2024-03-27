@@ -3,6 +3,7 @@ import { challenges, events, team_challenges, team_events, teams, users } from '
 import { and, eq, sql } from 'drizzle-orm';
 import { lucia } from './lucia';
 import { generateRandomString } from './helpers';
+import type { ChallengesType } from './schema';
 
 // read from env
 const BACKEND_HOST = process.env.BACKEND_HOST;
@@ -158,16 +159,25 @@ class DatabaseActions {
      * Fetches Challenges assigned to Event ID
      * @return List of Challenges
      */
-    async getEventChallenges(id: string) {
-        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, id));
-        let resSanitized: any[] = [];
-        if (RES.length > 0) {
-            for (let challenge of RES) {
+    async getEventChallenges(eventID: string, teamID: string) {
+        const RES_CHALLS = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID));
+        const RES_SOLVED = await DB_ADAPTER.select({ id: team_challenges.challenge_id })
+            .from(team_challenges)
+            .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.is_solved, true)));
+        let resSanitized: ChallengesType[] = [];
+        if (RES_CHALLS.length > 0) {
+            for (let challenge of RES_CHALLS) {
                 challenge.static_flag = '';
                 resSanitized.push(challenge);
             }
         }
-        return RES.length > 0 ? resSanitized : [];
+        if (RES_SOLVED.length > 0) {
+            resSanitized = resSanitized.filter(
+                (challenge) =>
+                    challenge.depends_on === '' || RES_SOLVED.map((chall) => chall.id).includes(challenge.depends_on)
+            );
+        }
+        return resSanitized.length > 0 ? resSanitized : [];
     }
 
     /**
@@ -338,7 +348,7 @@ class DatabaseActions {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
         if (RES.length > 0) {
             const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
-                method: "POST",
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -359,7 +369,7 @@ class DatabaseActions {
                 challenge_uuid: DEPLOY_DATA.instance_id,
                 challenge_flag: DEPLOY_DATA.details.FLAG,
                 challenge_host: `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`, // @TODO: implement this correctly
-                challenge_port: "0", // @TODO: implement this correctly
+                challenge_port: '0', // @TODO: implement this correctly
                 is_running: true,
                 is_solved: false
             });

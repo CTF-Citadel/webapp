@@ -63,7 +63,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getTeamEvents(json.data.id);
                 break;
             case 'challenges':
-                response = await HANLDER.getEventChallenges(json.data.id);
+                response = await HANLDER.getEventChallenges(json.data.eventID, json.data.teamID);
                 break;
             case 'solved-challenges':
                 response = await HANLDER.getTeamSolvedChallenges(json.data.id);

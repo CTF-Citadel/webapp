@@ -70,7 +70,7 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper(false, { type: 'challenges', data: { id: uuid } });
+        const DATA = await requestWrapper(false, { type: 'challenges', data: { eventID: uuid, teamID: team } });
         const JSON = await DATA.json();
         challenges = JSON.data;
     }
