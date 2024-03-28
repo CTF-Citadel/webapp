@@ -19,11 +19,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - name: setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 21
-      - name: install, setup and build
+      - name: Install, Setup and Build
         run: |
           npm install
           npm run build

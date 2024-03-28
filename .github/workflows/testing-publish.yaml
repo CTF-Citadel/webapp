@@ -19,11 +19,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 21
-      - name: Install, setup and build
+      - name: Install, Setup and Build
         run: |
           npm install
           npm run build
@@ -40,7 +40,9 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=raw,testing
+          tags: |
+            type=raw,testing
+            type=ref,event=pr
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a

@@ -1,21 +1,23 @@
 name: Test and Build
 
-on:
-  push:
-    branches:  [ "**" ]
+on: push
 
 jobs:
   build:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 21
-      - name: Install, setup and build
+      - name: Install, Setup and Build
         run: |
           npm install
           npm run build
