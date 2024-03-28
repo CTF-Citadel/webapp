@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Dashboard from '../components/Dashboard.svelte';
-import Header from '../components/Header.svelte';
+import Dashboard from '../components/app/pages/Dashboard.svelte';
+import Header from '../components/app/lib/Header.svelte';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
@@ -27,7 +27,7 @@ if (!import.meta.env.DEV) {
         admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center">
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
         <Dashboard client:visible />
     </div>
 </Layout>

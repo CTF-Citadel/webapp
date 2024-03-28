@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.svelte';
-import PasswordReset from '../../components/PasswordReset.svelte';
+import Header from '../../components/app/lib/Header.svelte';
+import PasswordReset from '../../components/app/pages/Password.svelte';
 import { isValidPasswordresetTokens } from '../../lib/lucia-db';
 
 const { id } = Astro.params;

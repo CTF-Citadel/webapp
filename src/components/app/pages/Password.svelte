@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
-    import { validPassword } from '../lib/helpers';
+    import { validPassword } from '../../../lib/helpers';
 
     // from parent
     export let id = '';

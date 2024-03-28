@@ -40,7 +40,7 @@
             <div class="flex items-center lg:order-2">
                 <DarkMode btnClass="" class="p-1.5 text-2xl text-black dark:text-white" />
                 {#if interactive}
-                    <a href="/user">
+                    <a href="/profile">
                         <button class="p-2.5 text-black dark:text-white">
                             <UserCircleOutline />
                         </button>

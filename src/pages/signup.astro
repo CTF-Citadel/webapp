@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import SignupPage from '../components/SignUp.svelte';
-import Header from '../components/Header.svelte';
+import SignupPage from '../components/app/pages/Signup.svelte';
+import Header from '../components/app/lib/Header.svelte';
 import { lucia } from '../lib/lucia';
 
 if (Astro.locals.user) {
@@ -13,7 +13,7 @@ if (Astro.locals.user) {
 
 <Layout title="Sign Up">
     <Header client:visible />
-    <div transition:animate="slide" class="flex flex-1 justify-center items-center h-full">
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
         <SignupPage client:visible />
     </div>
 </Layout>

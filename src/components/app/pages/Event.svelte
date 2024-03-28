@@ -1,9 +1,9 @@
 <script lang="ts">
     import { Card, Button, Spinner } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
-    import { requestWrapper } from '../lib/helpers';
+    import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
-    import type { EventsType, TeamEventsType } from '../lib/schema';
+    import type { EventsType, TeamEventsType } from '../../../lib/schema';
 
     export let userSession: any = {};
 
@@ -43,7 +43,7 @@
     {:else if events.length > 0}
         {#each events as event}
             <Card
-                img="/img/scoreboard.webp"
+                img="/img/banners/04.webp"
                 class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
             >
                 <div class="mb-6">
@@ -51,17 +51,27 @@
                     <p>Start: {formatToDate(event.events.event_start)}</p>
                     <p>End: {formatToDate(event.events.event_end)}</p>
                 </div>
-                <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) != 0}>
-                    {#if validTimerange(event.events.event_start, event.events.event_end) == 0}
-                        <a class="p-3" href="/events/{event.events.id}">Challenges</a>
+                <div class="flex flex-row space-x-4">
+                    <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) != 0}>
+                        {#if validTimerange(event.events.event_start, event.events.event_end) == 0}
+                            <a class="p-3" href="/events/{event.events.id}">Challenges</a>
+                            <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
+                        {:else}
+                            <p class="p-3">
+                                {validTimerange(event.events.event_start, event.events.event_end) == 1 ? 'Upcoming' : 'Expired'}
+                            </p>
+                        {/if}
+                    </Button>
+                    <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) != 0}>
+                        <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
                         <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
-                    {:else}
-                        <p class="p-3">
-                            {validTimerange(event.events.event_start, event.events.event_end) == 1 ? 'Upcoming' : 'Expired'}
-                        </p>
-                    {/if}
-                </Button>
+                    </Button>
+                </div>
             </Card>
         {/each}
+    {:else}
+        <div class="text-center">
+            <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Events found.</h1>
+        </div>
     {/if}
 </div>

@@ -1,8 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Challenge from '../../components/app/pages/Challenges.svelte';
-import Header from '../../components/app/lib/Header.svelte';
 import DatabaseActions from '../../lib/actions';
+import Layout from '../../layouts/Layout.astro';
+import Scoreboard from '../../components/app/pages/Scoreboard.svelte';
+import Header from '../../components/app/lib/Header.svelte';
 import { lucia } from '../../lib/lucia';
 import { DUMMY_SESSION } from '../../lib/helpers';
 
@@ -30,14 +30,14 @@ if (!exists) {
 }
 ---
 
-<Layout title="Challenges">
+<Layout title="Scoreboard">
     <Header
         username={session.username}
         interactive={true}
         admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="fade">
-        <Challenge uuid={uuid} team={session.user_team_id} user={session.id} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center">
+        <Scoreboard uuid={uuid} client:visible />
     </div>
 </Layout>
