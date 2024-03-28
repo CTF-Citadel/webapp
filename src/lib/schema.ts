@@ -4,10 +4,12 @@ import { pgTable, text, timestamp, boolean, bigint, integer, primaryKey } from '
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
     username: text('username').unique().notNull(),
+    email: text('email').unique().notNull(),
     hashed_password: text('hashed_password').notNull(),
     user_role: text('user_role').notNull(),
     user_team_id: text('user_team_id').notNull(),
-    email: text('email').unique().notNull(),
+    user_avatar: text('user_avatar').notNull(),
+    user_affiliation: text('user_affiliation').notNull(),
     is_verified: boolean('is_verified').notNull(),
     is_blocked: boolean('is_blocked').notNull()
 });

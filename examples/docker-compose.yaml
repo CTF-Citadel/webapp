@@ -40,5 +40,8 @@ services:
       AC_ENABLE: false
       AC_HOST: '127.0.0.1'
       AC_PORT: 8080
+      DISABLE_EMAIL_VERIFY: false
+      ENFORCE_EMAIL_DOMAIN: false
+      ENFORCE_DOMAIN: 'example.com'
       TZ: Europe/Vienna
     restart: unless-stopped

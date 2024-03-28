@@ -1,5 +1,10 @@
-import type { WrapperFormat } from "./backend";
+import type { WrapperFormat } from './backend';
 import { generateId } from 'lucia';
+
+// check for enforce flags
+const DISABLE_EMAIL_VERIFY = Boolean(process.env.DISABLE_EMAIL_VERIFY || false);
+const ENFORCE_EMAIL_DOMAIN = Boolean(process.env.ENFORCE_EMAIL_DOMAIN || false);
+const ENFORCE_DOMAIN = process.env.EMAIL_DOMAIN || '';
 
 export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
     const DEST = privileged ? '/admin' : '/user';
@@ -16,7 +21,7 @@ export function generateRandomString(length: number) {
 
 // expiration check
 export function isWithinExpiration(expiryUnixEpoch: number) {
-    return Date.now() < expiryUnixEpoch ? true : false
+    return Date.now() < expiryUnixEpoch ? true : false;
 }
 
 export function validUsername(input: string): boolean {
@@ -30,7 +35,16 @@ export function validPassword(input: string): boolean {
 }
 
 export function validEmail(input: string): boolean {
-    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input);
+    if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input) === true) {
+        if (ENFORCE_EMAIL_DOMAIN) return input.endsWith(ENFORCE_DOMAIN);
+        return true;
+    }
+    return false;
+}
+
+export function checkVerifyBypass(): boolean {
+    if (DISABLE_EMAIL_VERIFY) return true;
+    return false;
 }
 
 export const DUMMY_SESSION = {
@@ -41,7 +55,16 @@ export const DUMMY_SESSION = {
     user_team_id: 'someTeam',
     is_blocked: false,
     is_verified: true
-}
+};
+
+export const AVATARS = [
+    { value: 'wolf', name: 'Wolf' },
+    { value: 'cat', name: 'Cat' },
+    { value: 'dog', name: 'Dog' },
+    { value: 'mole', name: 'Mole' },
+    { value: 'male', name: 'Hacker' },
+    { value: 'female', name: 'Hacktress' }
+];
 
 export const COUNTRIES = [
     { value: 'AF', name: 'Afghanistan' },

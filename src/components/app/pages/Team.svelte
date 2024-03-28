@@ -201,7 +201,7 @@
                 <Card size="lg" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
                     <h1>You are playing for: {thisTeam.team_name}</h1>
                     <p>Description {thisTeam.team_description}</p>
-                    <p>Country: {thisTeam.team_country_code}</p>
+                    <p>Country: {thisTeam.team_country_code}</p><span class="fi fi-{thisTeam.team_country_code}"></span>
                     <h1>Your Team-Token is: <bold>{thisTeam.team_join_token}</bold></h1>
                     <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={hasCreated}>
                         Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
@@ -235,7 +235,7 @@
                                     {entry.team_description}
                                 </TableBodyCell>
                                 <TableBodyCell>
-                                    {entry.team_country_code}
+                                    <span class="fi fi-{thisTeam.team_country_code}"></span>
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}
