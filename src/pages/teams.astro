@@ -29,7 +29,7 @@ if (!import.meta.env.DEV) {
         admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
-        <TeamOverview sessionID={sessionID} teamID={session.user_team_id} userID={session.id} client:visible />
+    <div transition:animate="fade" class="flex flex-1 flex-grow justify-center">
+        <TeamOverview sessionID={sessionID} session={session} client:visible />
     </div>
 </Layout>

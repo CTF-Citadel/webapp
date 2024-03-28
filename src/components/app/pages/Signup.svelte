@@ -29,6 +29,11 @@
         });
         if (RESP) {
             authResponse = await RESP.json();
+            // verify is set to bypassed
+            if (authResponse.redirect) {
+                // go to dash
+                window.location.href = '/';
+            }
         }
     }
 </script>
@@ -38,8 +43,10 @@
 >
     <div class="flex flex-col space-y-6">
         <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign Up</h3>
-        {#if authResponse && authResponse.verifySent == true}
+        {#if authResponse && authResponse.success === true && authResponse.redirect === false}
             <p>Done, check your Inbox!</p>
+        {:else if authResponse && authResponse.redirect === true}
+            <p>Done, now login!</p>
         {:else}
             <Label class="space-y-2">
                 <span>Your username</span>

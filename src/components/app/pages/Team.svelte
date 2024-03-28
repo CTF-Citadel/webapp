@@ -21,15 +21,14 @@
     import type { TeamsType } from '../../../lib/schema';
 
     export let sessionID: string = '';
-    export let teamID: string = '';
-    export let userID: string = '';
+    export let session: any = {};
 
     let loading = true;
     let defaultModal = false;
     let hasTeam = false;
     let hasCreated = false;
-    let thisTeam: any = {};
-    let teams: TeamsType[] = [];
+    let thisTeam: TeamsType;
+    let teams: { team_name: string; team_description: string; team_country_code: string }[] = [];
     let selection: 0 | 'Join' | 'Create' = 0;
     let inputs = {
         teamToken: '',
@@ -40,25 +39,13 @@
 
     onMount(async () => {
         await refreshTeams();
-        hasCreated = await hasCreatedTeam();
         // check for team
-        if (teamID != '' && teamID != 'someTeam') {
+        if (session.user_team_id != '' && session.user_team_id != 'someTeam') {
             hasTeam = true;
             await refreshTeamInfo();
         }
         loading = false;
     });
-
-    async function hasCreatedTeam() {
-        const DATA = await requestWrapper(false, {
-            type: 'has-created',
-            data: {
-                user: userID
-            }
-        });
-        const JSON = await DATA.json();
-        return JSON.data.created;
-    }
 
     async function refreshTeams() {
         const DATA = await requestWrapper(false, { type: 'teams' });
@@ -67,9 +54,10 @@
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: teamID } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: session.user_team_id } });
         const JSON = await DATA.json();
         thisTeam = JSON.data;
+        hasCreated = session.id === thisTeam.team_creator;
     }
 
     async function createTeam() {
@@ -77,7 +65,7 @@
             type: 'create-team',
             data: {
                 session: sessionID,
-                creator: userID,
+                creator: session.id,
                 name: inputs.teamName,
                 description: inputs.teamDesc,
                 country: inputs.teamCountry
@@ -93,7 +81,7 @@
     async function joinTeam() {
         const DATA = await requestWrapper(false, {
             type: 'join-team',
-            data: { session: sessionID, user: userID, token: inputs.teamToken }
+            data: { session: sessionID, user: session.id, token: inputs.teamToken }
         });
         if (DATA.ok) {
             defaultModal = false;
@@ -184,40 +172,65 @@
     </svelte:fragment>
 </Modal>
 
-<div class="flex flex-1 flex-col justify-center items-center">
-    {#if !hasTeam}
-        <Card size="sm" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
-            <p>You are currently not playing for any team!</p>
-            <Button size="lg" class="mt-4" on:click={() => modalOpen('Join')}>
-                Join Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
-            </Button>
-            <Button size="lg" class="mt-4" on:click={() => modalOpen('Create')} disabled={hasCreated}>
-                Create Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
-            </Button>
-        </Card>
-    {:else}
-        <div class="flex flex-col sm:flex-row">
-            {#if Object.keys(thisTeam).length > 0}
-                <Card size="lg" padding="sm" img="" class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl">
-                    <h1>You are playing for: {thisTeam.team_name}</h1>
-                    <p>Description {thisTeam.team_description}</p>
-                    <p>Country: {thisTeam.team_country_code}</p><span class="fi fi-{thisTeam.team_country_code}"></span>
-                    <h1>Your Team-Token is: <bold>{thisTeam.team_join_token}</bold></h1>
-                    <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={hasCreated}>
-                        Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
-                    </Button>
-                </Card>
-            {/if}
-        </div>
-    {/if}
-
+<div class="flex flex-col flex-grow flex-1 max-w-8/10">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />
         </div>
     {:else}
-        <h1>TEAMS:</h1>
-        <div class="flex flex-col sm:flex-row">
+        <div class="flex flex-col items-center">
+            <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
+                <span class="italic text-neutral-500 opacity-50">#</span>
+                YOUR TEAM
+            </h1>
+            {#if !hasTeam}
+                <Card
+                    size="sm"
+                    padding="sm"
+                    img=""
+                    class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+                >
+                    <p>You are currently not playing for any team!</p>
+                    <Button size="lg" class="mt-4" on:click={() => modalOpen('Join')}>
+                        Join Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                    </Button>
+                    <Button size="lg" class="mt-4" on:click={() => modalOpen('Create')} disabled={hasCreated}>
+                        Create Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                    </Button>
+                </Card>
+            {:else if Object.keys(thisTeam).length > 0}
+                <Card
+                    size="lg"
+                    padding="sm"
+                    img=""
+                    class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+                >
+                    {#if hasCreated}
+                        <h1>You are the <b>TEAM LEADER</b> of: <b>{thisTeam.team_name}</b></h1>
+                    {:else}
+                        <h1>You are playing for: <b>{thisTeam.team_name}</b></h1>
+                    {/if}
+                    <p>Description <b>{thisTeam.team_description}</b></p>
+                    <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
+                    <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
+                    <div class="flex flex-row justify-center items-center space-x-4">
+                        {#if hasCreated}
+                            <Button size="lg" class="mt-4">
+                                Refresh Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                            </Button>
+                        {/if}
+                        <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={hasCreated}>
+                            Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                        </Button>
+                    </div>
+                </Card>
+            {/if}
+        </div>
+        <div class="flex flex-col flex-1 items-center">
+            <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
+                <span class="italic text-neutral-500 opacity-50">#</span>
+                OTHER TEAMS
+            </h1>
             {#if teams.length > 0}
                 <Table>
                     <TableHead>
@@ -234,8 +247,8 @@
                                 <TableBodyCell>
                                     {entry.team_description}
                                 </TableBodyCell>
-                                <TableBodyCell>
-                                    <span class="fi fi-{thisTeam.team_country_code}"></span>
+                                <TableBodyCell class="text-center">
+                                    <span class="fi fi-{entry.team_country_code.toLowerCase()}"></span>
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}

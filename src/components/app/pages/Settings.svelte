@@ -9,5 +9,4 @@
     {#if user.user_role == 'admin'}
         <Admin />
     {/if}
-    <User user={user} />
 </div>

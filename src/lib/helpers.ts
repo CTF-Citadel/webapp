@@ -1,11 +1,6 @@
 import type { WrapperFormat } from './backend';
 import { generateId } from 'lucia';
 
-// check for enforce flags
-const DISABLE_EMAIL_VERIFY = Boolean(process.env.DISABLE_EMAIL_VERIFY || false);
-const ENFORCE_EMAIL_DOMAIN = Boolean(process.env.ENFORCE_EMAIL_DOMAIN || false);
-const ENFORCE_DOMAIN = process.env.EMAIL_DOMAIN || '';
-
 export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
     const DEST = privileged ? '/admin' : '/user';
     return await fetch(`/api/v1${DEST}`, {
@@ -34,16 +29,11 @@ export function validPassword(input: string): boolean {
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^]{12,96}$/.test(input);
 }
 
-export function validEmail(input: string): boolean {
+export function validEmail(input: string, enforce: boolean = false, domain: string = ''): boolean {
     if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input) === true) {
-        if (ENFORCE_EMAIL_DOMAIN) return input.endsWith(ENFORCE_DOMAIN);
+        if (enforce) return input.endsWith(domain);
         return true;
     }
-    return false;
-}
-
-export function checkVerifyBypass(): boolean {
-    if (DISABLE_EMAIL_VERIFY) return true;
     return false;
 }
 

@@ -40,7 +40,7 @@
             data: { userID: user, teamID: team, eventID: uuid, challengeID: challenge_id, flag: input }
         });
         const JSON = await DATA.json();
-        if (JSON.data.correct == true) {
+        if (JSON.data.correct === true) {
             successFlag[challenge_id] = 0;
         } else successFlag[challenge_id] = 1;
         setTimeout(async () => {

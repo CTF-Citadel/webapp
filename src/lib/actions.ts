@@ -89,9 +89,9 @@ class DatabaseActions {
      * Fetches all Teams
      * @return List of Teams
      */
-    async getAllTeams(redacted: boolean = false) {
+    async getAllTeams() {
         const RES = await DB_ADAPTER.select().from(teams);
-        return RES.length > 0 ? (redacted ? RES : RES) : [];
+        return RES.length > 0 ? RES : [];
     }
 
     /**
@@ -101,6 +101,19 @@ class DatabaseActions {
     async getTeamInfo(teamID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
         return RES.length > 0 ? RES[0] : null;
+    }
+
+    /**
+     * Fetches sanitized Teams
+     * @return List sanitized of Teams
+     */
+    async getTeamLisitng(redacted: boolean = false) {
+        const RES = await DB_ADAPTER.select({
+            team_name: teams.team_name,
+            team_description: teams.team_description,
+            team_country_code: teams.team_country_code
+        }).from(teams);
+        return RES.length > 0 ? (redacted ? RES : RES) : [];
     }
 
     /**

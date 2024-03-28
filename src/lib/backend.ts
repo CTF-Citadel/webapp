@@ -45,7 +45,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
     try {
         switch (json.type) {
             case 'teams':
-                response = await HANLDER.getAllTeams(true);
+                response = await HANLDER.getTeamLisitng();
                 break;
             case 'events':
                 response = await HANLDER.getAllEvents();
@@ -123,7 +123,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     json.data.userID,
                     TIMESTAMP_STATIC
                 );
-                if (response == true) {
+                if (response) {
                     if (AC_ENABLE === true) {
                         AC.flagSubmit(
                             json.data.flag,
@@ -151,7 +151,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     json.data.user,
                     TIMESTAMP
                 );
-                if (response == true) {
+                if (response) {
                     if (AC_ENABLE === true) {
                         AC.flagSubmit(
                             json.data.flag,
