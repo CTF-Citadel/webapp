@@ -34,7 +34,7 @@
                     required
                 />
             </Label>
-            {#if authResponse && authResponse.error != 'None'}
+            {#if authResponse && authResponse.error !== 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
             <Button on:click={onSubmit} class="w-full">Submit Reset</Button>

@@ -126,7 +126,7 @@
     }
 
     function checkAll(items: TeamsType[]) {
-        if (marked.size == items.length) {
+        if (marked.size === items.length) {
             marked.clear();
         } else {
             for (let team of items) {
@@ -313,7 +313,7 @@
                         <Table>
                             <TableHead>
                                 <TableHeadCell>
-                                    <Checkbox on:change={() => checkAll(teams)} checked={marked.size == teams.length} />
+                                    <Checkbox on:change={() => checkAll(teams)} checked={marked.size === teams.length} />
                                 </TableHeadCell>
                                 <TableHeadCell>ID</TableHeadCell>
                                 <TableHeadCell>Creator ID</TableHeadCell>

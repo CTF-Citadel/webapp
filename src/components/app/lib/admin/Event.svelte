@@ -80,7 +80,7 @@
     Edit Popup
 -->
 
-{#if editData != null}
+{#if editData !== undefined}
     <Modal defaultClass="rounded-none" bind:open={edit} title="Edit Event">
         <div class="mb-6">
             <Label for="event_name" class="mb-2">Change Event Name</Label>
@@ -185,10 +185,10 @@
             <div>
                 <Button
                     on:click={createEvent}
-                    disabled={eventTemplate.name == '' ||
-                        eventTemplate.description == '' ||
-                        datePicker.end == '' ||
-                        datePicker.start == ''}>Create</Button
+                    disabled={eventTemplate.name === '' ||
+                        eventTemplate.description === '' ||
+                        datePicker.end === '' ||
+                        datePicker.start === ''}>Create</Button
                 >
                 <Button
                     on:click={() => {

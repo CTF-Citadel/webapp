@@ -53,7 +53,7 @@ export const POST: APIRoute = async (context) => {
             }
         } catch (e: any) {
             console.log(e);
-            if (e.code == 'ER_DUP_ENTRY') {
+            if (e.code === 'ER_DUP_ENTRY') {
                 errorMessage = 'User already exists';
             } else {
                 errorMessage = 'An error occurred';

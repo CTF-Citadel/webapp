@@ -80,7 +80,7 @@
                     on:click={() => {
                         assignEvent(selectedEvent);
                     }}
-                    disabled={selectedEvent == ''}>Assign</Button
+                    disabled={selectedEvent === ''}>Assign</Button
                 >
                 <Button
                     on:click={() => {

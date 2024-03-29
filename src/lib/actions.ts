@@ -24,7 +24,7 @@ class DatabaseActions {
      */
     async checkEventExist(event_id: string) {
         const RES = await DB_ADAPTER.select().from(events).where(eq(events.id, event_id));
-        return RES.length == 0 ? false : true;
+        return RES.length === 0 ? false : true;
     }
 
     /**
@@ -33,9 +33,9 @@ class DatabaseActions {
      */
     async checkUserExist(userName: string, userEmail: string) {
         const RES_NAME = await DB_ADAPTER.select().from(users).where(eq(users.id, userName));
-        if (RES_NAME.length == 0) return false;
+        if (RES_NAME.length === 0) return false;
         const RES_EMAIL = await DB_ADAPTER.select().from(users).where(eq(users.email, userEmail));
-        return RES_EMAIL.length == 0 ? false : true;
+        return RES_EMAIL.length === 0 ? false : true;
     }
 
     /**
@@ -44,7 +44,7 @@ class DatabaseActions {
      */
     async checkTeamNameExist(teamName: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName));
-        return RES.length == 0 ? false : RES[0].id;
+        return RES.length === 0 ? false : RES[0].id;
     }
 
     /**
@@ -53,7 +53,7 @@ class DatabaseActions {
      */
     async checkTeamToken(token: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, token));
-        return RES.length == 0 ? false : RES[0].id;
+        return RES.length === 0 ? false : RES[0].id;
     }
 
     /**
@@ -62,7 +62,7 @@ class DatabaseActions {
      */
     async checkHasCreatedTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_creator, userID));
-        return RES.length == 0 ? false : true;
+        return RES.length === 0 ? false : true;
     }
 
     /**
@@ -71,8 +71,8 @@ class DatabaseActions {
      */
     async checkUserInTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID));
-        if (RES.length == 0) return false;
-        if (RES[0].user_team_id == '') return false;
+        if (RES.length === 0) return false;
+        if (RES[0].user_team_id === '') return false;
         return RES[0].user_team_id;
     }
 
@@ -548,7 +548,7 @@ class DatabaseActions {
     async resetTeamToken(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         const TEAM = await this.getTeamInfo(teamID);
-        if (user && TEAM != null) {
+        if (user && TEAM !== null) {
             if (TEAM.team_creator === user.id) {
                 await DB_ADAPTER.update(teams)
                     .set({
@@ -567,8 +567,8 @@ class DatabaseActions {
         const { session, user } = await lucia.validateSession(sessionID);
         const TEAM = await this.getTeamInfo(teamID);
         const MEMBERS = await this.getTeamMembers(teamID);
-        if (user && TEAM != null && MEMBERS.length > 0) {
-            if (TEAM.team_creator != user.id || MEMBERS.length === 1) {
+        if (user && TEAM !== null && MEMBERS.length > 0) {
+            if (TEAM.team_creator !== user.id || MEMBERS.length === 1) {
                 await DB_ADAPTER.update(users)
                     .set({
                         user_team_id: ''

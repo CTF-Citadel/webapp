@@ -26,7 +26,6 @@ if (!import.meta.env.DEV) {
     <Header
         username={session.username}
         interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
     <div transition:animate="fade" class="flex flex-1 flex-grow justify-center">

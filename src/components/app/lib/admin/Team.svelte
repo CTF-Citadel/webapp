@@ -39,7 +39,7 @@
 <!--
     Edit Popups
 -->
-{#if editData != null}
+{#if editData !== undefined}
     <Modal defaultClass="rounded-none" bind:open={edit} title="Edit Team">
         <div class="mb-6">
             <Label for="team_name" class="mb-2">Change Team Name</Label>

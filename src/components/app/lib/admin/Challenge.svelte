@@ -29,7 +29,7 @@
     const DISPATCH = createEventDispatcher();
 
     $: editData = challenges.find((item) => item.id === editUUID);
-    $: dependants = challenges.filter((item) => item.depends_on != '').map((match) => match.depends_on);
+    $: dependants = challenges.filter((item) => item.depends_on !== '').map((match) => match.depends_on);
 
     const DIFFICULTIES = [
         { value: 'Easy', name: 'Easy' },
@@ -103,7 +103,7 @@
     Edit Popup
 -->
 
-{#if editData != null}
+{#if editData !== undefined}
     <Modal defaultClass="rounded-none" bind:open={edit} title="Edit Challenge">
         <div class="mb-6">
             <Label for="chal_name" class="mb-2">Change Challenge Name</Label>
@@ -138,10 +138,10 @@
                 <div>
                     <Button
                         on:click={updateChallenge}
-                        disabled={editData.challenge_difficulty == '' ||
-                            editData.challenge_category == '' ||
-                            editData.base_points == 0 ||
-                            editData.challenge_name == ''}>Update</Button
+                        disabled={editData.challenge_difficulty === '' ||
+                            editData.challenge_category === '' ||
+                            editData.base_points === 0 ||
+                            editData.challenge_name === ''}>Update</Button
                     >
                     <Button
                         on:click={() => {
@@ -264,17 +264,17 @@
             <div>
                 <Button
                     on:click={createChallenge}
-                    disabled={selectedDiff == '' ||
-                        selectedEvent == '' ||
-                        challengeTemplate.name == '' ||
-                        challengeTemplate.description == '' ||
-                        challengeTemplate.category == '' ||
-                        challengeTemplate.points == 0 ||
-                        (challengeTemplate.staticFlag == '' && challengeTemplate.flagStatic) ||
-                        (dependsOnChallenge == '' && challengeNeedsDepend) ||
-                        (challengeTemplate.fileURL == '' && challengeNeedsFile) ||
-                        (challengeTemplate.path == '' && challengeTemplate.staticFlag == '') ||
-                        (challengeTemplate.path == '' && challengeTemplate.isContainer)}>Create</Button
+                    disabled={selectedDiff === '' ||
+                        selectedEvent === '' ||
+                        challengeTemplate.name === '' ||
+                        challengeTemplate.description === '' ||
+                        challengeTemplate.category === '' ||
+                        challengeTemplate.points === 0 ||
+                        (challengeTemplate.staticFlag === '' && challengeTemplate.flagStatic) ||
+                        (dependsOnChallenge === '' && challengeNeedsDepend) ||
+                        (challengeTemplate.fileURL === '' && challengeNeedsFile) ||
+                        (challengeTemplate.path === '' && challengeTemplate.staticFlag === '') ||
+                        (challengeTemplate.path === '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button
                     on:click={() => {

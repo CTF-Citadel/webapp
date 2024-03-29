@@ -7,11 +7,10 @@
     // from parent
     export let username = '';
     export let interactive = false;
-    export let admin = false;
 
     // header text
     let headerText = 'CTF Citadel';
-    if (username != '') {
+    if (username !== '') {
         const currentTime = new Date();
         const currentHour = currentTime.getHours();
 
@@ -40,13 +39,6 @@
             <div class="flex items-center lg:order-2">
                 <DarkMode btnClass="" class="p-1.5 text-2xl text-black dark:text-white" />
                 {#if interactive}
-                    <a href="/profile">
-                        <button class="p-2.5 text-black dark:text-white">
-                            <UserCircleOutline />
-                        </button>
-                    </a>
-                {/if}
-                {#if admin}
                     <a href="/settings">
                         <button class="p-2.5 text-black dark:text-white">
                             <CogOutline />

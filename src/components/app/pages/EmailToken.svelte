@@ -23,7 +23,7 @@
             <p>Resent Verifcation Email, check your Inbox!</p>
         {:else if !verified}
             <p>Please verify your Email Address!</p>
-            {#if authResponse && authResponse.error != "None"}
+            {#if authResponse && authResponse.error !== "None"}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
             <Button on:click={onResend} class="w-full">Resend Email</Button>

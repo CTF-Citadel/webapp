@@ -27,7 +27,7 @@ export const generateEmailverificationTokens = async (userId: string) => {
 
 export const generatePasswordresetTokens = async (email: string) => {
     const targetUser = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
-    if (targetUser.length == 0) return false;
+    if (targetUser.length === 0) return false;
     const storedUserTokens = await DB_ADAPTER.select().from(resetTokens).where(eq(resetTokens.user_id, targetUser[0].id));
     if (storedUserTokens.length > 0) {
         const reusableStoredToken = storedUserTokens.find((token) => {
@@ -46,7 +46,7 @@ export const generatePasswordresetTokens = async (email: string) => {
 
 export const validateEmailverificationTokens = async (token: string) => {
     const storedTokens = await DB_ADAPTER.select().from(verificationTokens).where(eq(verificationTokens.id, token));
-    if (storedTokens.length == 0) return false;
+    if (storedTokens.length === 0) return false;
     await DB_ADAPTER.delete(verificationTokens).where(eq(verificationTokens.id, token));
     if (!isWithinExpiration(Number(storedTokens[0].expires))) {
         return false;
@@ -56,7 +56,7 @@ export const validateEmailverificationTokens = async (token: string) => {
 
 export const validatePasswordresetTokens = async (token: string) => {
     const storedTokens = await DB_ADAPTER.select().from(resetTokens).where(eq(resetTokens.id, token));
-    if (storedTokens.length == 0) return false;
+    if (storedTokens.length = 0) return false;
     await DB_ADAPTER.delete(resetTokens).where(eq(resetTokens.id, token));
     const tokenExpires = Number(storedTokens[0].expires);
     if (!isWithinExpiration(tokenExpires)) {
@@ -67,7 +67,7 @@ export const validatePasswordresetTokens = async (token: string) => {
 
 export const isValidPasswordresetTokens = async (token: string) => {
     const storedTokens = await DB_ADAPTER.select().from(resetTokens).where(eq(resetTokens.id, token));
-    if (storedTokens.length == 0) return false;
+    if (storedTokens.length === 0) return false;
     const tokenExpires = Number(storedTokens[0].expires);
     if (!isWithinExpiration(tokenExpires)) {
         await DB_ADAPTER.delete(resetTokens).where(eq(resetTokens.id, token));
@@ -78,7 +78,7 @@ export const isValidPasswordresetTokens = async (token: string) => {
 
 export const isRegisteredEmail = async (email: string) => {
     const storedUsers = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
-    if (storedUsers.length == 0) return false;
+    if (storedUsers.length === 0) return false;
     return true;
 };
 

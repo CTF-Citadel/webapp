@@ -16,7 +16,7 @@ if (!import.meta.env.DEV) {
     if (!Astro.locals.user.is_verified) {
         return Astro.redirect('/verify/email');
     }
-    if (Astro.locals.user.user_role != 'admin') {
+    if (Astro.locals.user.user_role !== 'admin') {
         return new Response('Forbidden', { status: 403 });
     }
     session = { ...Astro.locals.user };
@@ -27,10 +27,9 @@ if (!import.meta.env.DEV) {
     <Header
         username={session.username}
         interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
     <div transition:animate="fade" class="flex flex-1">
-        <GeneralSettings user={session} client:visible />
+        <GeneralSettings session={session} client:visible />
     </div>
 </Layout>

@@ -76,7 +76,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     json.data.challengeID,
                     json.data.eventID
                 );
-                if (response != false && AC_ENABLE === true) {
+                if (response !== false && AC_ENABLE === true) {
                     AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
                 }
                 break;
@@ -99,7 +99,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                         json.data.country
                     );
                     const TEAM_ID = await HANLDER.checkTeamNameExist(json.data.name);
-                    if (TEAM_ID != false) {
+                    if (TEAM_ID !== false) {
                         response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
                     }
                 }
@@ -108,7 +108,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 const IS_JOINED = await HANLDER.checkUserInTeam(json.data.user);
                 if (!IS_JOINED) {
                     const TEAM_ID = await HANLDER.checkTeamToken(json.data.token);
-                    if (TEAM_ID != false) {
+                    if (TEAM_ID !== false) {
                         response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
                     }
                 }

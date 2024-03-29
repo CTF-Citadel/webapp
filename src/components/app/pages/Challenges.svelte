@@ -92,7 +92,7 @@
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
-            if (TEMP.error == false) {
+            if (TEMP.error === false) {
                 challengeResponse[challenge_id] = TEMP.data;
                 deploymentStatus[challenge_id] = 3;
             } else {
@@ -152,7 +152,7 @@
                         </p>
                     </div>
                     {#if !solvedChallenges.includes(challenge.id)}
-                        {#if challenge.static_file_url != ''}
+                        {#if challenge.static_file_url !== ''}
                             <div class="mb-6">
                                 <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                                 <div class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center">
@@ -170,7 +170,7 @@
                                         deployChallenge(challenge.id);
                                     }}
                                 >
-                                    {#if deploymentStatus[challenge.id] == 1}
+                                    {#if deploymentStatus[challenge.id] === 1}
                                         <Spinner class="mr-3" size="4" />Starting ..
                                     {:else}
                                         Start
@@ -178,7 +178,7 @@
                                 </Button>
                             </div>
                         {/if}
-                        {#if challengeResponse[challenge.id] && deploymentStatus[challenge.id] == 3}
+                        {#if challengeResponse[challenge.id] && deploymentStatus[challenge.id] === 3}
                             <div class="mb-6" transition:slide>
                                 <Alert class="my-2" color="green">
                                     <span class="font-bold">Started!</span><br />
@@ -189,7 +189,7 @@
                                 <Label for="challenge-ip" class="mb-2">Host</Label>
                                 <a href="http://{challengeResponse[challenge.id].details.IP}/"><p id="challenge-ip">{challengeResponse[challenge.id].details.IP}</p></a>
                             </div>
-                        {:else if deploymentStatus[challenge.id] == 2}
+                        {:else if deploymentStatus[challenge.id] === 2}
                             <div class="mb-6" transition:slide>
                                 <Alert class="my-2" color="red">
                                     <span class="font-bold">Failed!</span><br />
@@ -208,9 +208,9 @@
                         </div>
                         <div>
                             <Button
-                                disabled={challengeInputs[challenge.id] == '' ||
+                                disabled={challengeInputs[challenge.id] === '' ||
                                     !checkFlagInput(challengeInputs[challenge.id]) ||
-                                    (challenge.needs_container && deploymentStatus[challenge.id] != 3 ||
+                                    (challenge.needs_container && deploymentStatus[challenge.id] !== 3 ||
                                     successFlag[challenge.id] === 0)}
                                 on:click={() =>
                                     checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}

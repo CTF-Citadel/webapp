@@ -65,7 +65,7 @@
     Edit Popup
 -->
 
-{#if editData != null}
+{#if editData !== undefined}
     <Modal defaultClass="rounded-none" bind:open={edit} title="Edit User">
         <div class="mb-6">
             <Label for="email" class="mb-2">Change Email address</Label>

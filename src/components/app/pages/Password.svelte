@@ -13,7 +13,7 @@
     };
 
     function checkInput() {
-        return inputs.password == inputs.password_repeat;
+        return inputs.password === inputs.password_repeat;
     }
 
     async function onSubmit() {
@@ -83,13 +83,13 @@
             {#if inputs.password_repeat.length > 0 && !checkInput()}
                 <p class="text-primary-700 dark:text-primary-500">Passwords do not match!</p>
             {/if}
-            {#if authResponse && authResponse.error != 'None'}
+            {#if authResponse && authResponse.error !== 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
             <Button
                 on:click={onSubmit}
                 class="w-full"
-                disabled={!checkInput() || !validPassword(inputs.password) || inputs.password_repeat.length == 0}
+                disabled={!checkInput() || !validPassword(inputs.password) || inputs.password_repeat.length === 0}
                 >Reset Password</Button
             >
         {/if}

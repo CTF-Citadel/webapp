@@ -18,7 +18,7 @@ export const POST: APIRoute = async (context) => {
     if (validEmail(email)) {
         try {
             const EXISTING_USER: UsersType[] = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
-            if (EXISTING_USER.length == 0) throw Error('AUTH_NON_EXISTENT');
+            if (EXISTING_USER.length === 0) throw Error('AUTH_NON_EXISTENT');
             const VALID = await new Argon2id().verify(EXISTING_USER[0].hashed_password || '', password);
             if (!VALID) throw Error('AUTH_INVALID_PASSWORD');
             const SESSION = await lucia.createSession(EXISTING_USER[0].id, {});

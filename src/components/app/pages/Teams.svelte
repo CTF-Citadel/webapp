@@ -25,7 +25,6 @@
     export let session: any = {};
 
     let loading = true;
-    let cardLoading = false;
     let hasTeam = false;
     let hasCreated = false;
     let thisTeam: TeamsType;
@@ -44,7 +43,7 @@
 
     onMount(async () => {
         await refreshTeams();
-        if (session.user_team_id != '' && session.user_team_id != 'someTeam') {
+        if (session.user_team_id !== '' && session.user_team_id !== 'someTeam') {
             hasTeam = true;
             await refreshTeamInfo();
             await refreshTeamMembers();
@@ -81,9 +80,7 @@
         });
         if (DATA.ok) {
             menus.create = false;
-            cardLoading = true;
             await refreshTeamInfo();
-            cardLoading = false;
         }
     }
 
@@ -148,7 +145,7 @@
     <svelte:fragment slot="footer">
         <Button
             on:click={createTeam}
-            disabled={inputs.teamName == '' || inputs.teamDesc == '' || inputs.teamCountry == ''}>Create</Button
+            disabled={inputs.teamName === '' || inputs.teamDesc === '' || inputs.teamCountry === ''}>Create</Button
         >
         <Button
             on:click={() => {
@@ -176,7 +173,7 @@
         />
     </div>
     <svelte:fragment slot="footer">
-        <Button on:click={joinTeam} disabled={inputs.teamToken == ''}>Join</Button>
+        <Button on:click={joinTeam} disabled={inputs.teamToken === ''}>Join</Button>
         <Button
             on:click={() => {
                 menus.join = false;
@@ -201,13 +198,13 @@
                 <span class="italic text-neutral-500 opacity-50">#</span>
                 YOUR TEAM
             </h1>
-            {#if !hasTeam}
-                <Card
-                    size="sm"
-                    padding="sm"
-                    img=""
-                    class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
-                >
+            <Card
+                size="sm"
+                padding="sm"
+                img=""
+                class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+            >
+                {#if !hasTeam}
                     <h1 class="mx-auto">You are currently not playing for any team!</h1>
                     <div class="flex flex-row space-x-4 justify-center">
                         <Button
@@ -230,62 +227,49 @@
                             Create <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                         </Button>
                     </div>
-                </Card>
-            {:else if Object.keys(thisTeam).length > 0}
-                <Card
-                    size="lg"
-                    padding="sm"
-                    img=""
-                    class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
-                >
-                    {#if cardLoading}
-                        <div class="text-center">
-                            <Spinner size={'16'} />
-                        </div>
-                    {:else}
-                        <div transition:fade>
-                            {#if hasCreated}
-                                <h1>You are leading: <b>{thisTeam.team_name}</b></h1>
-                            {:else}
-                                <h1>You are playing for: <b>{thisTeam.team_name}</b></h1>
-                            {/if}
-                            <p>Description: <b>{thisTeam.team_description}</b></p>
-                            <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
-                            <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
-                            <h1>Members: <b>{teamMembers.length}</b></h1>
-                            {#if teamMembers.length > 0}
-                                <div class="flex flex-col m-4">
-                                    <table>
-                                        <tr class="text-center border-b-2">
-                                            <th class="border-x-2 p-2"><b>Username</b></th>
-                                            <th class="border-x-2 p-2"><b>Affiliation</b></th>
+                {:else if Object.keys(thisTeam).length > 0}
+                    <div transition:fade>
+                        {#if hasCreated}
+                            <h1>You are leading: <b>{thisTeam.team_name}</b></h1>
+                        {:else}
+                            <h1>You are playing for: <b>{thisTeam.team_name}</b></h1>
+                        {/if}
+                        <p>Description: <b>{thisTeam.team_description}</b></p>
+                        <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
+                        <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
+                        <h1>Members: <b>{teamMembers.length}</b></h1>
+                        {#if teamMembers.length > 0}
+                            <div class="flex flex-col m-4">
+                                <table>
+                                    <tr class="text-center border-b-2">
+                                        <th class="border-x-2 p-2"><b>Username</b></th>
+                                        <th class="border-x-2 p-2"><b>Affiliation</b></th>
+                                    </tr>
+                                    {#each teamMembers as member}
+                                        <tr class="text-center">
+                                            <td class="border-x-2 p-2"
+                                                >{member.username}
+                                                {member.id === thisTeam.team_creator ? '(Owner)' : ''}</td
+                                            >
+                                            <td class="border-x-2 p-2">{member.user_affiliation}</td>
                                         </tr>
-                                        {#each teamMembers as member}
-                                            <tr class="text-center">
-                                                <td class="border-x-2 p-2"
-                                                    >{member.username}
-                                                    {member.id === thisTeam.team_creator ? '(Owner)' : ''}</td
-                                                >
-                                                <td class="border-x-2 p-2">{member.user_affiliation}</td>
-                                            </tr>
-                                        {/each}
-                                    </table>
-                                </div>
-                            {/if}
-                            <div class="flex flex-row justify-center items-center space-x-4">
-                                {#if hasCreated}
-                                    <Button size="lg" class="mt-4" on:click={resetToken}>
-                                        Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
-                                    </Button>
-                                {/if}
-                                <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={teamMembers.length > 1}>
-                                    Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
-                                </Button>
+                                    {/each}
+                                </table>
                             </div>
+                        {/if}
+                        <div class="flex flex-row justify-center items-center space-x-4">
+                            {#if hasCreated}
+                                <Button size="lg" class="mt-4" on:click={resetToken}>
+                                    Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                                </Button>
+                            {/if}
+                            <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={teamMembers.length > 1}>
+                                Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                            </Button>
                         </div>
-                    {/if}
-                </Card>
-            {/if}
+                    </div>
+                {/if}
+            </Card>
         </div>
         <div class="flex flex-col flex-1 items-center">
             <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
