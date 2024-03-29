@@ -51,7 +51,13 @@
     >
         <div class="mb-6">
             <Label for="team_name" class="mb-2">Change Team Name</Label>
-            <Input id="team_name" placeholder="name" bind:value={editData.team_name} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="team_name"
+                placeholder="name"
+                bind:value={editData.team_name}
+                required
+            />
         </div>
         <svelte:fragment slot="footer">
             <div class="flex flex-row justify-between w-full">

@@ -139,16 +139,38 @@
 >
     <div class="mb-6">
         <Label for="team-name" class="mb-2">Team Name</Label>
-        <Input bind:value={inputs.teamName} name="team-name" type="text" placeholder="BugHunters" required />
+        <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            bind:value={inputs.teamName}
+            name="team-name"
+            type="text"
+            placeholder="BugHunters"
+            required
+        />
     </div>
     <div class="mb-6">
         <Label for="team-textarea" class="mb-2">Team Description</Label>
-        <Textarea id="event-textarea" name="team-textarea" placeholder="..." rows="4" bind:value={inputs.teamDesc} />
+        <Textarea
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="event-textarea"
+            name="team-textarea"
+            placeholder="..."
+            rows="4"
+            bind:value={inputs.teamDesc}
+        />
     </div>
     <div class="mb-6">
-        <Label for="team-textarea" class="mb-2">
-            <Select class="mt-2" items={COUNTRIES} bind:value={inputs.teamCountry} />
-        </Label>
+        <Label class="mb-2">Select Country</Label>
+        <Select
+            defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+            bind:value={inputs.teamCountry}
+            placeholder=""
+        >
+            <option selected value="">None</option>
+            {#each COUNTRIES as { value, name }}
+                <option {value}>{name}</option>
+            {/each}
+        </Select>
     </div>
     <svelte:fragment slot="footer">
         <Button
@@ -157,7 +179,7 @@
         >
         <Button
             on:click={() => {
-                menus.join = false;
+                menus.create = false;
             }}
             color="alternative">Cancel</Button
         >
@@ -180,8 +202,8 @@
     <div class="mb-6 text-center">
         <Label for="team-token" class="mb-2">Team Token</Label>
         <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
             bind:value={inputs.teamToken}
-            class="text-center"
             name="team-token"
             type="text"
             placeholder="CTD-X7X5K8..."

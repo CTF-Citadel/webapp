@@ -77,7 +77,14 @@
     >
         <div class="mb-6">
             <Label for="email" class="mb-2">Change Email address</Label>
-            <Input type="email" id="email" bind:value={editData.email} placeholder="name@example.com" required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                type="email"
+                id="email"
+                bind:value={editData.email}
+                placeholder="name@example.com"
+                required
+            />
         </div>
         <div>
             <Label for="verify-check" class="mb-2">Verified</Label>

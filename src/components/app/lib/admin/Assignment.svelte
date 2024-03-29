@@ -67,10 +67,17 @@
 >
     <div>
         {#if events.length > 0}
-            <Label>
-                Select Event
-                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-            </Label>
+            <Label class="mb-2">Select Event</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={selectedEvent}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each sortedEvents as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         {:else}
             <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
                 <span slot="icon">

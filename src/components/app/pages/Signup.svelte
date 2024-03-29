@@ -50,7 +50,14 @@
         {:else}
             <Label class="space-y-2">
                 <span>Your username</span>
-                <Input bind:value={inputs.username} type="text" name="username" placeholder="myuniqueuser" required />
+                <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                    bind:value={inputs.username}
+                    type="text"
+                    name="username"
+                    placeholder="myuniqueuser"
+                    required
+                />
             </Label>
             {#if inputs.username.length > 0 && !validUsername(inputs.username)}
                 <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
@@ -68,6 +75,7 @@
             <Label class="space-y-2">
                 <span>Email</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.email}
                     on:keydown={onEnterKey}
                     type="email"
@@ -89,6 +97,7 @@
             <Label class="space-y-2">
                 <span>Your password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password}
                     on:keydown={onEnterKey}
                     type="password"

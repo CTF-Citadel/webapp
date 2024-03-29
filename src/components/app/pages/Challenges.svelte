@@ -5,7 +5,7 @@
     import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
     import type { ChallengesType } from '../../../lib/schema';
-    import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte'
+    import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte';
 
     export let uuid: string = '';
     export let team: string = '';
@@ -155,10 +155,14 @@
                         {#if challenge.static_file_url !== ''}
                             <div class="mb-6">
                                 <Label for="challenge-diff" class="mb-2">Challenge File</Label>
-                                <div class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center">
+                                <div
+                                    class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center"
+                                >
                                     <DownloadSolid size="md" color="#fff" />
                                     <a class="text-white" href={challenge.static_file_url} download
-                                        >{challenge.static_file_url.split('/')[(challenge.static_file_url.split('/')).length - 1].split('?')[0]}</a
+                                        >{challenge.static_file_url
+                                            .split('/')
+                                            [challenge.static_file_url.split('/').length - 1].split('?')[0]}</a
                                     >
                                 </div>
                             </div>
@@ -187,7 +191,9 @@
                             </div>
                             <div class="mb-6">
                                 <Label for="challenge-ip" class="mb-2">Host</Label>
-                                <a href="http://{challengeResponse[challenge.id].details.IP}/"><p id="challenge-ip">{challengeResponse[challenge.id].details.IP}</p></a>
+                                <a href="http://{challengeResponse[challenge.id].details.IP}/"
+                                    ><p id="challenge-ip">{challengeResponse[challenge.id].details.IP}</p></a
+                                >
                             </div>
                         {:else if deploymentStatus[challenge.id] === 2}
                             <div class="mb-6" transition:slide>
@@ -200,6 +206,7 @@
                         <div class="mb-6">
                             <Label for="flag-submit" class="mb-2">Submit Flag</Label>
                             <Input
+                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                                 id="flag-submit"
                                 placeholder="TH&lcub;&rcub;"
                                 bind:value={challengeInputs[challenge.id]}
@@ -210,8 +217,8 @@
                             <Button
                                 disabled={challengeInputs[challenge.id] === '' ||
                                     !checkFlagInput(challengeInputs[challenge.id]) ||
-                                    (challenge.needs_container && deploymentStatus[challenge.id] !== 3 ||
-                                    successFlag[challenge.id] === 0)}
+                                    (challenge.needs_container && deploymentStatus[challenge.id] !== 3) ||
+                                    successFlag[challenge.id] === 0}
                                 on:click={() =>
                                     checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
                                 >Submit</Button

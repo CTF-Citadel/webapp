@@ -115,31 +115,69 @@
     >
         <div class="mb-6">
             <Label for="chal_name" class="mb-2">Change Challenge Name</Label>
-            <Input id="chal_name" placeholder="name" bind:value={editData.challenge_name} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="chal_name"
+                placeholder="name"
+                bind:value={editData.challenge_name}
+                required
+            />
         </div>
         <div class="mb-6">
             <Label for="chall_textarea" class="mb-2">Change Challenge Description</Label>
-            <Textarea id="chal_textarea" placeholder="..." rows="4" bind:value={editData.challenge_description} />
+            <Textarea
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="chal_textarea"
+                placeholder="..."
+                rows="4"
+                bind:value={editData.challenge_description}
+            />
         </div>
         <div class="mb-6">
-            <Label>
-                Change Challenge Difficulty
-                <Select class="mt-2" items={DIFFICULTIES} bind:value={editData.challenge_difficulty} />
-            </Label>
+            <Label class="mb-2">Change Challenge Difficulty</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={editData.challenge_difficulty}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each DIFFICULTIES as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         </div>
         <div class="mb-6">
             <Label for="chal_name" class="mb-2">Change Challenge Category</Label>
-            <Input id="chal_name" placeholder="Linux/Web/OSINT/..." bind:value={editData.challenge_category} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="chal_name"
+                placeholder="Linux/Web/OSINT/..."
+                bind:value={editData.challenge_category}
+                required
+            />
         </div>
         <div class="mb-6">
             <Label for="challenge-textarea" class="mb-2">Change Base Points</Label>
-            <Input id="challenge-name" type="number" bind:value={editData.base_points} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="challenge-name"
+                type="number"
+                bind:value={editData.base_points}
+                required
+            />
         </div>
         <div>
-            <Label>
-                Change Event Assignment
-                <Select class="mt-2" items={sortedEvents} bind:value={editData.event_id} />
-            </Label>
+            <Label class="mb-2">Change Event Assignment</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={editData.event_id}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each sortedEvents as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         </div>
         <svelte:fragment slot="footer">
             <div class="flex flex-row justify-between w-full">
@@ -181,25 +219,56 @@
 >
     <div class="mb-6">
         <Label for="challenge-name" class="mb-2">Challenge Name</Label>
-        <Input id="challenge-name" placeholder="Petition" bind:value={challengeTemplate.name} required />
+        <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="challenge-name"
+            placeholder="Petition"
+            bind:value={challengeTemplate.name}
+            required
+        />
     </div>
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Challenge Description</Label>
-        <Textarea id="challenge-textarea" placeholder="..." rows="4" bind:value={challengeTemplate.description} />
+        <Textarea
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="challenge-textarea"
+            placeholder="..."
+            rows="4"
+            bind:value={challengeTemplate.description}
+        />
     </div>
     <div class="mb-6">
-        <Label>
-            Challenge Difficulty
-            <Select class="mt-2" items={DIFFICULTIES} bind:value={selectedDiff} />
-        </Label>
+        <Label class="mb-2">Challenge Difficulty</Label>
+        <Select
+            defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+            bind:value={selectedDiff}
+            placeholder=""
+        >
+            <option selected value="">None</option>
+            {#each DIFFICULTIES as { value, name }}
+                <option {value}>{name}</option>
+            {/each}
+        </Select>
     </div>
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Challenge Category</Label>
-        <Input id="challenge-name" placeholder="Linux/Web/OSINT/..." bind:value={challengeTemplate.category} required />
+        <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="challenge-name"
+            placeholder="Linux/Web/OSINT/..."
+            bind:value={challengeTemplate.category}
+            required
+        />
     </div>
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Challenge Base Points</Label>
-        <Input id="challenge-name" type="number" bind:value={challengeTemplate.points} required />
+        <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="challenge-name"
+            type="number"
+            bind:value={challengeTemplate.points}
+            required
+        />
     </div>
     <div class="mb-6">
         <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
@@ -207,7 +276,13 @@
     {#if challengeTemplate.isContainer}
         <div class="mb-6" transition:slide>
             <Label for="challenge-file" class="mb-2">Compose File</Label>
-            <Input id="challenge-file" placeholder="some" bind:value={challengeTemplate.path} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="challenge-file"
+                placeholder="some"
+                bind:value={challengeTemplate.path}
+                required
+            />
         </div>
     {/if}
     <div class="mb-6">
@@ -217,6 +292,7 @@
         <div class="mb-6" transition:slide>
             <Label for="challenge-url" class="mb-2">File URL</Label>
             <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="challenge-url"
                 placeholder="https://example.com/source.zip"
                 bind:value={challengeTemplate.fileURL}
@@ -231,6 +307,7 @@
         <div class="mb-6" transition:slide>
             <Label for="challenge-static" class="mb-2">Static Flag</Label>
             <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="challenge-static"
                 placeholder="3asy-r3v3rs1ng"
                 bind:value={challengeTemplate.staticFlag}
@@ -244,10 +321,17 @@
     {#if challengeNeedsDepend}
         {#if challenges.length > 0}
             <div class="mb-6">
-                <Label>
-                    Parent Challenge
-                    <Select class="mt-2" items={selectchallenges} bind:value={dependsOnChallenge} />
-                </Label>
+                <Label class="mb-2">Parent Challenge</Label>
+                <Select
+                    defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                    bind:value={dependsOnChallenge}
+                    placeholder=""
+                >
+                    <option selected value="">None</option>
+                    {#each selectchallenges as { value, name }}
+                        <option {value}>{name}</option>
+                    {/each}
+                </Select>
             </div>
         {:else}
             <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
@@ -261,10 +345,17 @@
     {/if}
     {#if events.length > 0}
         <div class="mb-6" transition:slide>
-            <Label>
-                Assign To Event
-                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-            </Label>
+            <Label class="mb-2">Assign To Event</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={selectedEvent}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each sortedEvents as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         </div>
     {:else}
         <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">

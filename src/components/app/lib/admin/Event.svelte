@@ -92,11 +92,23 @@
     >
         <div class="mb-6">
             <Label for="event_name" class="mb-2">Change Event Name</Label>
-            <Input id="event_name" placeholder="name" bind:value={editData.event_name} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="event_name"
+                placeholder="name"
+                bind:value={editData.event_name}
+                required
+            />
         </div>
         <div>
             <Label for="event_textarea" class="mb-2">Change Event Description</Label>
-            <Textarea id="event_textarea" placeholder="..." rows="4" bind:value={editData.event_description} />
+            <Textarea
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="event_textarea"
+                placeholder="..."
+                rows="4"
+                bind:value={editData.event_description}
+            />
         </div>
         <svelte:fragment slot="footer">
             <div class="flex flex-row justify-between w-full">
@@ -130,11 +142,23 @@
 >
     <div class="mb-6">
         <Label for="event-name" class="mb-2">Event Name</Label>
-        <Input id="event-name" placeholder="myCTF" bind:value={eventTemplate.name} required />
+        <Input
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="event-name"
+            placeholder="myCTF"
+            bind:value={eventTemplate.name}
+            required
+        />
     </div>
     <div class="mb-6">
         <Label for="event-textarea" class="mb-2">Event Description</Label>
-        <Textarea id="event-textarea" placeholder="..." rows="4" bind:value={eventTemplate.description} />
+        <Textarea
+            class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+            id="event-textarea"
+            placeholder="..."
+            rows="4"
+            bind:value={eventTemplate.description}
+        />
     </div>
 
     <div class="mb-6">

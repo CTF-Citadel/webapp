@@ -44,6 +44,7 @@
             <Label class="space-y-2">
                 <span>New Password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password}
                     type="password"
                     name="password"
@@ -71,6 +72,7 @@
             <Label class="space-y-2">
                 <span>Repeat Password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password_repeat}
                     on:input={checkInput}
                     type="password"

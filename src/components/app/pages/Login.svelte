@@ -20,11 +20,7 @@
     });
 
     async function onEnterKey(event: any) {
-        if (
-            event.key === 'Enter' &&
-            inputs.email.length > 0 &&
-            inputs.password.length > 0
-        ) {
+        if (event.key === 'Enter' && inputs.email.length > 0 && inputs.password.length > 0) {
             await onLogin();
         }
     }
@@ -61,6 +57,7 @@
         <Label class="space-y-2">
             <span>Email</span>
             <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 bind:value={inputs.email}
                 on:keydown={onEnterKey}
                 type="email"
@@ -73,6 +70,7 @@
         <Label class="space-y-2">
             <span>Your password</span>
             <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 bind:value={inputs.password}
                 on:keydown={onEnterKey}
                 type="password"
@@ -89,7 +87,9 @@
         {#if authResponse && authResponse.error !== 'None'}
             <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
         {/if}
-        <Button on:click={onLogin} disabled={inputs.email.length === 0 || inputs.password.length === 0} class="w-full">Login to your account</Button>
+        <Button on:click={onLogin} disabled={inputs.email.length === 0 || inputs.password.length === 0} class="w-full"
+            >Login to your account</Button
+        >
         <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
             Not registered?
             <a href="/signup" class="text-primary-700 hover:underline dark:text-primary-500">Create account</a>
