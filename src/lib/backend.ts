@@ -74,17 +74,20 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     GEN_FLAG,
                     json.data.teamID,
                     json.data.challengeID,
-                    json.data.eventID,
+                    json.data.eventID
                 );
                 if (response != false && AC_ENABLE === true) {
                     AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
                 }
                 break;
-            case 'has-created':
-                response = await HANLDER.checkHasCreatedTeam(json.data.user);
-                break;
             case 'team-info':
                 response = await HANLDER.getTeamInfo(json.data.id);
+                break;
+            case 'team-members':
+                response = await HANLDER.getTeamMembers(json.data.id);
+                break;
+            case 'reset-team-token':
+                response = await HANLDER.resetTeamToken(json.data.session, json.data.teamID);
                 break;
             case 'create-team':
                 const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
@@ -111,7 +114,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 }
                 break;
             case 'leave-team':
-                response = await HANLDER.leaveTeam(json.data.session);
+                response = await HANLDER.leaveTeam(json.data.session, json.data.teamID);
                 break;
             case 'check-flag-static':
                 const TIMESTAMP_STATIC = Date.now();

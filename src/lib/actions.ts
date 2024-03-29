@@ -107,13 +107,29 @@ class DatabaseActions {
      * Fetches sanitized Teams
      * @return List sanitized of Teams
      */
-    async getTeamLisitng(redacted: boolean = false) {
+    async getTeamLisitng() {
         const RES = await DB_ADAPTER.select({
             team_name: teams.team_name,
             team_description: teams.team_description,
             team_country_code: teams.team_country_code
         }).from(teams);
-        return RES.length > 0 ? (redacted ? RES : RES) : [];
+        return RES.length > 0 ? RES : [];
+    }
+
+    /**
+     * Fetches Team Members of Team with ID
+     * @return List of Team Members
+     */
+    async getTeamMembers(teamID: string) {
+        const RES = await DB_ADAPTER.select({
+            id: users.id,
+            username: users.username,
+            user_avatar: users.user_avatar,
+            user_affiliation: users.user_affiliation
+        })
+            .from(users)
+            .where(eq(users.user_team_id, teamID));
+        return RES.length > 0 ? RES : [];
     }
 
     /**
@@ -526,17 +542,43 @@ class DatabaseActions {
     }
 
     /**
+     * Resets a team's join token by ID
+     * @return void
+     */
+    async resetTeamToken(sessionID: string, teamID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        const TEAM = await this.getTeamInfo(teamID);
+        if (user && TEAM != null) {
+            if (TEAM.team_creator === user.id) {
+                await DB_ADAPTER.update(teams)
+                    .set({
+                        team_join_token: 'CTD-' + generateRandomString(16).toUpperCase()
+                    })
+                    .where(eq(teams.id, teamID));
+            }
+        }
+    }
+
+    /**
      * Validates and removes a user from his team
      * @return void
      */
-    async leaveTeam(sessionID: string) {
+    async leaveTeam(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user) {
-            await DB_ADAPTER.update(users)
-                .set({
-                    user_team_id: ''
-                })
-                .where(eq(users.id, user.id));
+        const TEAM = await this.getTeamInfo(teamID);
+        const MEMBERS = await this.getTeamMembers(teamID);
+        if (user && TEAM != null && MEMBERS.length > 0) {
+            if (TEAM.team_creator != user.id || MEMBERS.length === 1) {
+                await DB_ADAPTER.update(users)
+                    .set({
+                        user_team_id: ''
+                    })
+                    .where(eq(users.id, user.id));
+                // yeet the team if creator is the last one to leave
+                if (TEAM.team_creator === user.id && MEMBERS.length === 1) {
+                    await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID))
+                }
+            }
         }
     }
 
