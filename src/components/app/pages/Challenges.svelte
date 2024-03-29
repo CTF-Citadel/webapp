@@ -6,6 +6,7 @@
     import { AccordionItem, Accordion } from 'flowbite-svelte';
     import type { ChallengesType } from '../../../lib/schema';
     import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte';
+    import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
 
     export let uuid: string = '';
     export let team: string = '';
@@ -252,7 +253,10 @@
         </div>
     {/each}
 {:else}
-    <div class="text-center">
+    <div class="flex flex-col flex-1 justify-center text-center w-full h-full">
+        <div>
+            <Moon class="w-20 h-20 p-4 mx-auto text-neutral-900 dark:text-neutral-100" />
+        </div>
         <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Challenges found.</h1>
     </div>
 {/if}

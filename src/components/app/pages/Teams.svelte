@@ -18,6 +18,7 @@
     } from 'flowbite-svelte';
     import { requestWrapper, COUNTRIES } from '../../../lib/helpers';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
+    import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import type { TeamsType } from '../../../lib/schema';
     import { fade } from 'svelte/transition';
 
@@ -244,10 +245,8 @@
             >
                 {#if !hasTeam}
                     <h1 class="mx-auto">You are currently not playing for any team!</h1>
-                    <div class="flex flex-row space-x-4 justify-center">
+                    <div class="flex flex-row space-x-4 justify-center mt-4">
                         <Button
-                            size="lg"
-                            class="mt-4"
                             on:click={() => {
                                 menus.join = true;
                             }}
@@ -255,8 +254,6 @@
                             Join
                         </Button>
                         <Button
-                            size="lg"
-                            class="mt-4"
                             on:click={() => {
                                 menus.create = true;
                             }}
@@ -338,7 +335,10 @@
                     </TableBody>
                 </Table>
             {:else}
-                <div class="text-center">
+                <div class="flex flex-col flex-1 justify-center text-center w-full h-full">
+                    <div>
+                        <Moon class="w-20 h-20 p-4 mx-auto text-neutral-900 dark:text-neutral-100" />
+                    </div>
                     <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Teams found.</h1>
                 </div>
             {/if}

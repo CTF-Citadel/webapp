@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Card, Button, Spinner } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
+    import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import type { EventsType, TeamEventsType } from '../../../lib/schema';
@@ -52,17 +53,25 @@
                     <p>End: {formatToDate(event.events.event_end)}</p>
                 </div>
                 <div class="flex flex-row space-x-4">
-                    <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}>
+                    <Button
+                        class="p-0"
+                        disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
+                    >
                         {#if validTimerange(event.events.event_start, event.events.event_end) === 0}
                             <a class="p-3" href="/events/{event.events.id}">Challenges</a>
                             <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
                         {:else}
                             <p class="p-3">
-                                {validTimerange(event.events.event_start, event.events.event_end) === 1 ? 'Upcoming' : 'Expired'}
+                                {validTimerange(event.events.event_start, event.events.event_end) === 1
+                                    ? 'Upcoming'
+                                    : 'Expired'}
                             </p>
                         {/if}
                     </Button>
-                    <Button class="p-0" disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}>
+                    <Button
+                        class="p-0"
+                        disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
+                    >
                         <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
                         <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
                     </Button>
@@ -71,6 +80,9 @@
         {/each}
     {:else}
         <div class="text-center">
+            <div>
+                <Moon class="w-20 h-20 p-4 mx-auto text-neutral-900 dark:text-neutral-100" />
+            </div>
             <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Events found.</h1>
         </div>
     {/if}
