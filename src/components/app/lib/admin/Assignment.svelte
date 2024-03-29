@@ -56,7 +56,15 @@
     Create Popups
 -->
 
-<Modal defaultClass="rounded-none" bind:open={create} title="Assign To">
+<Modal
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    bind:open={create}
+    title="Assign To"
+>
     <div>
         {#if events.length > 0}
             <Label>

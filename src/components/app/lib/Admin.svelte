@@ -244,13 +244,18 @@
         </div>
     {:else}
         <Tabs
+            divider={false}
+            defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
             contentClass=""
-            activeClasses="p-4 text-primary-600 bg-gray-100 dark:bg-gray-800 dark:text-primary-500"
-            inactiveClasses="p-4 text-gray-500 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
+            inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
         >
             <TabItem title="Users" bind:open={tabStates.users}>
                 {#if users.length > 0}
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Username</TableHeadCell>
@@ -263,29 +268,29 @@
                         </TableHead>
                         <TableBody>
                             {#each users as entry}
-                                <TableBodyRow>
-                                    <TableBodyCell>
+                                <TableBodyRow class="custom">
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.username}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.email}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.user_role}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.is_verified}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.user_team_id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.is_blocked}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button
                                             color="alternative"
                                             on:click={() => {
@@ -310,10 +315,16 @@
             <TabItem title="Teams" bind:open={tabStates.teams}>
                 {#if teams.length > 0}
                     {#key marked.size}
-                        <Table>
+                        <Table
+                            color="custom"
+                            class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        >
                             <TableHead>
                                 <TableHeadCell>
-                                    <Checkbox on:change={() => checkAll(teams)} checked={marked.size === teams.length} />
+                                    <Checkbox
+                                        on:change={() => checkAll(teams)}
+                                        checked={marked.size === teams.length}
+                                    />
                                 </TableHeadCell>
                                 <TableHeadCell>ID</TableHeadCell>
                                 <TableHeadCell>Creator ID</TableHeadCell>
@@ -326,31 +337,31 @@
                             <TableBody>
                                 {#each teams as entry}
                                     <TableBodyRow>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             <Checkbox
                                                 on:change={() => checkEvent(entry.id)}
                                                 checked={marked.has(entry.id)}
                                             />
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.id}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_creator}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_name}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_description}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_country_code}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_join_token}
                                         </TableBodyCell>
-                                        <TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             <Button
                                                 on:click={() => {
                                                     editUUID = entry.id;
@@ -374,7 +385,10 @@
             </TabItem>
             <TabItem title="Events" bind:open={tabStates.events}>
                 {#if events.length > 0}
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
@@ -386,22 +400,22 @@
                         <TableBody>
                             {#each events as entry}
                                 <TableBodyRow>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_description}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_start}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_end}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button
                                             on:click={() => {
                                                 editUUID = entry.id;
@@ -422,9 +436,12 @@
                     </Alert>
                 {/if}
             </TabItem>
-            <TabItem title="Assigned Events" bind:open={tabStates.assignments}>
+            <TabItem title="Assignments" bind:open={tabStates.assignments}>
                 {#if teamEvents.length > 0}
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>Team ID</TableHeadCell>
                             <TableHeadCell>Event ID</TableHeadCell>
@@ -434,16 +451,16 @@
                         <TableBody>
                             {#each teamEvents as entry}
                                 <TableBodyRow>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.team_id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.team_points}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button
                                             on:click={() => {
                                                 unassignEvent(entry.event_id, entry.team_id);
@@ -465,7 +482,10 @@
             </TabItem>
             <TabItem title="Challenges" bind:open={tabStates.challenges}>
                 {#if challenges.length > 0}
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Name</TableHeadCell>
@@ -476,19 +496,19 @@
                         <TableBody>
                             {#each challenges as entry}
                                 <TableBodyRow>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.id}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.challenge_name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.challenge_description}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.challenge_category}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button
                                             on:click={() => {
                                                 editUUID = entry.id;

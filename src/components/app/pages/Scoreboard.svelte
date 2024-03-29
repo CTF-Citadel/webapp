@@ -196,12 +196,17 @@
         </div>
         <div class="my-10">
             <Tabs
+                divider={false}
+                defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
                 contentClass=""
-                activeClasses="p-4 text-primary-600 bg-gray-100 dark:bg-gray-800 dark:text-primary-500"
-                inactiveClasses="p-4 text-gray-500 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
+                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
             >
                 <TabItem title="Teams" bind:open={tabs.teams}>
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
@@ -209,10 +214,10 @@
                         <TableBody>
                             {#each teamScores as entry}
                                 <TableBodyRow color="custom">
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.points}
                                     </TableBodyCell>
                                 </TableBodyRow>
@@ -221,7 +226,10 @@
                     </Table>
                 </TabItem>
                 <TabItem title="Users" bind:open={tabs.users}>
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                    >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
@@ -229,10 +237,10 @@
                         <TableBody>
                             {#each userScores as entry}
                                 <TableBodyRow color="custom">
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.points}
                                     </TableBodyCell>
                                 </TableBodyRow>

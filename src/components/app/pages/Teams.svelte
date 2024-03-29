@@ -128,7 +128,15 @@
     Create Popup
 -->
 
-<Modal title="Create Team" bind:open={menus.create} autoclose>
+<Modal
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    title="Create Team"
+    bind:open={menus.create}
+>
     <div class="mb-6">
         <Label for="team-name" class="mb-2">Team Name</Label>
         <Input bind:value={inputs.teamName} name="team-name" type="text" placeholder="BugHunters" required />
@@ -160,7 +168,15 @@
     Join Popup
 -->
 
-<Modal title="Join Team" bind:open={menus.join} autoclose>
+<Modal
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    title="Join Team"
+    bind:open={menus.join}
+>
     <div class="mb-6 text-center">
         <Label for="team-token" class="mb-2">Team Token</Label>
         <Input
@@ -214,7 +230,7 @@
                                 menus.join = true;
                             }}
                         >
-                            Join <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                            Join
                         </Button>
                         <Button
                             size="lg"
@@ -224,7 +240,7 @@
                             }}
                             disabled={hasCreated}
                         >
-                            Create <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
+                            Create
                         </Button>
                     </div>
                 {:else if Object.keys(thisTeam).length > 0}
@@ -277,7 +293,7 @@
                 OTHER TEAMS
             </h1>
             {#if teams.length > 0}
-                <Table>
+                <Table color="custom" class="bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
                     <TableHead>
                         <TableHeadCell>Name</TableHeadCell>
                         <TableHeadCell>Description</TableHeadCell>
@@ -286,13 +302,13 @@
                     <TableBody>
                         {#each teams as entry}
                             <TableBodyRow>
-                                <TableBodyCell>
+                                <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                     {entry.team_name}
                                 </TableBodyCell>
-                                <TableBodyCell>
+                                <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                     {entry.team_description}
                                 </TableBodyCell>
-                                <TableBodyCell class="text-center">
+                                <TableBodyCell class="text-center text-neutral-900 dark:text-neutral-100">
                                     <span class="fi fi-{entry.team_country_code.toLowerCase()}"></span>
                                 </TableBodyCell>
                             </TableBodyRow>
@@ -301,7 +317,7 @@
                 </Table>
             {:else}
                 <div class="text-center">
-                    <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Challenges found.</h1>
+                    <h1 class="text-neutral-900 dark:text-neutral-100 font-bold italic">No Teams found.</h1>
                 </div>
             {/if}
         </div>

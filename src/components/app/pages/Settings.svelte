@@ -28,7 +28,7 @@
             <Spinner size={'16'} />
         </div>
     {:else}
-        <div class="flex flex-col flex-1 items-center">
+        <div class="flex flex-col items-center">
             <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
                 <span class="italic text-neutral-500 opacity-50">#</span>
                 PROFILE
@@ -54,7 +54,7 @@
                 <span class="italic text-neutral-500 opacity-50">#</span>
                 SETTINGS
             </h1>
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col flex-1 items-center">
                 <Admin />
             </div>
         {/if}

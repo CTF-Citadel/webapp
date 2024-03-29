@@ -81,7 +81,15 @@
 -->
 
 {#if editData !== undefined}
-    <Modal defaultClass="rounded-none" bind:open={edit} title="Edit Event">
+    <Modal
+        dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+        defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+        backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+        color="none"
+        outsideclose
+        bind:open={edit}
+        title="Edit Event"
+    >
         <div class="mb-6">
             <Label for="event_name" class="mb-2">Change Event Name</Label>
             <Input id="event_name" placeholder="name" bind:value={editData.event_name} required />
@@ -111,7 +119,15 @@
     Create Popup
 -->
 
-<Modal defaultClass="rounded-none" bind:open={create} title="Create Event">
+<Modal
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    bind:open={create}
+    title="Create Event"
+>
     <div class="mb-6">
         <Label for="event-name" class="mb-2">Event Name</Label>
         <Input id="event-name" placeholder="myCTF" bind:value={eventTemplate.name} required />
