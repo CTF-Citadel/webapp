@@ -16,8 +16,13 @@
     let successFlag: { [key: string]: -1 | 0 | 1 } = {};
     let deploymentStatus: { [key: string]: 0 | 1 | 2 | 3 } = {};
     let challenges: ChallengesType[] = [];
+    let deployments: {
+        challenge_id: string;
+        challenge_host: string;
+        challenge_port: string;
+        is_running: boolean;
+    }[] = [];
     let solvedChallenges: string[] = [];
-    let challengeResponse: { [key: string]: any } = {};
     let challengeInputs: { [key: string]: string } = {};
     let categories: { [key: string]: ChallengesType[] } = {};
 
@@ -25,6 +30,7 @@
         await refreshChallenges().finally(() => {
             sortByCategory(challenges);
         });
+        await refreshDeployedChallenges();
         await refreshSolvedChallenges();
         loading = false;
     });
@@ -72,8 +78,13 @@
 
     async function refreshChallenges() {
         const DATA = await requestWrapper(false, { type: 'challenges', data: { eventID: uuid, teamID: team } });
-        const JSON = await DATA.json();
-        challenges = JSON.data;
+        challenges = (await DATA.json()).data;
+    }
+
+    async function refreshDeployedChallenges() {
+        const DATA = await requestWrapper(false, { type: 'get-deployed', data: { eventID: uuid, teamID: team } });
+        deployments = (await DATA.json()).data;
+        console.log(deployments);
     }
 
     async function refreshSolvedChallenges() {
@@ -93,8 +104,7 @@
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
-            if (TEMP.error === false) {
-                challengeResponse[challenge_id] = TEMP.data;
+            if (TEMP.error === false && TEMP.data === true) {
                 deploymentStatus[challenge_id] = 3;
             } else {
                 deploymentStatus[challenge_id] = 2;
@@ -122,7 +132,7 @@
                         ? '#28a745'
                         : challenge.challenge_difficulty === 'Medium'
                           ? '#FF9800'
-                          : '#dc3545'}; filter: drop-shadow(8px 8px 4px {challenge.challenge_difficulty === 'Easy'
+                          : '#dc3545'}; filter: drop-shadow(0px 0px 6px {challenge.challenge_difficulty === 'Easy'
                         ? '#28a745'
                         : challenge.challenge_difficulty === 'Medium'
                           ? '#FF9800'
@@ -133,23 +143,28 @@
                         <Label for="challenge-name" class="mb-2">Challenge Name</Label>
                         <p id="challenge-name">{challenge.challenge_name}</p>
                     </div>
-                    <Accordion flush>
-                        <AccordionItem>
-                            <span slot="header">Challenge Description</span>
-                            <p class="mb-2 text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
-                        </AccordionItem>
-                    </Accordion>
-                    <div class="mb-6 mt-6">
+                    <div class="mb-4">
+                        <Accordion flush>
+                            <AccordionItem>
+                                <span slot="header">Challenge Description</span>
+                                <p class="text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
+                    <div class="mb-2">
                         <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
                         <p>Category: {challenge.challenge_category}</p>
-                        <p
-                            style="color: {challenge.challenge_difficulty === 'Easy'
-                                ? '#28a745'
-                                : challenge.challenge_difficulty === 'Medium'
-                                  ? '#FF9800'
-                                  : '#dc3545'};"
-                        >
-                            Difficulty: {challenge.challenge_difficulty}
+                        <p>
+                            Difficulty:
+                            <span
+                                style="color: {challenge.challenge_difficulty === 'Easy'
+                                    ? '#28a745'
+                                    : challenge.challenge_difficulty === 'Medium'
+                                      ? '#FF9800'
+                                      : '#dc3545'};"
+                            >
+                                {challenge.challenge_difficulty}
+                            </span>
                         </p>
                     </div>
                     {#if !solvedChallenges.includes(challenge.id)}
@@ -169,40 +184,54 @@
                             </div>
                         {/if}
                         {#if challenge.needs_container}
-                            <div class="mb-6">
-                                <Button
-                                    on:click={() => {
-                                        deployChallenge(challenge.id);
-                                    }}
-                                >
-                                    {#if deploymentStatus[challenge.id] === 1}
-                                        <Spinner class="mr-3" size="4" />Starting ..
-                                    {:else}
-                                        Start
-                                    {/if}
-                                </Button>
-                            </div>
-                        {/if}
-                        {#if challengeResponse[challenge.id] && deploymentStatus[challenge.id] === 3}
-                            <div class="mb-6" transition:slide>
-                                <Alert class="my-2" color="green">
-                                    <span class="font-bold">Started!</span><br />
-                                    Infos below.
-                                </Alert>
-                            </div>
-                            <div class="mb-6">
-                                <Label for="challenge-ip" class="mb-2">Host</Label>
-                                <a href="http://{challengeResponse[challenge.id].details.IP}/"
-                                    ><p id="challenge-ip">{challengeResponse[challenge.id].details.IP}</p></a
-                                >
-                            </div>
-                        {:else if deploymentStatus[challenge.id] === 2}
-                            <div class="mb-6" transition:slide>
-                                <Alert class="my-2" color="red">
-                                    <span class="font-bold">Failed!</span><br />
-                                    Contact Admin if this repeats.
-                                </Alert>
-                            </div>
+                            {#if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === false}
+                                <div class="mb-6 text-center">
+                                    <Alert class="my-2" color="green">
+                                        <span class="font-bold">Queued!</span><br />
+                                        Check back soon.
+                                    </Alert>
+                                </div>
+                            {:else if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === true}
+                                <div class="mb-6">
+                                    <Label for="challenge-host" class="mb-2">Container running at:</Label>
+                                    <p id="challenge-host">
+                                        {deployments.find((entry) => entry.challenge_id === challenge.id)
+                                            ?.challenge_host}
+                                    </p>
+                                </div>
+                            {:else}
+                                <div class="mb-6 text-center">
+                                    <Label class="mb-2">This Challenge needs a Container</Label>
+                                    <Button
+                                        disabled={deploymentStatus[challenge.id] === 1 ||
+                                            deploymentStatus[challenge.id] === 3}
+                                        on:click={() => {
+                                            deployChallenge(challenge.id);
+                                        }}
+                                    >
+                                        {#if deploymentStatus[challenge.id] === 1}
+                                            <Spinner class="mr-3" size="4" />Starting ..
+                                        {:else}
+                                            Request
+                                        {/if}
+                                    </Button>
+                                </div>
+                                {#if deploymentStatus[challenge.id] === 3}
+                                    <div class="mb-6 text-center" transition:slide>
+                                        <Alert class="my-2" color="green">
+                                            <span class="font-bold">Queued!</span><br />
+                                            Check back soon.
+                                        </Alert>
+                                    </div>
+                                {:else if deploymentStatus[challenge.id] === 2}
+                                    <div class="mb-6 text-center" transition:slide>
+                                        <Alert class="my-2" color="red">
+                                            <span class="font-bold">Failed!</span><br />
+                                            Contact Admin if this repeats.
+                                        </Alert>
+                                    </div>
+                                {/if}
+                            {/if}
                         {/if}
                         <div class="mb-6">
                             <Label for="flag-submit" class="mb-2">Submit Flag</Label>
@@ -218,7 +247,6 @@
                             <Button
                                 disabled={challengeInputs[challenge.id] === '' ||
                                     !checkFlagInput(challengeInputs[challenge.id]) ||
-                                    (challenge.needs_container && deploymentStatus[challenge.id] !== 3) ||
                                     successFlag[challenge.id] === 0}
                                 on:click={() =>
                                     checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
@@ -226,14 +254,14 @@
                             >
                         </div>
                         {#if successFlag[challenge.id] === 0}
-                            <div transition:slide class="mt-6">
+                            <div transition:slide>
                                 <Alert class="my-2" color="green">
                                     <span class="font-bold">Correct Flag!</span><br />
                                     Congratulations.
                                 </Alert>
                             </div>
                         {:else if successFlag[challenge.id] === 1}
-                            <div transition:slide class="mt-6">
+                            <div transition:slide>
                                 <Alert class="my-2" color="red">
                                     <span class="font-bold">Incorrect!</span><br />
                                     Try again.
@@ -241,7 +269,7 @@
                             </div>
                         {/if}
                     {:else}
-                        <div transition:slide class="mt-6">
+                        <div transition:slide>
                             <Alert class="my-2" color="green">
                                 <span class="font-bold">Already Solved!</span><br />
                                 Try some other Challenges!

@@ -35,7 +35,7 @@
     let challenges: ChallengesType[] = [];
     let teamEvents: TeamEventsType[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
-    let selectchallenges: { value: string; name: string }[] = [];
+    let sortedChallenges: { value: string; name: string }[] = [];
     let loading: boolean = true;
     let editUUID: string = '';
     let marked = new Set<string>();
@@ -83,9 +83,9 @@
         const DATA = await requestWrapper(true, { type: 'challenges' });
         const JSON = await DATA.json();
         challenges = JSON.data;
-        selectchallenges = [];
+        sortedChallenges = [];
         challenges.forEach((element: any) => {
-            selectchallenges.push({ value: element.id, name: element.challenge_name });
+            sortedChallenges.push({ value: element.id, name: element.challenge_name });
         });
     }
 
@@ -198,6 +198,7 @@
     bind:events
     bind:challenges
     bind:sortedEvents
+    bind:sortedChallenges
     bind:editUUID
     on:refresh={async () => {
         await refreshEvents();

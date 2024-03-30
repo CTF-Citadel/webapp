@@ -47,7 +47,7 @@ export const sendVerificationLink = async (origin: string, email: string, token:
         </html>`
     }, (e: any) => {
         if (e !== null) {
-            console.log(e);
+            console.error(e);
         }
     });
 };
@@ -84,7 +84,7 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
         </html>`
     }, (e: any) => {
         if (e !== null) {
-            console.log(e);
+            console.error(e);
         }
     });
 };

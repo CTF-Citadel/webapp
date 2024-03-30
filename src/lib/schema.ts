@@ -123,6 +123,7 @@ export const team_challenges = pgTable(
         solved_at: bigint('solved_at', {
             mode: 'number'
         }).notNull(),
+        is_container: boolean('is_container').notNull(),
         is_solved: boolean('is_solved').notNull(),
         is_running: boolean('is_running').notNull()
     },

@@ -80,6 +80,9 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
                 }
                 break;
+            case 'get-deployed':
+                response = await HANLDER.getDeployedChallenge(json.data.teamID, json.data.eventID);
+                break;
             case 'team-info':
                 response = await HANLDER.getTeamInfo(json.data.id);
                 break;
@@ -181,7 +184,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
         } else {
             response = (e as Error).message;
         }
-        console.log(response);
+        console.error(response);
     }
     return new Response(
         JSON.stringify({
@@ -310,7 +313,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
         } else {
             response = (e as Error).message;
         }
-        console.log(response);
+        console.error(response);
     }
     return new Response(
         JSON.stringify({

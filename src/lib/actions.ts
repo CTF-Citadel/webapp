@@ -205,6 +205,11 @@ class DatabaseActions {
                 (challenge) =>
                     challenge.depends_on === '' || RES_SOLVED.map((chall) => chall.id).includes(challenge.depends_on)
             );
+        } else {
+            resSanitized = resSanitized.filter(
+                (challenge) =>
+                    challenge.depends_on === ''
+            );
         }
         return resSanitized.length > 0 ? resSanitized : [];
     }
@@ -365,18 +370,52 @@ class DatabaseActions {
     }
 
     /**
+     * Get all currently deployed or initiated Challenges per Event and Team ID
+     * @return List of cut down info, zero length if no found
+     */
+    async getDeployedChallenge(teamID: string, eventID: string) {
+        const RES = await DB_ADAPTER.select({
+            challenge_id: team_challenges.challenge_id,
+            challenge_host: team_challenges.challenge_host,
+            challenge_port: team_challenges.challenge_port,
+            is_running: team_challenges.is_running
+        })
+            .from(team_challenges)
+            .where(
+                and(
+                    eq(team_challenges.team_id, teamID),
+                    eq(team_challenges.event_id, eventID),
+                    eq(team_challenges.is_container, true),
+                    eq(team_challenges.is_solved, false)
+                )
+            );
+        return RES.length > 0 ? RES : [];
+    }
+
+    /**
      * Deploys a new Challenge
      * @return true if deployed, false if not
      */
-    async deployTeamChallenge(
-        genFlag: string,
-        team_id: string,
-        challenge_id: string,
-        event_id: string
-    ): Promise<boolean> {
-        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challenge_id));
+    async deployTeamChallenge(genFlag: string, teamID: string, challengeID: string, eventID: string): Promise<boolean> {
+        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID));
         if (RES.length > 0) {
-            const REQ: Response = await fetch(this.#BACKEND_URL + '/challenge', {
+            // note deployment
+            await DB_ADAPTER.insert(team_challenges).values({
+                team_id: teamID,
+                challenge_id: challengeID,
+                event_id: eventID,
+                solved_by: '',
+                solved_at: 0,
+                challenge_uuid: '',
+                challenge_flag: '',
+                challenge_host: '',
+                challenge_port: '',
+                is_container: true,
+                is_running: false,
+                is_solved: false
+            });
+            // then fetch with promise
+            fetch(`${this.#BACKEND_URL}/challenge`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -387,23 +426,41 @@ class DatabaseActions {
                         FLAG: genFlag
                     })
                 })
-            });
-            const DEPLOY_DATA = await REQ.json();
-            await DB_ADAPTER.insert(team_challenges).values({
-                team_id: team_id,
-                challenge_id: challenge_id,
-                event_id: event_id,
-                solved_by: '',
-                solved_at: 0,
-                challenge_uuid: DEPLOY_DATA.instance_id,
-                challenge_flag: DEPLOY_DATA.details.FLAG,
-                challenge_host: `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`, // @TODO: implement this correctly
-                challenge_port: '0', // @TODO: implement this correctly
-                is_running: true,
-                is_solved: false
-            });
-            DEPLOY_DATA.details.IP = `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`;
-            return DEPLOY_DATA;
+            })
+                .then(async (REQ) => {
+                    // on success update the challenge
+                    const DEPLOY_DATA = await REQ.json();
+                    await DB_ADAPTER.update(team_challenges)
+                        .set({
+                            challenge_uuid: DEPLOY_DATA.instance_id,
+                            challenge_flag: DEPLOY_DATA.details.FLAG,
+                            challenge_host: `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`,
+                            is_running: true
+                        })
+                        .where(
+                            and(
+                                eq(team_challenges.team_id, teamID),
+                                eq(team_challenges.event_id, eventID),
+                                eq(team_challenges.challenge_id, challengeID)
+                            )
+                        );
+                })
+                .catch(async (e) => {
+                    // on fail, remove the entry
+                    await DB_ADAPTER.delete(team_challenges).where(
+                        and(
+                            eq(team_challenges.team_id, teamID),
+                            eq(team_challenges.event_id, eventID),
+                            eq(team_challenges.challenge_id, challengeID)
+                        )
+                    );
+                    if (e instanceof Error) {
+                        console.error(e.message);
+                    } else {
+                        console.error((e as Error).message);
+                    }
+                });
+            return true;
         }
         return false;
     }
@@ -419,6 +476,7 @@ class DatabaseActions {
         userID: string,
         timestamp: number
     ): Promise<boolean> {
+        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = await DB_ADAPTER.select()
             .from(team_challenges)
             .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
@@ -426,7 +484,7 @@ class DatabaseActions {
             RES.length > 0 &&
             /^TH{.*}$/.test(flag) &&
             RES[0].is_running === true &&
-            RES[0].challenge_flag === flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'))
+            RES[0].challenge_flag === EXTRACTED_FLAG
         ) {
             // @TODO: Maybe close the container here
             // fetch(BACKEND) ...
@@ -455,6 +513,7 @@ class DatabaseActions {
         userID: string,
         timestamp: number
     ): Promise<boolean> {
+        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = await DB_ADAPTER.select()
             .from(challenges)
             .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)));
@@ -462,7 +521,7 @@ class DatabaseActions {
             RES.length > 0 &&
             /^TH{.*}$/.test(flag) &&
             RES[0].flag_static === true &&
-            RES[0].static_flag === flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'))
+            RES[0].static_flag === EXTRACTED_FLAG
         ) {
             // insert new since static
             await DB_ADAPTER.insert(team_challenges).values({
@@ -472,9 +531,10 @@ class DatabaseActions {
                 solved_by: userID,
                 solved_at: timestamp,
                 challenge_uuid: '',
-                challenge_flag: flag,
+                challenge_flag: EXTRACTED_FLAG,
                 challenge_host: '',
                 challenge_port: '',
+                is_container: false,
                 is_running: false,
                 is_solved: true
             });
@@ -576,7 +636,7 @@ class DatabaseActions {
                     .where(eq(users.id, user.id));
                 // yeet the team if creator is the last one to leave
                 if (TEAM.team_creator === user.id && MEMBERS.length === 1) {
-                    await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID))
+                    await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
                 }
             }
         }

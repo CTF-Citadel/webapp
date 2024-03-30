@@ -21,6 +21,7 @@
     export let events: EventsType[] = [];
     export let challenges: ChallengesType[] = [];
     export let sortedEvents: { value: string; name: string }[] = [];
+    export let sortedChallenges: { value: string; name: string }[] = [];
     export let editUUID: string = '';
     export let edit = false;
     export let create = false;
@@ -36,7 +37,6 @@
         { value: 'Medium', name: 'Medium' },
         { value: 'Hard', name: 'Hard' }
     ];
-    let selectchallenges: { value: string; name: string }[] = [];
     let selectedEvent = '';
     let dependsOnChallenge = '';
     let selectedDiff = '';
@@ -328,7 +328,7 @@
                     placeholder=""
                 >
                     <option selected value="">None</option>
-                    {#each selectchallenges as { value, name }}
+                    {#each sortedChallenges as { value, name }}
                         <option {value}>{name}</option>
                     {/each}
                 </Select>

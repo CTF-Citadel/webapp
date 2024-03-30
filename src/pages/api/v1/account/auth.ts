@@ -31,7 +31,7 @@ export const POST: APIRoute = async (context) => {
             } else if (e.message === 'AUTH_NON_EXISTENT') {
                 errorMessage = 'User not found';
             } else {
-                console.log(e);
+                console.error(e);
                 errorMessage = 'Unknown Error';
             }
         }

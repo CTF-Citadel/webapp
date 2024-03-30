@@ -191,7 +191,7 @@
             <Spinner size={'16'} />
         </div>
     {:else}
-        <div class="bg-neutral-100 dark:bg-neutral-900 mt-10">
+        <div class="bg-neutral-200 dark:bg-neutral-900 mt-10">
             <Chart bind:options></Chart>
         </div>
         <div class="my-10">
