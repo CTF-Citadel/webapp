@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script lang="ts">
     import { onMount } from 'svelte';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';

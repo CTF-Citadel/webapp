@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script>
     import { Card, Button } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';

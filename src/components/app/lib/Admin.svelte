@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script lang="ts">
     import { requestWrapper } from '../../../lib/helpers';
     import {

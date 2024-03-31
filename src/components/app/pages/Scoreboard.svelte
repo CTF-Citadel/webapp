@@ -1,3 +1,9 @@
+<!--
+  @component
+  ## Props
+  @prop export let uuid: string = '';
+-->
+
 <script lang="ts">
     import {
         Tabs,

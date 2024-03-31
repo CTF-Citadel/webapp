@@ -4,9 +4,9 @@ import Header from '../../components/app/lib/Header.svelte';
 import PasswordReset from '../../components/app/pages/Password.svelte';
 import { isValidPasswordresetTokens } from '../../lib/lucia-db';
 
-const { id } = Astro.params;
+const { uuid } = Astro.params;
 
-const VALID = await isValidPasswordresetTokens(id || '');
+const VALID = await isValidPasswordresetTokens(uuid || '');
 if (!VALID) {
     return new Response('Invalid or Expired Token!', {
         status: 401
@@ -17,6 +17,6 @@ if (!VALID) {
 <Layout title="Password Reset">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
-        <PasswordReset id={id} client:visible />
+        <PasswordReset uuid={uuid} client:visible />
     </div>
 </Layout>

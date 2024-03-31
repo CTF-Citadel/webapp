@@ -4,6 +4,7 @@
   @prop export let events: EventsType[] = [];
   @prop export let challenges: ChallengesType[] = [];
   @prop export let sortedEvents: { value: string; name: string }[] = [];
+  @prop export let sortedChallenges: { value: string; name: string }[] = [];
   @prop export let editUUID: string = '';
   @prop export let edit = false;
   @prop export let create = false;

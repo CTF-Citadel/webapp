@@ -1,10 +1,16 @@
+<!--
+  @component
+  ## Props
+  @prop export let uuid: string = '';
+-->
+
 <script lang="ts">
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
     import { validPassword } from '../../../lib/helpers';
 
     // from parent
-    export let id = '';
+    export let uuid: string = '';
 
     let authResponse: any;
     let inputs = {
@@ -17,7 +23,7 @@
     }
 
     async function onSubmit() {
-        const RESP = await fetch(`/api/v1/reset/${id}`, {
+        const RESP = await fetch(`/api/v1/reset/${uuid}`, {
             method: 'POST',
             body: JSON.stringify(inputs)
         });

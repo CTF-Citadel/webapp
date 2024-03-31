@@ -1,3 +1,9 @@
+<!--
+  @component
+  ## Props
+  @prop export let session: any = {};
+-->
+
 <script lang="ts">
     import Admin from '../lib/Admin.svelte';
     import { onMount } from 'svelte';

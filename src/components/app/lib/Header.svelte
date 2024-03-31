@@ -1,3 +1,10 @@
+<!--
+  @component
+  ## Props
+  @prop export let username = '';
+  @prop export let interactive = false;
+-->
+
 <script lang="ts">
     import { DarkMode } from 'flowbite-svelte';
     import ArrowLeftToBracketOutline from 'flowbite-svelte-icons/ArrowLeftToBracketOutline.svelte';

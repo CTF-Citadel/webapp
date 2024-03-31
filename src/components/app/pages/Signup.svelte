@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script lang="ts">
     import { validEmail, validPassword, validUsername } from '../../../lib/helpers';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';

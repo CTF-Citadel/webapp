@@ -1,3 +1,10 @@
+<!--
+  @component
+  ## Props
+  @prop export let session: any = {};
+  @prop export let sessionID: string = '';
+-->
+
 <script lang="ts">
     import { onMount } from 'svelte';
     import {
@@ -22,8 +29,8 @@
     import type { TeamsType } from '../../../lib/schema';
     import { fade } from 'svelte/transition';
 
-    export let sessionID: string = '';
     export let session: any = {};
+    export let sessionID: string = '';
 
     let loading = true;
     let hasTeam = false;

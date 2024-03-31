@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script lang="ts">
     import { Card, Button } from 'flowbite-svelte';
 

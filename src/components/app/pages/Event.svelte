@@ -1,3 +1,9 @@
+<!--
+  @component
+  ## Props
+  @prop export let session: any = {};
+-->
+
 <script lang="ts">
     import { Card, Button, Spinner } from 'flowbite-svelte';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
@@ -6,7 +12,7 @@
     import { onMount } from 'svelte';
     import type { EventsType, TeamEventsType } from '../../../lib/schema';
 
-    export let userSession: any = {};
+    export let session: any = {};
 
     let loading: boolean = true;
     let events: { events: EventsType; team_events: TeamEventsType }[] = [];
@@ -17,7 +23,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'team-events', data: { id: userSession.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-events', data: { id: session.user_team_id } });
         const JSON = await DATA.json();
         events = JSON.data;
     }

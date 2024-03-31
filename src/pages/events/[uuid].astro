@@ -37,6 +37,6 @@ if (!exists) {
         client:visible
     />
     <div transition:animate="fade">
-        <Challenge uuid={uuid} team={session.user_team_id} user={session.id} client:visible />
+        <Challenge uuid={uuid} session={session} client:visible />
     </div>
 </Layout>

@@ -1,3 +1,10 @@
+<!--
+  @component
+  ## Props
+  @prop export let uuid: string = '';
+  @prop export let session: any = '';
+-->
+
 <script lang="ts">
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
     import { requestWrapper } from '../../../lib/helpers';
@@ -9,8 +16,7 @@
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
 
     export let uuid: string = '';
-    export let team: string = '';
-    export let user: string = '';
+    export let session: any = '';
 
     let loading: boolean = true;
     let successFlag: { [key: string]: -1 | 0 | 1 } = {};
@@ -44,7 +50,7 @@
         const TYPE = staticFlag ? 'check-flag-static' : 'check-flag';
         const DATA = await requestWrapper(false, {
             type: TYPE,
-            data: { userID: user, teamID: team, eventID: uuid, challengeID: challenge_id, flag: input }
+            data: { userID: session.id, teamID: session.user_team_id, eventID: uuid, challengeID: challenge_id, flag: input }
         });
         const JSON = await DATA.json();
         if (JSON.data.correct === true) {
@@ -77,18 +83,18 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper(false, { type: 'challenges', data: { eventID: uuid, teamID: team } });
+        const DATA = await requestWrapper(false, { type: 'challenges', data: { eventID: uuid, teamID: session.user_team_id } });
         challenges = (await DATA.json()).data;
     }
 
     async function refreshDeployedChallenges() {
-        const DATA = await requestWrapper(false, { type: 'get-deployed', data: { eventID: uuid, teamID: team } });
+        const DATA = await requestWrapper(false, { type: 'get-deployed', data: { eventID: uuid, teamID: session.user_team_id } });
         deployments = (await DATA.json()).data;
         console.log(deployments);
     }
 
     async function refreshSolvedChallenges() {
-        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { id: team } });
+        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { id: session.user_team_id } });
         const JSON = await DATA.json();
         solvedChallenges = [];
         for (let entry of JSON.data) {
@@ -100,7 +106,7 @@
         deploymentStatus[challenge_id] = 1;
         const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
-            data: { teamID: team, challengeID: challenge_id, eventID: uuid }
+            data: { teamID: session.user_team_id, challengeID: challenge_id, eventID: uuid }
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
