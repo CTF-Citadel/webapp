@@ -50,7 +50,13 @@
         const TYPE = staticFlag ? 'check-flag-static' : 'check-flag';
         const DATA = await requestWrapper(false, {
             type: TYPE,
-            data: { userID: session.id, teamID: session.user_team_id, eventID: uuid, challengeID: challenge_id, flag: input }
+            data: {
+                userID: session.id,
+                teamID: session.user_team_id,
+                eventID: uuid,
+                challengeID: challenge_id,
+                flag: input
+            }
         });
         const JSON = await DATA.json();
         if (JSON.data.correct === true) {
@@ -83,12 +89,18 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper(false, { type: 'challenges', data: { eventID: uuid, teamID: session.user_team_id } });
+        const DATA = await requestWrapper(false, {
+            type: 'challenges',
+            data: { eventID: uuid, teamID: session.user_team_id }
+        });
         challenges = (await DATA.json()).data;
     }
 
     async function refreshDeployedChallenges() {
-        const DATA = await requestWrapper(false, { type: 'get-deployed', data: { eventID: uuid, teamID: session.user_team_id } });
+        const DATA = await requestWrapper(false, {
+            type: 'get-deployed',
+            data: { eventID: uuid, teamID: session.user_team_id }
+        });
         deployments = (await DATA.json()).data;
         console.log(deployments);
     }
@@ -126,168 +138,170 @@
         <Spinner size={'16'} />
     </div>
 {:else if challenges.length > 0}
-    {#each Object.entries(categories) as [key, value]}
-        <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
-            <span class="italic text-neutral-500 opacity-50">#</span>
-            {key}
-        </h1>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start m-4">
-            {#each value as challenge}
-                <Card
-                    style="border-color: {challenge.challenge_difficulty === 'Easy'
-                        ? '#28a745'
-                        : challenge.challenge_difficulty === 'Medium'
-                          ? '#FF9800'
-                          : '#dc3545'}; filter: drop-shadow(0px 0px 6px {challenge.challenge_difficulty === 'Easy'
-                        ? '#28a745'
-                        : challenge.challenge_difficulty === 'Medium'
-                          ? '#FF9800'
-                          : '#dc3545'});"
-                    class="bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl my-2"
-                >
-                    <div class="mb-2">
-                        <Label for="challenge-name" class="mb-2">Challenge Name</Label>
-                        <p id="challenge-name">{challenge.challenge_name}</p>
-                    </div>
-                    <div class="mb-4">
-                        <Accordion flush>
-                            <AccordionItem>
-                                <span slot="header">Challenge Description</span>
-                                <p class="text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
-                            </AccordionItem>
-                        </Accordion>
-                    </div>
-                    <div class="mb-2">
-                        <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
-                        <p>Category: {challenge.challenge_category}</p>
-                        <p>
-                            Difficulty:
-                            <span
-                                style="color: {challenge.challenge_difficulty === 'Easy'
-                                    ? '#28a745'
-                                    : challenge.challenge_difficulty === 'Medium'
-                                      ? '#FF9800'
-                                      : '#dc3545'};"
-                            >
-                                {challenge.challenge_difficulty}
-                            </span>
-                        </p>
-                    </div>
-                    {#if !solvedChallenges.includes(challenge.id)}
-                        {#if challenge.static_file_url !== ''}
-                            <div class="mb-6">
-                                <Label for="challenge-diff" class="mb-2">Challenge File</Label>
-                                <div
-                                    class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center"
+    <div class="flex-1">
+        {#each Object.entries(categories) as [key, value]}
+            <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
+                <span class="italic text-neutral-500 opacity-50">#</span>
+                {key}
+            </h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start m-4">
+                {#each value as challenge}
+                    <Card
+                        style="border-color: {challenge.challenge_difficulty === 'Easy'
+                            ? '#28a745'
+                            : challenge.challenge_difficulty === 'Medium'
+                              ? '#FF9800'
+                              : '#dc3545'}; filter: drop-shadow(0px 0px 6px {challenge.challenge_difficulty === 'Easy'
+                            ? '#28a745'
+                            : challenge.challenge_difficulty === 'Medium'
+                              ? '#FF9800'
+                              : '#dc3545'});"
+                        class="bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl my-2"
+                    >
+                        <div class="mb-2">
+                            <Label for="challenge-name" class="mb-2">Challenge Name</Label>
+                            <p id="challenge-name">{challenge.challenge_name}</p>
+                        </div>
+                        <div class="mb-4">
+                            <Accordion flush>
+                                <AccordionItem>
+                                    <span slot="header">Challenge Description</span>
+                                    <p class="text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
+                        <div class="mb-2">
+                            <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
+                            <p>Category: {challenge.challenge_category}</p>
+                            <p>
+                                Difficulty:
+                                <span
+                                    style="color: {challenge.challenge_difficulty === 'Easy'
+                                        ? '#28a745'
+                                        : challenge.challenge_difficulty === 'Medium'
+                                          ? '#FF9800'
+                                          : '#dc3545'};"
                                 >
-                                    <DownloadSolid size="md" color="#fff" />
-                                    <a class="text-white" href={challenge.static_file_url} download
-                                        >{challenge.static_file_url
-                                            .split('/')
-                                            [challenge.static_file_url.split('/').length - 1].split('?')[0]}</a
-                                    >
-                                </div>
-                            </div>
-                        {/if}
-                        {#if challenge.needs_container}
-                            {#if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === false}
-                                <div class="mb-6 text-center">
-                                    <Alert class="my-2" color="green">
-                                        <span class="font-bold">Queued!</span><br />
-                                        Check back soon.
-                                    </Alert>
-                                </div>
-                            {:else if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === true}
+                                    {challenge.challenge_difficulty}
+                                </span>
+                            </p>
+                        </div>
+                        {#if !solvedChallenges.includes(challenge.id)}
+                            {#if challenge.static_file_url !== ''}
                                 <div class="mb-6">
-                                    <Label for="challenge-host" class="mb-2">Container running at:</Label>
-                                    <p id="challenge-host">
-                                        {deployments.find((entry) => entry.challenge_id === challenge.id)
-                                            ?.challenge_host}
-                                    </p>
-                                </div>
-                            {:else}
-                                <div class="mb-6 text-center">
-                                    <Label class="mb-2">This Challenge needs a Container</Label>
-                                    <Button
-                                        disabled={deploymentStatus[challenge.id] === 1 ||
-                                            deploymentStatus[challenge.id] === 3}
-                                        on:click={() => {
-                                            deployChallenge(challenge.id);
-                                        }}
+                                    <Label for="challenge-diff" class="mb-2">Challenge File</Label>
+                                    <div
+                                        class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center"
                                     >
-                                        {#if deploymentStatus[challenge.id] === 1}
-                                            <Spinner class="mr-3" size="4" />Starting ..
-                                        {:else}
-                                            Request
-                                        {/if}
-                                    </Button>
+                                        <DownloadSolid size="md" color="#fff" />
+                                        <a class="text-white" href={challenge.static_file_url} download
+                                            >{challenge.static_file_url
+                                                .split('/')
+                                                [challenge.static_file_url.split('/').length - 1].split('?')[0]}</a
+                                        >
+                                    </div>
                                 </div>
-                                {#if deploymentStatus[challenge.id] === 3}
-                                    <div class="mb-6 text-center" transition:slide>
+                            {/if}
+                            {#if challenge.needs_container}
+                                {#if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === false}
+                                    <div class="mb-6 text-center">
                                         <Alert class="my-2" color="green">
                                             <span class="font-bold">Queued!</span><br />
                                             Check back soon.
                                         </Alert>
                                     </div>
-                                {:else if deploymentStatus[challenge.id] === 2}
-                                    <div class="mb-6 text-center" transition:slide>
-                                        <Alert class="my-2" color="red">
-                                            <span class="font-bold">Failed!</span><br />
-                                            Contact Admin if this repeats.
-                                        </Alert>
+                                {:else if deployments.find((entry) => entry.challenge_id === challenge.id)?.is_running === true}
+                                    <div class="mb-6">
+                                        <Label for="challenge-host" class="mb-2">Container running at:</Label>
+                                        <p id="challenge-host">
+                                            {deployments.find((entry) => entry.challenge_id === challenge.id)
+                                                ?.challenge_host}
+                                        </p>
                                     </div>
+                                {:else}
+                                    <div class="mb-6 text-center">
+                                        <Label class="mb-2">This Challenge needs a Container</Label>
+                                        <Button
+                                            disabled={deploymentStatus[challenge.id] === 1 ||
+                                                deploymentStatus[challenge.id] === 3}
+                                            on:click={() => {
+                                                deployChallenge(challenge.id);
+                                            }}
+                                        >
+                                            {#if deploymentStatus[challenge.id] === 1}
+                                                <Spinner class="mr-3" size="4" />Starting ..
+                                            {:else}
+                                                Request
+                                            {/if}
+                                        </Button>
+                                    </div>
+                                    {#if deploymentStatus[challenge.id] === 3}
+                                        <div class="mb-6 text-center" transition:slide>
+                                            <Alert class="my-2" color="green">
+                                                <span class="font-bold">Queued!</span><br />
+                                                Check back soon.
+                                            </Alert>
+                                        </div>
+                                    {:else if deploymentStatus[challenge.id] === 2}
+                                        <div class="mb-6 text-center" transition:slide>
+                                            <Alert class="my-2" color="red">
+                                                <span class="font-bold">Failed!</span><br />
+                                                Contact Admin if this repeats.
+                                            </Alert>
+                                        </div>
+                                    {/if}
                                 {/if}
                             {/if}
-                        {/if}
-                        <div class="mb-6">
-                            <Label for="flag-submit" class="mb-2">Submit Flag</Label>
-                            <Input
-                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                                id="flag-submit"
-                                placeholder="TH&lcub;&rcub;"
-                                bind:value={challengeInputs[challenge.id]}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Button
-                                disabled={challengeInputs[challenge.id] === '' ||
-                                    !checkFlagInput(challengeInputs[challenge.id]) ||
-                                    successFlag[challenge.id] === 0}
-                                on:click={() =>
-                                    checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
-                                >Submit</Button
-                            >
-                        </div>
-                        {#if successFlag[challenge.id] === 0}
+                            <div class="mb-6">
+                                <Label for="flag-submit" class="mb-2">Submit Flag</Label>
+                                <Input
+                                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                    id="flag-submit"
+                                    placeholder="TH&lcub;&rcub;"
+                                    bind:value={challengeInputs[challenge.id]}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Button
+                                    disabled={challengeInputs[challenge.id] === '' ||
+                                        !checkFlagInput(challengeInputs[challenge.id]) ||
+                                        successFlag[challenge.id] === 0}
+                                    on:click={() =>
+                                        checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
+                                    >Submit</Button
+                                >
+                            </div>
+                            {#if successFlag[challenge.id] === 0}
+                                <div transition:slide>
+                                    <Alert class="my-2" color="green">
+                                        <span class="font-bold">Correct Flag!</span><br />
+                                        Congratulations.
+                                    </Alert>
+                                </div>
+                            {:else if successFlag[challenge.id] === 1}
+                                <div transition:slide>
+                                    <Alert class="my-2" color="red">
+                                        <span class="font-bold">Incorrect!</span><br />
+                                        Try again.
+                                    </Alert>
+                                </div>
+                            {/if}
+                        {:else}
                             <div transition:slide>
                                 <Alert class="my-2" color="green">
-                                    <span class="font-bold">Correct Flag!</span><br />
-                                    Congratulations.
-                                </Alert>
-                            </div>
-                        {:else if successFlag[challenge.id] === 1}
-                            <div transition:slide>
-                                <Alert class="my-2" color="red">
-                                    <span class="font-bold">Incorrect!</span><br />
-                                    Try again.
+                                    <span class="font-bold">Already Solved!</span><br />
+                                    Try some other Challenges!
                                 </Alert>
                             </div>
                         {/if}
-                    {:else}
-                        <div transition:slide>
-                            <Alert class="my-2" color="green">
-                                <span class="font-bold">Already Solved!</span><br />
-                                Try some other Challenges!
-                            </Alert>
-                        </div>
-                    {/if}
-                </Card>
-            {/each}
-        </div>
-    {/each}
+                    </Card>
+                {/each}
+            </div>
+        {/each}
+    </div>
 {:else}
-    <div class="flex flex-col flex-1 justify-center text-center w-full h-full">
+    <div class="text-center m-auto">
         <div>
             <Moon class="w-20 h-20 p-4 mx-auto text-neutral-900 dark:text-neutral-100" />
         </div>

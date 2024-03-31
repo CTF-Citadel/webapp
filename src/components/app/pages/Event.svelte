@@ -48,41 +48,41 @@
             <Spinner size={'16'} />
         </div>
     {:else if events.length > 0}
-        {#each events as event}
-            <Card
-                img="/img/banners/04.webp"
-                class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
-            >
-                <div class="mb-6">
-                    <p>Name: {event.events.event_name}</p>
-                    <p>Start: {formatToDate(event.events.event_start)}</p>
-                    <p>End: {formatToDate(event.events.event_end)}</p>
-                </div>
-                <div class="flex flex-row space-x-4">
-                    <Button
-                        class="p-0"
-                        disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
-                    >
-                        {#if validTimerange(event.events.event_start, event.events.event_end) === 0}
-                            <a class="p-3" href="/events/{event.events.id}">Challenges</a>
+        <div class="flex-1">
+            {#each events as event}
+                <Card
+                    img="/img/banners/04.webp"
+                    class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
+                >
+                    <div class="mb-6">
+                        <p>Name: {event.events.event_name}</p>
+                        <p>Start: {formatToDate(event.events.event_start)}</p>
+                        <p>End: {formatToDate(event.events.event_end)}</p>
+                    </div>
+                    <div class="flex flex-row space-x-4">
+                        <Button
+                            class="p-0"
+                            disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
+                        >
+                            {#if validTimerange(event.events.event_start, event.events.event_end) === 0}
+                                <a class="p-3" href="/events/{event.events.id}">Challenges</a>
+                                <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
+                            {:else}
+                                <p class="p-3">
+                                    {validTimerange(event.events.event_start, event.events.event_end) === 1
+                                        ? 'Upcoming'
+                                        : 'Expired'}
+                                </p>
+                            {/if}
+                        </Button>
+                        <Button class="p-0">
+                            <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
                             <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
-                        {:else}
-                            <p class="p-3">
-                                {validTimerange(event.events.event_start, event.events.event_end) === 1
-                                    ? 'Upcoming'
-                                    : 'Expired'}
-                            </p>
-                        {/if}
-                    </Button>
-                    <Button
-                        class="p-0"
-                    >
-                        <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
-                        <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
-                    </Button>
-                </div>
-            </Card>
-        {/each}
+                        </Button>
+                    </div>
+                </Card>
+            {/each}
+        </div>
     {:else}
         <div class="text-center">
             <div>
