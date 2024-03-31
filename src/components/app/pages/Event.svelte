@@ -76,7 +76,6 @@
                     </Button>
                     <Button
                         class="p-0"
-                        disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
                     >
                         <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
                         <ArrowRightOutline class="w-5 h-5 mr-2 text-white" />
