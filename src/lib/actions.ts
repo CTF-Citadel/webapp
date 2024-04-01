@@ -20,7 +20,7 @@ class Actions {
 
     /**
      * Validate if an event exists by id
-     * @return True if it exists, False if it doesn't
+     * @returns True if it exists, False if it doesn't
      */
     async checkEventExist(eventID: string) {
         const RES = await DB_ADAPTER.select().from(events).where(eq(events.id, eventID));
@@ -28,19 +28,26 @@ class Actions {
     }
 
     /**
-     * Validate if an event exists by username and email
-     * @return True if it exists, False if it doesn't
+     * Validate if a user exists by id
+     * @returns True if he exists, False if he doesn't
      */
-    async checkUserExist(userName: string, userEmail: string) {
-        const RES_NAME = await DB_ADAPTER.select().from(users).where(eq(users.id, userName));
-        if (RES_NAME.length === 0) return false;
-        const RES_EMAIL = await DB_ADAPTER.select().from(users).where(eq(users.email, userEmail));
-        return RES_EMAIL.length === 0 ? false : true;
+    async checkUserExist(userID: string) {
+        const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID));
+        return RES.length === 0 ? false : true;
+    }
+
+    /**
+     * Validate if a team exists by id
+     * @returns True if it exists, False if it doesn't
+     */
+    async checkTeamExist(teamID: string) {
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
+        return RES.length === 0 ? false : true;
     }
 
     /**
      * Validate if a team exists by name
-     * @return The team's ID if exists, False if it doesn't
+     * @returns The team's ID if exists, False if it doesn't
      */
     async checkTeamNameExist(teamName: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName));
@@ -49,7 +56,7 @@ class Actions {
 
     /**
      * Validate if a team token is valid and corresponds to a team
-     * @return The team's ID if exists and valid, else false
+     * @returns The team's ID if exists and valid, else false
      */
     async checkTeamToken(teamToken: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, teamToken));
@@ -58,7 +65,7 @@ class Actions {
 
     /**
      * Validate if a user has created a team
-     * @return True if the user has, false if he hasn't
+     * @returns True if the user has, false if he hasn't
      */
     async checkHasCreatedTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_creator, userID));
@@ -67,7 +74,7 @@ class Actions {
 
     /**
      * Validate if a user is currently in a team
-     * @return The team's ID if user is, false if he isn't
+     * @returns The team's ID if user is, false if he isn't
      */
     async checkUserInTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID));
@@ -78,7 +85,7 @@ class Actions {
 
     /**
      * Fetches all Users
-     * @return List of Users
+     * @returns List of Users
      */
     async getAllUsers() {
         const RES = await DB_ADAPTER.select().from(users);
@@ -87,7 +94,7 @@ class Actions {
 
     /**
      * Fetches all Teams
-     * @return List of Teams
+     * @returns List of Teams
      */
     async getAllTeams() {
         const RES = await DB_ADAPTER.select().from(teams);
@@ -96,7 +103,7 @@ class Actions {
 
     /**
      * Fetches Team Info with specific ID
-     * @return Team Dict if found, else null
+     * @returns Team Dict if found, else null
      */
     async getTeamInfo(teamID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
@@ -105,7 +112,7 @@ class Actions {
 
     /**
      * Fetches sanitized Teams
-     * @return List sanitized of Teams
+     * @returns List sanitized of Teams
      */
     async getTeamLisitng() {
         const RES = await DB_ADAPTER.select({
@@ -118,7 +125,7 @@ class Actions {
 
     /**
      * Fetches Team Members of Team with ID
-     * @return List of Team Members
+     * @returns List of Team Members
      */
     async getTeamMembers(teamID: string) {
         const RES = await DB_ADAPTER.select({
@@ -134,7 +141,7 @@ class Actions {
 
     /**
      * Fetches all Events
-     * @return List of Events
+     * @returns List of Events
      */
     async getAllEvents() {
         const RES = await DB_ADAPTER.select().from(events);
@@ -143,7 +150,7 @@ class Actions {
 
     /**
      * Fetches all Assigned Events
-     * @return List of Events
+     * @returns List of Events
      */
     async getAllTeamEvents() {
         const RES = await DB_ADAPTER.select().from(team_events);
@@ -152,7 +159,7 @@ class Actions {
 
     /**
      * Fetches all Challenges
-     * @return List of Challenges
+     * @returns List of Challenges
      */
     async getAllChallenges() {
         const RES = await DB_ADAPTER.select().from(challenges);
@@ -161,7 +168,7 @@ class Actions {
 
     /**
      * Fetches Events assigned to a Team ID
-     * @return List of Events
+     * @returns List of Events
      */
     async getTeamEvents(teamID: string) {
         const EVENTS = await DB_ADAPTER.select()
@@ -173,7 +180,7 @@ class Actions {
 
     /**
      * Fetches solved Challenges assigned to a Team ID
-     * @return List of Challenge ID's
+     * @returns List of Challenge ID's
      */
     async getTeamSolvedChallenges(teamID: string) {
         const RES = await DB_ADAPTER.select({
@@ -186,7 +193,7 @@ class Actions {
 
     /**
      * Fetches Challenges assigned to Event ID
-     * @return List of Challenges
+     * @returns List of Challenges
      */
     async getEventChallenges(eventID: string, teamID: string) {
         const RES_CHALLS = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID));
@@ -213,7 +220,7 @@ class Actions {
 
     /**
      * Fetches Points per Team based on Event ID
-     * @return
+     * @returns
      * ```
      * {
      *     id: string | null;
@@ -238,7 +245,7 @@ class Actions {
 
     /**
      * Fetches Points per User based on Event ID
-     * @return
+     * @returns
      * ```
      * {
      *     id: string | null;
@@ -263,7 +270,7 @@ class Actions {
 
     /**
      * Fetches Solves per Team based on Event ID
-     * @return
+     * @returns
      * ```
      * {
      *     id: string | null;
@@ -291,7 +298,7 @@ class Actions {
 
     /**
      * Fetches Points for a single Team based on Event ID
-     * @return Number of points or zero
+     * @returns Number of points or zero
      */
     async getSingleTeamPointsByEvent(teamID: string, eventID: string) {
         const RES = await DB_ADAPTER.select({
@@ -312,7 +319,7 @@ class Actions {
 
     /**
      * Creates a new Challenge
-     * @return void
+     * @returns void
      */
     async createChallenge(
         name: string,
@@ -347,7 +354,7 @@ class Actions {
 
     /**
      * Checks if a specific Challenge is deployed and running
-     * @return true if deployed, false if not
+     * @returns true if deployed, false if not
      */
     async checkDeployedChallenge(teamID: string, challengeID: string, eventID: string): Promise<boolean> {
         const RES = await DB_ADAPTER.select()
@@ -367,7 +374,7 @@ class Actions {
 
     /**
      * Get all currently deployed or initiated Challenges per Event and Team ID
-     * @return List of cut down info, zero length if no found
+     * @returns List of cut down info, zero length if no found
      */
     async getDeployedChallenge(teamID: string, eventID: string) {
         const RES = await DB_ADAPTER.select({
@@ -390,7 +397,7 @@ class Actions {
 
     /**
      * Deploys a new Challenge
-     * @return true if deployed, false if not
+     * @returns true if deployed, false if not
      */
     async deployTeamChallenge(genFlag: string, teamID: string, challengeID: string, eventID: string): Promise<boolean> {
         const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID));
@@ -464,7 +471,7 @@ class Actions {
 
     /**
      * Checks a Flag for its validity
-     * @return true if the flag matches, false if it doesnt
+     * @returns true if the flag matches, false if it doesnt
      */
     async checkChallengeFlag(
         teamID: string,
@@ -527,7 +534,7 @@ class Actions {
 
     /**
      * Checks a static Flag for its validity
-     * @return true if the flag matches, false if it doesnt
+     * @returns true if the flag matches, false if it doesnt
      */
     async checkStaticChallengeFlag(
         teamID: string,
@@ -571,7 +578,7 @@ class Actions {
 
     /**
      * Creates a new event
-     * @return void
+     * @returns void
      */
     async createEvent(eventName: string, eventDesc: string, eventStart: number, eventEnd: number) {
         await DB_ADAPTER.insert(events).values({
@@ -585,7 +592,7 @@ class Actions {
 
     /**
      * Assigns an event per ID to a list of Teams
-     * @return void
+     * @returns void
      */
     async createTeamEvent(eventID: string, teamsList: string[]) {
         for (let team of teamsList) {
@@ -598,7 +605,7 @@ class Actions {
 
     /**
      * Creates a new Team
-     * @return void
+     * @returns void
      */
     async createTeam(userID: string, teamName: string, teamDesc: string, teamCountry: string) {
         const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length
@@ -617,7 +624,7 @@ class Actions {
 
     /**
      * Validates and adds a user to a team
-     * @return void
+     * @returns void
      */
     async joinTeam(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -632,7 +639,7 @@ class Actions {
 
     /**
      * Resets a team's join token by ID
-     * @return void
+     * @returns void
      */
     async resetTeamToken(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -650,7 +657,7 @@ class Actions {
 
     /**
      * Validates and removes a user from his team
-     * @return void
+     * @returns void
      */
     async leaveTeam(sessionID: string, teamID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -673,7 +680,7 @@ class Actions {
 
     /**
      * Updates an Event's properties
-     * @return void
+     * @returns void
      */
     async updateEvent(eventID: string, eventName: string, eventDesc: string) {
         await DB_ADAPTER.update(events)
@@ -686,7 +693,7 @@ class Actions {
 
     /**
      * Updates a Challenge's properties
-     * @return void
+     * @returns void
      */
     async updateChallenge(
         id: string,
@@ -712,7 +719,7 @@ class Actions {
 
     /**
      * Updates a Users properties
-     * @return void
+     * @returns void
      */
     async updateUser(userID: string, userEmail: string, isVerified: boolean) {
         await DB_ADAPTER.update(users)
@@ -725,7 +732,7 @@ class Actions {
 
     /**
      * Deletes a Team Event per ID
-     * @return void
+     * @returns void
      */
     async deleteTeamEvent(eventID: string, teamID: string) {
         await DB_ADAPTER.delete(team_events).where(
@@ -735,7 +742,7 @@ class Actions {
 
     /**
      * Deletes a Team per ID
-     * @return void
+     * @returns void
      */
     async deleteTeam(teamID: string) {
         await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
@@ -753,7 +760,7 @@ class Actions {
 
     /**
      * Deletes a User per ID
-     * @return void
+     * @returns void
      */
     async deleteUser(userID: string) {
         // remove user data
@@ -764,7 +771,7 @@ class Actions {
 
     /**
      * Deletes a Challenge per ID
-     * @return void
+     * @returns void
      */
     async deleteChallenge(challengeID: string) {
         const CHALLENGE = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
@@ -779,7 +786,7 @@ class Actions {
 
     /**
      * Toggles Blocking of a user per ID
-     * @return void
+     * @returns void
      */
     async toggleBlockUser(userID: string) {
         const RES = (await DB_ADAPTER.select().from(users).where(eq(users.id, userID))).at(0);
@@ -803,7 +810,7 @@ class Actions {
 
     /**
      * Deletes an event per ID
-     * @return void
+     * @returns void
      */
     async deleteEvent(eventID: string) {
         const ACTIVE_CHALLENGES = (
