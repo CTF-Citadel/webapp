@@ -28,7 +28,7 @@
     }
 </script>
 
-<div class="flex flex-col flex-grow flex-1 max-w-8/10">
+<div class="flex flex-col flex-grow flex-1 max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />

@@ -191,7 +191,7 @@
     }
 </script>
 
-<div style="width: 80%;">
+<div class="flex-1 max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center mt-10">
             <Spinner size={'16'} />

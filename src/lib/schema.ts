@@ -91,10 +91,7 @@ export const team_events = pgTable(
             .notNull(),
         event_id: text('event_id')
             .references(() => events.id)
-            .notNull(),
-        team_points: bigint('team_points', {
-            mode: 'number'
-        }).notNull()
+            .notNull()
     },
     (table) => {
         return {

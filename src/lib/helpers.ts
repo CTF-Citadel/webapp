@@ -19,6 +19,10 @@ export function isWithinExpiration(expiryUnixEpoch: number) {
     return Date.now() < expiryUnixEpoch ? true : false;
 }
 
+export function validJoinToken(input: string): boolean {
+    return /^[a-zA-Z0-9_]{4,24}$/.test(input);
+}
+
 export function validUsername(input: string): boolean {
     return /^[a-zA-Z0-9_]{4,24}$/.test(input);
 }

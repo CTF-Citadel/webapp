@@ -64,11 +64,16 @@
         } else successFlag[challenge_id] = 1;
         setTimeout(async () => {
             successFlag[challenge_id] = -1;
+            await refreshChallenges().finally(() => {
+                sortByCategory(challenges);
+            });
             await refreshSolvedChallenges();
         }, 2000);
     }
 
     function sortByCategory(data: ChallengesType[]) {
+        // clear array
+        categories = {};
         // Category Sorting
         data.forEach((item) => {
             if (!categories[item.challenge_category]) {
@@ -130,6 +135,12 @@
         } else {
             deploymentStatus[challenge_id] = 2;
         }
+        setTimeout(async () => {
+            await refreshChallenges().finally(() => {
+                sortByCategory(challenges);
+            });
+            await refreshDeployedChallenges();
+        }, 2000);
     }
 </script>
 
@@ -138,13 +149,13 @@
         <Spinner size={'16'} />
     </div>
 {:else if challenges.length > 0}
-    <div class="flex-1">
+    <div class="flex-1 max-w-screen-2xl px-4">
         {#each Object.entries(categories) as [key, value]}
             <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
                 <span class="italic text-neutral-500 opacity-50">#</span>
                 {key}
             </h1>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start m-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start">
                 {#each value as challenge}
                     <Card
                         style="border-color: {challenge.challenge_difficulty === 'Easy'
@@ -219,22 +230,7 @@
                                         </p>
                                     </div>
                                 {:else}
-                                    <div class="mb-6 text-center">
-                                        <Label class="mb-2">This Challenge needs a Container</Label>
-                                        <Button
-                                            disabled={deploymentStatus[challenge.id] === 1 ||
-                                                deploymentStatus[challenge.id] === 3}
-                                            on:click={() => {
-                                                deployChallenge(challenge.id);
-                                            }}
-                                        >
-                                            {#if deploymentStatus[challenge.id] === 1}
-                                                <Spinner class="mr-3" size="4" />Starting ..
-                                            {:else}
-                                                Request
-                                            {/if}
-                                        </Button>
-                                    </div>
+                                    
                                     {#if deploymentStatus[challenge.id] === 3}
                                         <div class="mb-6 text-center" transition:slide>
                                             <Alert class="my-2" color="green">
@@ -248,6 +244,23 @@
                                                 <span class="font-bold">Failed!</span><br />
                                                 Contact Admin if this repeats.
                                             </Alert>
+                                        </div>
+                                    {:else}
+                                        <div class="mb-6 text-center" transition:slide>
+                                            <Label class="mb-2">This Challenge needs a Container</Label>
+                                            <Button
+                                                disabled={deploymentStatus[challenge.id] === 1 ||
+                                                    deploymentStatus[challenge.id] === 3}
+                                                on:click={() => {
+                                                    deployChallenge(challenge.id);
+                                                }}
+                                            >
+                                                {#if deploymentStatus[challenge.id] === 1}
+                                                    <Spinner class="mr-3" size="4" />Requesting ..
+                                                {:else}
+                                                    Request
+                                                {/if}
+                                            </Button>
                                         </div>
                                     {/if}
                                 {/if}

@@ -206,10 +206,7 @@ class DatabaseActions {
                     challenge.depends_on === '' || RES_SOLVED.map((chall) => chall.id).includes(challenge.depends_on)
             );
         } else {
-            resSanitized = resSanitized.filter(
-                (challenge) =>
-                    challenge.depends_on === ''
-            );
+            resSanitized = resSanitized.filter((challenge) => challenge.depends_on === '');
         }
         return resSanitized.length > 0 ? resSanitized : [];
     }
@@ -366,7 +363,6 @@ class DatabaseActions {
             );
         return RES.length > 0 ? true : false;
         // @TODO: Check if still running by fetching backend
-        // fetch(BACKEND) ...
     }
 
     /**
@@ -425,7 +421,8 @@ class DatabaseActions {
                     environment_variables: JSON.stringify({
                         FLAG: genFlag
                     })
-                })
+                }),
+                signal: AbortSignal.timeout(90000)
             })
                 .then(async (REQ) => {
                     // on success update the challenge
@@ -486,18 +483,45 @@ class DatabaseActions {
             RES[0].is_running === true &&
             RES[0].challenge_flag === EXTRACTED_FLAG
         ) {
-            // @TODO: Maybe close the container here
-            // fetch(BACKEND) ...
             await DB_ADAPTER.update(team_challenges)
                 .set({
                     solved_by: userID,
                     solved_at: timestamp,
-                    is_solved: true,
-                    is_running: false
+                    is_solved: true
                 })
                 .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
+            // shut down the container
+            fetch(`${this.#BACKEND_URL}/container?container_id=${RES[0].challenge_uuid}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                signal: AbortSignal.timeout(10000)
+            })
+                .then(async (response) => {
+                    // container is down
+                    if (response.ok) {
+                        await DB_ADAPTER.update(team_challenges)
+                            .set({
+                                is_running: false
+                            })
+                            .where(
+                                and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID))
+                            );
+                    }
+                })
+                .catch(async (e) => {
+                    // something went wrong
+                    if (e instanceof Error) {
+                        console.error(e.message);
+                    } else {
+                        console.error((e as Error).message);
+                    }
+                });
+            // flag is valid
             return true;
         }
+        // flag is not valid
         return false;
     }
 
@@ -538,8 +562,10 @@ class DatabaseActions {
                 is_running: false,
                 is_solved: true
             });
+            // flag is valid
             return true;
         }
+        // flag is not valid
         return false;
     }
 
@@ -565,8 +591,7 @@ class DatabaseActions {
         for (let team of teams) {
             await DB_ADAPTER.insert(team_events).values({
                 team_id: team,
-                event_id: eventID,
-                team_points: 0
+                event_id: eventID
             });
         }
     }

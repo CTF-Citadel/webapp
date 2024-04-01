@@ -7,7 +7,7 @@
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
 </script>
 
-<div class="flex flex-1 flex-col justify-center max-w-8/10">
+<div class="flex flex-1 flex-col justify-center max-w-screen-2xl px-4">
     <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
         <span class="italic text-neutral-500 opacity-50">#</span>
         DASHBOARD

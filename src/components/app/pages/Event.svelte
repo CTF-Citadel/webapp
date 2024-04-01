@@ -42,13 +42,13 @@
     }
 </script>
 
-<div class="flex flex-col 2xl:flex-row">
+<div class="flex flex-col 2xl:flex-row max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />
         </div>
     {:else if events.length > 0}
-        <div class="flex-1">
+        <div class="flex flex-1 flex-col lg:flex-row">
             {#each events as event}
                 <Card
                     img="/img/banners/04.webp"

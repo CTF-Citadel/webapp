@@ -242,7 +242,7 @@
     Main Tab
 -->
 
-<div class="w-full h-full flex-1">
+<div class="w-full h-full flex-1 max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />
@@ -450,7 +450,6 @@
                         <TableHead>
                             <TableHeadCell>Team ID</TableHeadCell>
                             <TableHeadCell>Event ID</TableHeadCell>
-                            <TableHeadCell>Current Score</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
                         <TableBody>
@@ -461,9 +460,6 @@
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.team_points}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button

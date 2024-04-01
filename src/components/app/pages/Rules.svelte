@@ -8,7 +8,7 @@
     export let discord: string = '';
 </script>
 
-<div class="flex flex-1 flex-col w-full max-w-screen-lg p-4">
+<div class="flex flex-1 flex-col w-full max-w-screen-2xl px-4">
     <div class="flex flex-col mb-4">
         <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
             <span class="italic text-neutral-500 opacity-50">#</span>

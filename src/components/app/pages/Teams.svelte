@@ -233,7 +233,7 @@
     Main
 -->
 
-<div class="flex flex-col flex-grow flex-1 max-w-8/10">
+<div class="flex flex-col flex-1 max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />
@@ -305,7 +305,7 @@
                                     Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                                 </Button>
                             {/if}
-                            <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={teamMembers.length > 1}>
+                            <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator}>
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>
                         </div>

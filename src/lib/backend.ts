@@ -154,7 +154,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     json.data.teamID,
                     json.data.challengeID,
                     json.data.flag,
-                    json.data.user,
+                    json.data.userID,
                     TIMESTAMP
                 );
                 if (response) {
