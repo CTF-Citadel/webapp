@@ -1,9 +1,9 @@
-import DatabaseActions from './actions';
-import AntiCheatHandler from './anticheat';
+import Actions from './actions';
+import AntiCheat from './anticheat';
 
-const AC_ENABLE = Boolean(process.env.AC_ENABLE) || false;
-const AC = new AntiCheatHandler();
-const HANLDER = new DatabaseActions();
+const AC_ENABLE = Boolean(process.env.M0N1T0R_ENABLE) || false;
+const AC = new AntiCheat();
+const HANLDER = new Actions();
 
 export type WrapperFormat = {
     type: string;
@@ -24,7 +24,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
     let json: WrapperFormat;
     let response: any = '';
     let errorStatus: boolean = false;
-    // evaluate base request
+
     try {
         json = (await request.json()) as WrapperFormat;
     } catch (e: unknown) {
@@ -41,7 +41,7 @@ export async function normalWrapper(request: Request): Promise<Response> {
             })
         );
     }
-    // match the request type
+
     try {
         switch (json.type) {
             case 'teams':
@@ -225,6 +225,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             })
         );
     }
+
     try {
         switch (json.type) {
             case 'users':
@@ -300,7 +301,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.deleteUser(json.data.id);
                 break;
             case 'block-user':
-                response = await HANLDER.blockUser(json.data.id);
+                response = await HANLDER.toggleBlockUser(json.data.id);
                 break;
             case 'delete-team':
                 response = await HANLDER.deleteTeam(json.data.id);

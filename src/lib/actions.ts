@@ -12,7 +12,7 @@ const BACKEND_PORT = process.env.BACKEND_PORT;
 /**
  * Handler for Database related actions
  */
-class DatabaseActions {
+class Actions {
     #BACKEND_URL: string;
     constructor() {
         this.#BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
@@ -22,8 +22,8 @@ class DatabaseActions {
      * Validate if an event exists by id
      * @return True if it exists, False if it doesn't
      */
-    async checkEventExist(event_id: string) {
-        const RES = await DB_ADAPTER.select().from(events).where(eq(events.id, event_id));
+    async checkEventExist(eventID: string) {
+        const RES = await DB_ADAPTER.select().from(events).where(eq(events.id, eventID));
         return RES.length === 0 ? false : true;
     }
 
@@ -51,8 +51,8 @@ class DatabaseActions {
      * Validate if a team token is valid and corresponds to a team
      * @return The team's ID if exists and valid, else false
      */
-    async checkTeamToken(token: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, token));
+    async checkTeamToken(teamToken: string) {
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, teamToken));
         return RES.length === 0 ? false : RES[0].id;
     }
 
@@ -222,7 +222,7 @@ class DatabaseActions {
      * }[]
      * ```
      */
-    async getTeamPointsByEvent(event_id: string) {
+    async getTeamPointsByEvent(eventID: string) {
         const RES = await DB_ADAPTER.select({
             id: team_challenges.team_id,
             name: teams.team_name,
@@ -231,7 +231,7 @@ class DatabaseActions {
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
-            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id, teams.team_name);
         return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
     }
@@ -247,7 +247,7 @@ class DatabaseActions {
      * }[]
      * ```
      */
-    async getUserPointsByEvent(event_id: string) {
+    async getUserPointsByEvent(eventID: string) {
         const RES = await DB_ADAPTER.select({
             id: users.id,
             name: users.username,
@@ -256,7 +256,7 @@ class DatabaseActions {
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(users, eq(team_challenges.solved_by, users.id))
-            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
             .groupBy(users.id);
         return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
     }
@@ -273,7 +273,7 @@ class DatabaseActions {
      * }[]
      * ```
      */
-    async getAllSolvesByEvent(event_id: string) {
+    async getAllSolvesByEvent(eventID: string) {
         const RES = await DB_ADAPTER.select({
             id: team_challenges.team_id,
             name: teams.team_name,
@@ -284,7 +284,7 @@ class DatabaseActions {
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
-            .where(and(eq(team_challenges.event_id, event_id), eq(team_challenges.is_solved, true)))
+            .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id, teams.team_name, challenges.base_points, team_challenges.solved_at);
         return RES.length > 0 ? RES : [];
     }
@@ -293,7 +293,7 @@ class DatabaseActions {
      * Fetches Points for a single Team based on Event ID
      * @return Number of points or zero
      */
-    async getSingleTeamPointsByEvent(team_id: string, event_id: string) {
+    async getSingleTeamPointsByEvent(teamID: string, eventID: string) {
         const RES = await DB_ADAPTER.select({
             points: sql<number>`cast(sum(${challenges.base_points}) as int)`
         })
@@ -301,8 +301,8 @@ class DatabaseActions {
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .where(
                 and(
-                    eq(team_challenges.event_id, event_id),
-                    eq(team_challenges.team_id, team_id),
+                    eq(team_challenges.event_id, eventID),
+                    eq(team_challenges.team_id, teamID),
                     eq(team_challenges.is_solved, true)
                 )
             )
@@ -349,14 +349,14 @@ class DatabaseActions {
      * Checks if a specific Challenge is deployed and running
      * @return true if deployed, false if not
      */
-    async checkDeployedChallenge(team_id: string, challenge_id: string, event_id: string): Promise<boolean> {
+    async checkDeployedChallenge(teamID: string, challengeID: string, eventID: string): Promise<boolean> {
         const RES = await DB_ADAPTER.select()
             .from(team_challenges)
             .where(
                 and(
-                    eq(team_challenges.challenge_id, challenge_id),
-                    eq(team_challenges.team_id, team_id),
-                    eq(team_challenges.event_id, event_id),
+                    eq(team_challenges.challenge_id, challengeID),
+                    eq(team_challenges.team_id, teamID),
+                    eq(team_challenges.event_id, eventID),
                     eq(team_challenges.is_running, true),
                     eq(team_challenges.is_solved, false)
                 )
@@ -573,13 +573,13 @@ class DatabaseActions {
      * Creates a new event
      * @return void
      */
-    async createEvent(name: string, desc: string, start: number, end: number) {
+    async createEvent(eventName: string, eventDesc: string, eventStart: number, eventEnd: number) {
         await DB_ADAPTER.insert(events).values({
             id: crypto.randomUUID(),
-            event_name: name,
-            event_description: desc,
-            event_start: start,
-            event_end: end
+            event_name: eventName,
+            event_description: eventDesc,
+            event_start: eventStart,
+            event_end: eventEnd
         });
     }
 
@@ -587,8 +587,8 @@ class DatabaseActions {
      * Assigns an event per ID to a list of Teams
      * @return void
      */
-    async createTeamEvent(eventID: string, teams: string[]) {
-        for (let team of teams) {
+    async createTeamEvent(eventID: string, teamsList: string[]) {
+        for (let team of teamsList) {
             await DB_ADAPTER.insert(team_events).values({
                 team_id: team,
                 event_id: eventID
@@ -600,15 +600,19 @@ class DatabaseActions {
      * Creates a new Team
      * @return void
      */
-    async createTeam(userID: string, name: string, desc: string, country: string) {
-        await DB_ADAPTER.insert(teams).values({
-            id: crypto.randomUUID(),
-            team_creator: userID,
-            team_join_token: 'CTD-' + generateRandomString(16).toUpperCase(),
-            team_name: name,
-            team_description: desc,
-            team_country_code: country
-        });
+    async createTeam(userID: string, teamName: string, teamDesc: string, teamCountry: string) {
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length
+        // only create if name is unique
+        if (TEAMS_WITH_NAME === 0) {
+            await DB_ADAPTER.insert(teams).values({
+                id: crypto.randomUUID(),
+                team_creator: userID,
+                team_join_token: 'CTD-' + generateRandomString(16).toUpperCase(),
+                team_name: teamName,
+                team_description: teamDesc,
+                team_country_code: teamCountry
+            });
+        }
     }
 
     /**
@@ -671,13 +675,13 @@ class DatabaseActions {
      * Updates an Event's properties
      * @return void
      */
-    async updateEvent(id: string, name: string, desc: string) {
+    async updateEvent(eventID: string, eventName: string, eventDesc: string) {
         await DB_ADAPTER.update(events)
             .set({
-                event_name: name,
-                event_description: desc
+                event_name: eventName,
+                event_description: eventDesc
             })
-            .where(eq(events.id, id));
+            .where(eq(events.id, eventID));
     }
 
     /**
@@ -710,13 +714,13 @@ class DatabaseActions {
      * Updates a Users properties
      * @return void
      */
-    async updateUser(id: string, new_email: string, verified: boolean) {
+    async updateUser(userID: string, userEmail: string, isVerified: boolean) {
         await DB_ADAPTER.update(users)
             .set({
-                email: new_email,
-                is_verified: verified
+                email: userEmail,
+                is_verified: isVerified
             })
-            .where(eq(users.id, id));
+            .where(eq(users.id, userID));
     }
 
     /**
@@ -733,9 +737,9 @@ class DatabaseActions {
      * Deletes a Team per ID
      * @return void
      */
-    async deleteTeam(id: string) {
-        await DB_ADAPTER.delete(teams).where(eq(teams.id, id));
-        const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, id));
+    async deleteTeam(teamID: string) {
+        await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
+        const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID));
         REF_USERS.forEach(async (user) => {
             await lucia.invalidateUserSessions(user.id);
             await DB_ADAPTER.update(users)
@@ -751,9 +755,10 @@ class DatabaseActions {
      * Deletes a User per ID
      * @return void
      */
-    async deleteUser(id: string) {
-        await lucia.invalidateUserSessions(id);
-        await DB_ADAPTER.delete(users).where(eq(users.id, id));
+    async deleteUser(userID: string) {
+        // remove user data
+        await lucia.invalidateUserSessions(userID);
+        await DB_ADAPTER.delete(users).where(eq(users.id, userID));
         await lucia.deleteExpiredSessions();
     }
 
@@ -761,30 +766,38 @@ class DatabaseActions {
      * Deletes a Challenge per ID
      * @return void
      */
-    async deleteChallenge(id: string) {
-        await DB_ADAPTER.delete(team_challenges).where(eq(team_challenges.challenge_id, id));
-        await DB_ADAPTER.delete(challenges).where(eq(challenges.id, id));
+    async deleteChallenge(challengeID: string) {
+        const CHALLENGE = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
+        const ACTIVE_CHALLENGES = (
+            await DB_ADAPTER.select().from(team_challenges).where(eq(team_challenges.challenge_id, challengeID))
+        ).length;
+        // only allow deletion if challenge is not bound
+        if (CHALLENGE !== undefined && ACTIVE_CHALLENGES === 0) {
+            await DB_ADAPTER.delete(challenges).where(eq(challenges.id, CHALLENGE.id));
+        }
     }
 
     /**
-     * Blocks a user per ID
+     * Toggles Blocking of a user per ID
      * @return void
      */
-    async blockUser(id: string) {
-        const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, id));
-        await lucia.invalidateUserSessions(id);
-        if (RES[0].is_blocked) {
-            await DB_ADAPTER.update(users)
-                .set({
-                    is_blocked: false
-                })
-                .where(eq(users.id, id));
-        } else {
-            await DB_ADAPTER.update(users)
-                .set({
-                    is_blocked: true
-                })
-                .where(eq(users.id, id));
+    async toggleBlockUser(userID: string) {
+        const RES = (await DB_ADAPTER.select().from(users).where(eq(users.id, userID))).at(0);
+        await lucia.invalidateUserSessions(userID);
+        if (RES !== undefined) {
+            if (RES.is_blocked) {
+                await DB_ADAPTER.update(users)
+                    .set({
+                        is_blocked: false
+                    })
+                    .where(eq(users.id, RES.id));
+            } else {
+                await DB_ADAPTER.update(users)
+                    .set({
+                        is_blocked: true
+                    })
+                    .where(eq(users.id, RES.id));
+            }
         }
     }
 
@@ -792,14 +805,17 @@ class DatabaseActions {
      * Deletes an event per ID
      * @return void
      */
-    async deleteEvent(id: string) {
-        await DB_ADAPTER.delete(events).where(eq(events.id, id));
-        // @TODO: Event Deletion should prune:
-        // team_challenges since it could contain
-        // refs to old events
-        // We also need to delete any other event
-        // referenced data here
+    async deleteEvent(eventID: string) {
+        const ACTIVE_CHALLENGES = (
+            await DB_ADAPTER.select().from(team_challenges).where(eq(team_challenges.event_id, eventID))
+        ).length;
+        const PASSIVE_CHALLENGES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID)))
+            .length;
+        // allow deletion only if the event is bound to nothing
+        if (ACTIVE_CHALLENGES === 0 && PASSIVE_CHALLENGES === 0) {
+            await DB_ADAPTER.delete(events).where(eq(events.id, eventID));
+        }
     }
 }
 
-export default DatabaseActions;
+export default Actions;

@@ -1,8 +1,8 @@
 // read from env
-const AC_HOST = process.env.AC_HOST;
-const AC_PORT = process.env.AC_PORT;
+const AC_HOST = process.env.M0N1T0R_HOST;
+const AC_PORT = process.env.M0N1T0R_PORT;
 
-class AntiCheatHandler {
+class AntiCheat {
     #AC_URL: string;
     constructor() {
         this.#AC_URL = `http://${AC_HOST}:${AC_PORT}`;
@@ -64,4 +64,4 @@ class AntiCheatHandler {
     }
 }
 
-export default AntiCheatHandler;
+export default AntiCheat;

@@ -1,5 +1,6 @@
 version: '3'
 services:
+  # Proxy
   nginx:
     image: docker.io/library/nginx:latest
     hostname: nginx
@@ -12,36 +13,101 @@ services:
     environment:
       TZ: Europe/Vienna
     restart: unless-stopped
-  postgres:
+    profiles:
+      - full
+      - standalone
+      - anticheat
+      - firstblood
+  # WebApp
+  postgres-webapp:
     image: docker.io/library/postgres:latest
-    hostname: postgres
+    hostname: postgres-webapp
     environment:
+      TZ: Europe/Vienna
       POSTGRES_USER: 'root'
       POSTGRES_PASSWORD: 'CHANGEME'
-      POSTGRES_DB: 'citadel'
-      TZ: Europe/Vienna
+      POSTGRES_DB: 'webapp'
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - ./data/postgres-webapp:/var/lib/postgresql/data
     restart: unless-stopped
-  astro:
-    image: ghcr.io/ctf-citadel/webapp:main
-    hostname: astro
+    profiles:
+      - full
+      - standalone
+      - anticheat
+      - firstblood
+  webapp:
+    image: ghcr.io/ctf-citadel/webapp:latest
+    hostname: webapp
     environment:
+      TZ: Europe/Vienna
+      DB_HOST: 'postgres-webapp'
+      DB_NAME: 'webapp'
+      DB_USER: 'root'
+      DB_PASS: 'CHANGEME'
+      # deployment endpoint
+      BACKEND_HOST: 'remote.example.com'
+      BACKEND_PORT: 443
+      # anticheat endpoint
+      M0N1T0R_ENABLE: false
+      M0N1T0R_HOST: 'm0n1t0r'
+      M0N1T0R_PORT: 9999
+      # reporter endpoint
+      F1RSTBL00D_ENABLE: false
+      F1RSTBL00D_HOST: 'f1rstbl00d'
+      F1RSTBL00D_PORT: 80
+      # platform specific
       INSTANCE_NAME: 'testCTF'
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
-      DB_HOST: 'postgres'
-      DB_NAME: 'citadel'
-      DB_USER: 'root'
-      DB_PASS: 'CHANGEME'
-      BACKEND_HOST: '127.0.0.1'
-      BACKEND_PORT: 8080
-      AC_ENABLE: false
-      AC_HOST: '127.0.0.1'
-      AC_PORT: 8080
       DISABLE_EMAIL_VERIFY: false
       ENFORCE_EMAIL_DOMAIN: false
       ENFORCE_DOMAIN: 'example.com'
-      TZ: Europe/Vienna
     restart: unless-stopped
+    profiles:
+      - full
+      - standalone
+      - anticheat
+      - firstblood
+  # AntiCheat
+  postgres-m0n1t0r:
+    image: docker.io/library/postgres:latest
+    hostname: postgres-m0n1t0r
+    environment:
+      TZ: Europe/Vienna
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'CHANGEME'
+      POSTGRES_DB: 'm0n1t0r'
+    volumes:
+      - ./data/postgres-m0n1t0r:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - full
+      - anticheat
+  m0n1t0r:
+    image: ghcr.io/ctf-citadel/m0n1t0r:latest
+    hostname: m0n1t0r
+    environment:
+      TZ: Europe/Vienna
+      DB_NAME: 'm0n1t0r'
+      DB_HOST: 'postgres-m0n1t0r'
+      DB_USER: 'root'
+      DB_PASSWORD: 'CHANGEME'
+    restart: unless-stopped
+    profiles:
+      - full
+      - anticheat
+  # Reporter
+  f1rstbl00d:
+    image: ghcr.io/ctf-citadel/f1rstbl00d:latest
+    hostname: f1rstbl00d
+    environment:
+      TZ: Europe/Vienna
+      BLOODTOKEN: 'CHANGEME'
+      DISCORD_TOKEN: 'CHANGEME'
+      DISCORD_CHANNEL_ID: 1234567890
+    volumes:
+      - ./data/sqlite-f1rstbl00d:/app/data
+    profiles:
+      - full
+      - firstblood
