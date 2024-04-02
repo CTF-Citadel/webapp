@@ -37,7 +37,7 @@
     let hasCreated = false;
     let thisTeam: TeamsType;
     let teamMembers: { id: string; username: string; user_avatar: string; user_affiliation: string }[] = [];
-    let teams: { team_name: string; team_description: string; team_country_code: string }[] = [];
+    let teams: { id: string; team_name: string; team_description: string; team_country_code: string }[] = [];
     let inputs = {
         teamToken: '',
         teamName: '',
@@ -305,7 +305,12 @@
                                     Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                                 </Button>
                             {/if}
-                            <Button size="lg" class="mt-4" on:click={leaveTeam} disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator}>
+                            <Button
+                                size="lg"
+                                class="mt-4"
+                                on:click={leaveTeam}
+                                disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator}
+                            >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>
                         </div>
@@ -319,7 +324,11 @@
                 OTHER TEAMS
             </h1>
             {#if teams.length > 0}
-                <Table color="custom" class="bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
+                <Table
+                    color="custom"
+                    class="bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                    hoverable
+                >
                     <TableHead>
                         <TableHeadCell>Name</TableHeadCell>
                         <TableHeadCell>Description</TableHeadCell>
@@ -327,7 +336,11 @@
                     </TableHead>
                     <TableBody>
                         {#each teams as entry}
-                            <TableBodyRow>
+                            <TableBodyRow
+                                on:click={() => {
+                                    window.location.href = `/teams/${entry.id}`;
+                                }}
+                            >
                                 <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                     {entry.team_name}
                                 </TableBodyCell>

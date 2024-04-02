@@ -212,6 +212,7 @@
                     <Table
                         color="custom"
                         class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        hoverable
                     >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
@@ -219,7 +220,12 @@
                         </TableHead>
                         <TableBody>
                             {#each teamScores as entry}
-                                <TableBodyRow color="custom">
+                                <TableBodyRow
+                                    color="custom"
+                                    on:click={() => {
+                                        window.location.href = `/teams/${entry.id}`;
+                                    }}
+                                >
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>
@@ -235,6 +241,7 @@
                     <Table
                         color="custom"
                         class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        hoverable
                     >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
@@ -242,7 +249,12 @@
                         </TableHead>
                         <TableBody>
                             {#each userScores as entry}
-                                <TableBodyRow color="custom">
+                                <TableBodyRow
+                                    color="custom"
+                                    on:click={() => {
+                                        window.location.href = `/users/${entry.id}`;
+                                    }}
+                                >
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>

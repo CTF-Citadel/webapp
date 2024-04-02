@@ -20,29 +20,29 @@ class Actions {
 
     /**
      * Validate if an event exists by id
-     * @returns True if it exists, False if it doesn't
+     * @returns Event Name if it exists, False if it doesn't
      */
     async checkEventExist(eventID: string) {
-        const RES = await DB_ADAPTER.select().from(events).where(eq(events.id, eventID));
-        return RES.length === 0 ? false : true;
+        const RES = (await DB_ADAPTER.select({ name: events.event_name }).from(events).where(eq(events.id, eventID))).at(0);
+        return RES === undefined ? false : RES.name;
     }
 
     /**
      * Validate if a user exists by id
-     * @returns True if he exists, False if he doesn't
+     * @returns User Name if he exists, False if he doesn't
      */
     async checkUserExist(userID: string) {
-        const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID));
-        return RES.length === 0 ? false : true;
+        const RES = (await DB_ADAPTER.select({ name: users.username }).from(users).where(eq(users.id, userID))).at(0);
+        return RES === undefined ? false : RES.name;
     }
 
     /**
      * Validate if a team exists by id
-     * @returns True if it exists, False if it doesn't
+     * @returns Team Name if it exists, False if it doesn't
      */
     async checkTeamExist(teamID: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
-        return RES.length === 0 ? false : true;
+        const RES = (await DB_ADAPTER.select({ name: teams.team_name }).from(teams).where(eq(teams.id, teamID))).at(0);
+        return RES === undefined ? false : RES.name;
     }
 
     /**
@@ -111,11 +111,50 @@ class Actions {
     }
 
     /**
+     * Fetches User Profile Info with specific ID
+     * @returns User Info if found, else null
+     */
+    async getUserProfile(userID: string) {
+        const RES = (await DB_ADAPTER.select({
+            username: users.username,
+            avatar: users.user_avatar,
+            affiliation: users.user_affiliation,
+            role: users.user_role,
+            team_id: users.user_team_id,
+            team_name: teams.team_name,
+            team_country: teams.team_country_code
+        }).from(users).where(eq(users.id, userID)).fullJoin(teams, eq(users.user_team_id, teams.id))).at(0);
+        return RES === undefined ? null : RES;
+    }
+
+    /**
+     * Fetches Team Profile Info with specific ID
+     * @returns User Info if found, else null
+     */
+    async getTeamProfile(teamID: string) {
+        const TEAM = (await DB_ADAPTER.select({
+            name: teams.team_name,
+            description: teams.team_description,
+            country: teams.team_country_code,
+        }).from(teams).where(eq(teams.id, teamID))).at(0);
+        const MEMBERS = await DB_ADAPTER.select({
+            id: users.id,
+            username: users.username,
+            avatar: users.user_avatar
+        }).from(users).where(eq(users.user_team_id, teamID))
+        if (MEMBERS.length > 0 && TEAM !== undefined) {
+            return { ...TEAM, members: MEMBERS }
+        }
+        return null;
+    }
+
+    /**
      * Fetches sanitized Teams
      * @returns List sanitized of Teams
      */
     async getTeamLisitng() {
         const RES = await DB_ADAPTER.select({
+            id: teams.id,
             team_name: teams.team_name,
             team_description: teams.team_description,
             team_country_code: teams.team_country_code

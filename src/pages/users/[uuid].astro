@@ -2,6 +2,7 @@
 import DatabaseActions from '../../lib/actions';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/app/lib/Header.svelte';
+import UserPage from '../../components/app/pages/User.svelte';
 import { lucia } from '../../lib/lucia';
 import { DUMMY_SESSION } from '../../lib/helpers';
 
@@ -20,21 +21,17 @@ if (!import.meta.env.DEV) {
     session = { ...Astro.locals.user };
 }
 
-// check if we access a non-existing challenge
 const ACTION = new DatabaseActions();
-const EXISTS = await ACTION.checkUserExist(uuid || '');
-if (EXISTS === false) {
+const USER = await ACTION.checkUserExist(uuid || '');
+if (USER === false) {
     // early exit to 404
     return Astro.redirect('/404');
 }
 ---
 
-<Layout title="Scoreboard">
-    <Header
-        username={session.username}
-        interactive={true}
-        client:visible
-    />
+<Layout title={USER}>
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center">
+        <UserPage uuid={uuid} client:visible />
     </div>
 </Layout>

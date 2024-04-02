@@ -21,16 +21,15 @@ if (!import.meta.env.DEV) {
     session = { ...Astro.locals.user };
 }
 
-// check if we access a non-existing challenge
 const ACTION = new DatabaseActions();
-let exists = await ACTION.checkEventExist(uuid || '');
-if (!exists) {
+const EVENT = await ACTION.checkEventExist(uuid || '');
+if (EVENT === false) {
     // early exit to 404
     return Astro.redirect('/404');
 }
 ---
 
-<Layout title="Challenges">
+<Layout title={EVENT}>
     <Header
         username={session.username}
         interactive={true}

@@ -42,15 +42,17 @@
             <Card
                 class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
             >
-                <div class="flex flex-col items-center p-6">
+                <div class="flex flex-col items-center p-6 dark:text-neutral-100 text-neutral-900">
                     <Avatar size="xl" src="/img/avatars/wolf.webp" />
-                    <h1 class="mt-2 text-xl font-medium text-gray-900 dark:text-white">{session.username}</h1>
+                    <h1 class="mt-2 text-xl font-medium">{session.username}</h1>
                     <span class="text-sm text-gray-500 dark:text-gray-400">{session.user_role}</span>
                     {#if team !== null}
-                        <h2 class="mt-4 font-medium text-gray-900 dark:text-white">Currently playing for:</h2>
-                        <h3 class="mt-2 font-medium text-gray-900 dark:text-white">{team.team_name}</h3>
+                        <h2 class="mt-4 font-medium">Currently playing for:</h2>
+                        <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
+                            {team.team_name}<span class="ml-2 fi fi-{team.team_country_code.toLowerCase()}"></span>
+                        </p>
                     {:else}
-                        <h2 class="mt-4 font-medium text-gray-900 dark:text-white">Currently not in a Team.</h2>
+                        <h2 class="mt-4 font-medium">Currently not in a Team.</h2>
                     {/if}
                 </div>
             </Card>
