@@ -47,6 +47,7 @@ services:
       # deployment endpoint
       BACKEND_HOST: 'remote.example.com'
       BACKEND_PORT: 443
+      BACKEND_PSK: 'CHANGEME'
       # anticheat endpoint
       M0N1T0R_ENABLE: false
       M0N1T0R_HOST: 'm0n1t0r'

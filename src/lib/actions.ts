@@ -8,14 +8,20 @@ import type { ChallengesType } from './schema';
 // read from env
 const BACKEND_HOST = process.env.BACKEND_HOST;
 const BACKEND_PORT = process.env.BACKEND_PORT;
+const BACKEND_PSK = process.env.BACKEND_PSK;
 
 /**
  * Handler for Database related actions
  */
 class Actions {
     #BACKEND_URL: string;
+    #BACKEND_HEADERS: { [key: string]: string };
     constructor() {
         this.#BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
+        this.#BACKEND_HEADERS = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${BACKEND_PSK}`
+        };
     }
 
     /**
@@ -459,9 +465,7 @@ class Actions {
             // then fetch with promise
             fetch(`${this.#BACKEND_URL}/challenge`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.#BACKEND_HEADERS,
                 body: JSON.stringify({
                     challenge: RES[0].container_file,
                     environment_variables: JSON.stringify({
@@ -539,9 +543,7 @@ class Actions {
             // shut down the container
             fetch(`${this.#BACKEND_URL}/container?container_id=${RES[0].challenge_uuid}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.#BACKEND_HEADERS,
                 signal: AbortSignal.timeout(10000)
             })
                 .then(async (response) => {
