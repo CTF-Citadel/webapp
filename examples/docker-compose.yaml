@@ -38,6 +38,9 @@ services:
   webapp:
     image: ghcr.io/ctf-citadel/webapp:latest
     hostname: webapp
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./webapp:/data
     environment:
       TZ: Europe/Vienna
       DB_HOST: 'postgres-webapp'
@@ -62,7 +65,7 @@ services:
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
-      DATA_FOLDER: '/some/valid/path'
+      DATA_FOLDER: '/data'
       # numbers but string, keep as is
       SCORING_E: '1.2'
       SCORING_K: '12'
