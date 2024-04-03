@@ -22,7 +22,16 @@
 
     $: editData = teams.find((item) => item['id'] === editUUID);
 
-    async function updateTeam() {}
+    async function updateTeam() {
+        const DATA = await requestWrapper(true, {
+            type: 'update-team',
+            data: { id: editUUID, name: editData?.team_name, description: editData?.team_description }
+        });
+        if (DATA.ok) {
+            edit = false;
+            DISPATCH('refresh');
+        }
+    }
 
     async function deleteTeam() {
         const DATA = await requestWrapper(true, {
@@ -54,8 +63,16 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="team_name"
-                placeholder="name"
                 bind:value={editData.team_name}
+                required
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="team_desc" class="mb-2">Change Description</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="team_desc"
+                bind:value={editData.team_description}
                 required
             />
         </div>

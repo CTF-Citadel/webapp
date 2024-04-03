@@ -71,6 +71,7 @@ services:
       DISABLE_EMAIL_VERIFY: false
       ENFORCE_EMAIL_DOMAIN: false
       ENFORCE_DOMAIN: 'example.com'
+      DISCORD_URL: ''
     restart: unless-stopped
     profiles:
       - full

@@ -113,8 +113,8 @@ class Actions {
             })
                 .from(team_challenges)
                 .where(eq(team_challenges.challenge_id, challengeID))
-                .fullJoin(users, eq(users.id, team_challenges.solved_by))
-                .fullJoin(challenges, eq(challenges.id, team_challenges.challenge_id))
+                .innerJoin(users, eq(users.id, team_challenges.solved_by))
+                .innerJoin(challenges, eq(challenges.id, team_challenges.challenge_id))
         ).at(0);
         return RES !== undefined ? RES : null;
     }
@@ -163,7 +163,7 @@ class Actions {
             })
                 .from(users)
                 .where(eq(users.id, userID))
-                .fullJoin(teams, eq(users.user_team_id, teams.id))
+                .innerJoin(teams, eq(users.user_team_id, teams.id))
         ).at(0);
         return RES === undefined ? null : RES;
     }
@@ -239,7 +239,15 @@ class Actions {
      * @returns List of Events
      */
     async getAllTeamEvents() {
-        const RES = await DB_ADAPTER.select().from(team_events);
+        const RES = await DB_ADAPTER.select({
+            event_id: events.id,
+            team_id: teams.id,
+            team_name: teams.team_name,
+            event_name: events.event_name
+        })
+            .from(team_events)
+            .innerJoin(events, eq(team_events.event_id, events.id))
+            .innerJoin(teams, eq(team_events.team_id, teams.id));
         return RES.length > 0 ? RES : [];
     }
 
@@ -259,7 +267,7 @@ class Actions {
     async getTeamEvents(teamID: string) {
         const EVENTS = await DB_ADAPTER.select()
             .from(team_events)
-            .fullJoin(events, eq(team_events.event_id, events.id))
+            .innerJoin(events, eq(team_events.event_id, events.id))
             .where(eq(team_events.team_id, teamID));
         return EVENTS.length > 0 ? EVENTS : [];
     }
@@ -349,8 +357,8 @@ class Actions {
             points_gained: challenges.base_points
         })
             .from(team_challenges)
-            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
-            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
+            .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .innerJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
             .groupBy(team_challenges.team_id, teams.team_name, challenges.id, team_challenges.solved_at);
         if (DATA.length > 0 && SOLVES.length > 0) {
@@ -372,8 +380,8 @@ class Actions {
             points_gained: challenges.base_points
         })
             .from(team_challenges)
-            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
-            .fullJoin(users, eq(team_challenges.solved_by, users.id))
+            .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .innerJoin(users, eq(team_challenges.solved_by, users.id))
             .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
             .groupBy(users.id, challenges.id, team_challenges.solved_at);
         if (DATA.length > 0 && SOLVES.length > 0) {
@@ -391,7 +399,7 @@ class Actions {
             points: sql<number>`cast(sum(${challenges.base_points}) as int)`
         })
             .from(team_challenges)
-            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .where(
                 and(
                     eq(team_challenges.event_id, eventID),
@@ -425,13 +433,14 @@ class Actions {
      * Changes a users first and lastname
      * @returns true if success, false if not
      */
-    async changeUserFullName(sessionID: string, firstName: string, lastName: string) {
+    async changeUserData(sessionID: string, firstName: string, lastName: string, affiliation: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user && validAlphanumeric(firstName, 30) && validAlphanumeric(lastName, 30)) {
             await DB_ADAPTER.update(users)
                 .set({
                     user_firstname: firstName,
-                    user_lastname: lastName
+                    user_lastname: lastName,
+                    user_affiliation: affiliation
                 })
                 .where(eq(users.id, user.id));
             return true;
@@ -838,7 +847,7 @@ class Actions {
         const ONGOING_EVENTS = (
             await DB_ADAPTER.select()
                 .from(team_events)
-                .fullJoin(events, eq(team_events.event_id, events.id))
+                .innerJoin(events, eq(team_events.event_id, events.id))
                 .where(
                     and(
                         eq(team_events.team_id, teamID),
@@ -883,6 +892,26 @@ class Actions {
                 await DB_ADAPTER.update(teams)
                     .set({
                         team_join_token: 'CTD-' + generateRandomString(16).toUpperCase()
+                    })
+                    .where(eq(teams.id, teamID));
+            }
+        }
+    }
+
+    /**
+     * Update a team's data token by ID
+     * @returns void
+     */
+    async updateTeamData(sessionID: string, teamID: string, name: string, description: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        const TEAM = await this.getTeamInfo(teamID);
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, name))).length;
+        if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.team_name === name)) {
+            if (TEAM.team_creator === user.id) {
+                await DB_ADAPTER.update(teams)
+                    .set({
+                        team_name: name,
+                        team_description: description
                     })
                     .where(eq(teams.id, teamID));
             }
@@ -956,16 +985,40 @@ class Actions {
      * Updates a Users properties
      * @returns void
      */
-    async updateUser(userID: string, userEmail: string, isVerified: boolean, role: string, firstName: string, lastName: string) {
+    async updateUser(
+        userID: string,
+        userEmail: string,
+        isVerified: boolean,
+        role: string,
+        firstName: string,
+        lastName: string,
+        affiliation: string,
+        team: string
+    ) {
         await DB_ADAPTER.update(users)
             .set({
                 email: userEmail,
                 is_verified: isVerified,
                 user_role: role,
                 user_firstname: firstName,
-                user_lastname: lastName
+                user_lastname: lastName,
+                user_affiliation: affiliation,
+                user_team_id: team
             })
             .where(eq(users.id, userID));
+    }
+
+    /**
+     * Updates a Team per ID
+     * @returns void
+     */
+    async updateTeam(teamID: string, name: string, description: string) {
+        await DB_ADAPTER.update(teams)
+            .set({
+                team_name: name,
+                team_description: description
+            })
+            .where(eq(teams.id, teamID));
     }
 
     /**
@@ -986,14 +1039,12 @@ class Actions {
         await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
         const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID));
         REF_USERS.forEach(async (user) => {
-            await lucia.invalidateUserSessions(user.id);
             await DB_ADAPTER.update(users)
                 .set({
                     user_team_id: ''
                 })
                 .where(eq(users.id, user.id));
         });
-        await lucia.deleteExpiredSessions();
     }
 
     /**

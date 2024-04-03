@@ -32,7 +32,9 @@
                 verified: editData?.is_verified,
                 role: editData?.user_role,
                 firstname: editData?.user_firstname,
-                lastname: editData?.user_lastname
+                lastname: editData?.user_lastname,
+                affiliation: editData?.user_affiliation,
+                team: editData?.user_team_id,
             }
         });
         if (DATA.ok) {
@@ -113,6 +115,24 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
                 bind:value={editData.user_lastname}
+                required
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Affiliation</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_affiliation}
+                required
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Team</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_team_id}
                 required
             />
         </div>

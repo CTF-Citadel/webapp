@@ -70,6 +70,8 @@
         const DATA = await requestWrapper(false, { type: 'team-info', data: { id: session.user_team_id } });
         thisTeam = (await DATA.json()).data;
         hasCreated = session.id === thisTeam.team_creator;
+        inputs.teamName = thisTeam.team_name;
+        inputs.teamDesc = thisTeam.team_description;
     }
 
     async function refreshTeamMembers() {
@@ -78,7 +80,10 @@
     }
 
     async function refreshLeavable() {
-        const DATA = await requestWrapper(false, { type: 'check-leave', data: { teamID: session.user_team_id, userID: session.id } });
+        const DATA = await requestWrapper(false, {
+            type: 'check-leave',
+            data: { teamID: session.user_team_id, userID: session.id }
+        });
         canLeaveTeam = (await DATA.json()).data;
     }
 
@@ -105,6 +110,23 @@
                 name: inputs.teamName.slice(0, 50),
                 description: inputs.teamDesc.slice(0, 100),
                 country: inputs.teamCountry
+            }
+        });
+        if (DATA.ok) {
+            menus.create = false;
+            await refreshTeams();
+            window.location.reload();
+        }
+    }
+
+    async function updateTeamData() {
+        const DATA = await requestWrapper(false, {
+            type: 'update-teamdata',
+            data: {
+                session: sessionID,
+                teamID: thisTeam.id,
+                name: inputs.teamName.slice(0, 50),
+                description: inputs.teamDesc.slice(0, 100)
             }
         });
         if (DATA.ok) {
@@ -254,7 +276,7 @@
                 YOUR TEAM
             </h1>
             <Card
-                size="sm"
+                size="md"
                 padding="sm"
                 img=""
                 class="m-4 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
@@ -308,7 +330,37 @@
                                 </table>
                             </div>
                         {/if}
+                        <div class="mb-6">
+                            <Label for="team-name" class="mb-2">Team Name</Label>
+                            <Input
+                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                bind:value={inputs.teamName}
+                                name="team-name"
+                                required
+                            />
+                        </div>
+                        <div class="mb-6">
+                            <Label for="team-desc" class="mb-2">Team Description</Label>
+                            <Input
+                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                bind:value={inputs.teamDesc}
+                                name="team-desc"
+                                required
+                            />
+                        </div>
                         <div class="flex flex-row justify-center items-center space-x-4">
+                            <Button
+                                size="lg"
+                                class="mt-4"
+                                on:click={updateTeamData}
+                                disabled={inputs.teamName === '' ||
+                                    inputs.teamDesc === '' ||
+                                    !validAlphanumeric(inputs.teamName, 50, true) ||
+                                    !validAlphanumeric(inputs.teamDesc, 100) ||
+                                    (inputs.teamName == thisTeam.team_name &&
+                                        inputs.teamDesc == thisTeam.team_description)}
+                                >Save Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" /></Button
+                            >
                             {#if hasCreated}
                                 <Button size="lg" class="mt-4" on:click={resetToken}>
                                     Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
@@ -318,7 +370,9 @@
                                 size="lg"
                                 class="mt-4"
                                 on:click={leaveTeam}
-                                disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator && canLeaveTeam === true}
+                                disabled={teamMembers.length > 1 &&
+                                    session.id === thisTeam.team_creator &&
+                                    canLeaveTeam === true}
                             >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>

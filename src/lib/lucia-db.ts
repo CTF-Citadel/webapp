@@ -45,7 +45,7 @@ export const safeCreateUser = async (userName: string, userEmail: string, userPa
         const SESSION = await lucia.createSession(USER_ID, {});
         return { ID: USER_ID, COOKIE: lucia.createSessionCookie(SESSION.id) };
     }
-}
+};
 
 /**
  * Verify a user by login request
@@ -65,7 +65,7 @@ export const safeVerifyUser = async (userEmail: string, userPassword: string) =>
             return { ID: USER.id, COOKIE: lucia.createSessionCookie(SESSION.id) };
         }
     }
-}
+};
 
 export const generateEmailverificationTokens = async (userId: string) => {
     const storedUserTokens = await DB_ADAPTER.select()
@@ -89,7 +89,9 @@ export const generateEmailverificationTokens = async (userId: string) => {
 export const generatePasswordresetTokens = async (email: string) => {
     const targetUser = await DB_ADAPTER.select().from(users).where(eq(users.email, email));
     if (targetUser.length === 0) return false;
-    const storedUserTokens = await DB_ADAPTER.select().from(resetTokens).where(eq(resetTokens.user_id, targetUser[0].id));
+    const storedUserTokens = await DB_ADAPTER.select()
+        .from(resetTokens)
+        .where(eq(resetTokens.user_id, targetUser[0].id));
     if (storedUserTokens.length > 0) {
         const reusableStoredToken = storedUserTokens.find((token) => {
             return isWithinExpiration(Number(token.expires));
@@ -117,9 +119,9 @@ export const validateEmailverificationTokens = async (token: string) => {
 
 export const validatePasswordresetTokens = async (token: string) => {
     const storedTokens = await DB_ADAPTER.select().from(resetTokens).where(eq(resetTokens.id, token));
-    if (storedTokens.length = 0) return false;
-    await DB_ADAPTER.delete(resetTokens).where(eq(resetTokens.id, token));
+    if (storedTokens.length === 0) return false;
     const tokenExpires = Number(storedTokens[0].expires);
+    await DB_ADAPTER.delete(resetTokens).where(eq(resetTokens.id, token));
     if (!isWithinExpiration(tokenExpires)) {
         return false;
     }

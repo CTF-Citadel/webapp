@@ -32,6 +32,7 @@
         await refreshUserTeam();
         inputs.firstName = session.user_firstname;
         inputs.lastName = session.user_lastname;
+        inputs.affiliation = session.user_affiliation;
         loading = false;
     });
 
@@ -41,13 +42,14 @@
         team = JSON.data;
     }
 
-    async function setFullName() {
+    async function updateUserData() {
         const DATA = await requestWrapper(false, {
-            type: 'update-fullname',
+            type: 'update-userdata',
             data: {
                 session: sessionID,
                 first: inputs.firstName.slice(0, 30),
-                last: inputs.lastName.slice(0, 30)
+                last: inputs.lastName.slice(0, 30),
+                affiliation: inputs.affiliation.slice(0, 30)
             }
         });
         if (DATA.ok) {
@@ -104,7 +106,7 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-col items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div class="flex flex-col justify items-center p-6 dark:text-neutral-100 text-neutral-900">
                         <div class="flex flex-col">
                             <h1 class="mb-6 text-xl font-medium">Personal Data</h1>
                             <div class="mb-6">
@@ -129,12 +131,27 @@
                                     required
                                 />
                             </div>
+                            <div class="mb-6">
+                                <Label for="affiliation" class="mb-2">Affiliation</Label>
+                                <Input
+                                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                    bind:value={inputs.affiliation}
+                                    name="affiliation"
+                                    type="text"
+                                    required
+                                />
+                            </div>
                             <Button
-                                on:click={setFullName}
+                                on:click={updateUserData}
                                 disabled={inputs.lastName === '' ||
                                     !validAlphanumeric(inputs.lastName, 30, true) ||
                                     inputs.firstName === '' ||
-                                    !validAlphanumeric(inputs.firstName, 30, true)}>Save</Button
+                                    !validAlphanumeric(inputs.firstName, 30, true) ||
+                                    inputs.affiliation === '' ||
+                                    !validAlphanumeric(inputs.affiliation, 30, true) ||
+                                    inputs.firstName == session.user_firstname &&
+                                    inputs.lastName == session.user_lastname && 
+                                    inputs.affiliation == session.user_affiliation}>Save</Button
                             >
                         </div>
                     </div>

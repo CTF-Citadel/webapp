@@ -37,19 +37,6 @@
             DISPATCH('refresh');
         }
     }
-
-    async function unassignEvent(eventID: string, teamID: string) {
-        const DATA = await requestWrapper(true, {
-            type: 'unassign-event',
-            data: {
-                event: eventID,
-                team: teamID
-            }
-        });
-        if (DATA.ok) {
-            DISPATCH('refresh');
-        }
-    }
 </script>
 
 <!--

@@ -6,13 +6,13 @@
     import { onMount } from "svelte";
 
     let sse: EventSource;
-    let socketMessages: any[] = [];
+    let socketMessages: any = {};
 
     onMount(() => {
         sse = new EventSource('/api/v1/ac/stream');
         sse.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            socketMessages.push(data.data);
+            socketMessages = data.data;
             console.log(socketMessages);
         };
         sse.onerror = () => {

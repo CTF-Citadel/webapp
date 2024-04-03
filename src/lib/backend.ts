@@ -101,8 +101,11 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'reset-password':
                 response = await HANLDER.resetPassword(json.data.session, json.data.password);
                 break;
-            case 'update-fullname':
-                response = await HANLDER.changeUserFullName(json.data.session, json.data.first, json.data.last);
+            case 'update-userdata':
+                response = await HANLDER.changeUserData(json.data.session, json.data.first, json.data.last, json.data.affiliation);
+                break;
+            case 'update-teamdata':
+                response = await HANLDER.updateTeamData(json.data.session, json.data.teamID, json.data.name, json.data.description);
                 break;
             case 'create-team':
                 const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
@@ -289,7 +292,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.verified,
                     json.data.role,
                     json.data.firstname,
-                    json.data.lastname
+                    json.data.lastname,
+                    json.data.affiliation,
+                    json.data.team
                 );
                 break;
             case 'update-event':
@@ -306,6 +311,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 break;
             case 'block-user':
                 response = await HANLDER.toggleBlockUser(json.data.id);
+                break;
+            case 'update-team':
+                response = await HANLDER.updateTeam(json.data.id, json.data.name, json.data.description);
                 break;
             case 'delete-team':
                 response = await HANLDER.deleteTeam(json.data.id);

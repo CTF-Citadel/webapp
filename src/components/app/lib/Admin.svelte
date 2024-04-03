@@ -40,7 +40,7 @@
     let events: EventsType[] = [];
     let users: UsersType[] = [];
     let challenges: ChallengesType[] = [];
-    let teamEvents: TeamEventsType[] = [];
+    let teamEvents: { event_id: string; event_name: string; team_id: string; team_name: string; }[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
     let sortedChallenges: { value: string; name: string }[] = [];
     let loading: boolean = true;
@@ -419,10 +419,10 @@
                                         {entry.event_description}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_start}
+                                        {new Date(entry.event_start).toLocaleString('eu')}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_end}
+                                        {new Date(entry.event_end).toLocaleString('eu')}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         <Button
@@ -452,7 +452,9 @@
                         class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
                     >
                         <TableHead>
+                            <TableHeadCell>Team</TableHeadCell>
                             <TableHeadCell>Team ID</TableHeadCell>
+                            <TableHeadCell>Event</TableHeadCell>
                             <TableHeadCell>Event ID</TableHeadCell>
                             <TableHeadCell />
                         </TableHead>
@@ -460,7 +462,13 @@
                             {#each teamEvents as entry}
                                 <TableBodyRow>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.team_name}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.team_id}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.event_name}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.event_id}

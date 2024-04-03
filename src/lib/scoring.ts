@@ -14,7 +14,7 @@ function dynDeductor(points: number, solves: number) {
  * @returns Adjusted Solve Data
  */
 export function adjustDynamic(
-    solveData: { id: string | null; name: string | null; challenge_id: string | null; timestamp: number | null; points_gained: number | null }[],
+    solveData: { id: string; name: string; challenge_id: string; timestamp: number; points_gained: number }[],
     challengeData: { id: string; solves: number }[]
 ) {
     const ACTUAL_SOLVES: { [id: string]: number } = challengeData.reduce<{ [id: string]: number }>((acc, curr) => {
@@ -24,10 +24,10 @@ export function adjustDynamic(
     let adjustedSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
     for (let entry of solveData) {
         adjustedSolves.push({
-            id: entry.id || '',
-            name: entry.name || '',
-            timestamp: entry.timestamp || 0,
-            points_gained: dynDeductor(entry.points_gained || 0, ACTUAL_SOLVES[entry.challenge_id || ''])
+            id: entry.id,
+            name: entry.name,
+            timestamp: entry.timestamp,
+            points_gained: dynDeductor(entry.points_gained, ACTUAL_SOLVES[entry.challenge_id])
         });
     }
     return adjustedSolves;
