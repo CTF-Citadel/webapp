@@ -61,7 +61,7 @@ services:
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
-      CERTIFICATE_FOLDER: '/some/valid/path'
+      DATA_FOLDER: '/some/valid/path'
       DISABLE_EMAIL_VERIFY: false
       ENFORCE_EMAIL_DOMAIN: false
       ENFORCE_DOMAIN: 'example.com'

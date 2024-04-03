@@ -4,6 +4,7 @@ import { and, eq, sql, gt, lt } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
 import { generateRandomString, validAlphanumeric, validPassword } from './helpers';
+import { checkLocalPoolMatch } from './storage';
 import type { ChallengesType } from './schema';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
@@ -446,13 +447,14 @@ class Actions {
         cat: string,
         diff: string,
         isContainer: boolean,
-        filePath: string,
+        containerFile: string,
         fileURL: string,
         toEvent: string,
         points: number,
         dependOn: string,
         needsStatic: boolean,
-        staticFlag: string
+        staticFlag: string,
+        needsFlagPool: boolean
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
@@ -462,12 +464,13 @@ class Actions {
             challenge_category: cat,
             challenge_difficulty: diff,
             needs_container: isContainer,
-            container_file: filePath,
+            container_file: containerFile,
             static_file_url: fileURL,
             base_points: points,
             depends_on: dependOn,
             flag_static: needsStatic,
-            static_flag: staticFlag
+            static_flag: staticFlag,
+            needs_flag_pool: needsFlagPool
         });
     }
 
@@ -577,7 +580,12 @@ class Actions {
      * Checks a Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkChallengeFlag(teamID: string, challengeID: string, flag: string, userID: string): Promise<boolean> {
+    async checkDynamicChallengeFlag(
+        teamID: string,
+        challengeID: string,
+        flag: string,
+        userID: string
+    ): Promise<boolean> {
         const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
@@ -648,12 +656,76 @@ class Actions {
     ): Promise<boolean> {
         const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
-        const RES = await DB_ADAPTER.select()
-            .from(challenges)
-            .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)));
-        if (RES.length > 0 && /^TH{.*}$/.test(flag) && RES[0].flag_static === true) {
-            if (RES[0].static_flag === EXTRACTED_FLAG) {
-                // insert new since static
+        const RES = (
+            await DB_ADAPTER.select()
+                .from(challenges)
+                .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
+        ).at(0);
+        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.flag_static === true) {
+            if (RES.static_flag === EXTRACTED_FLAG) {
+                await DB_ADAPTER.insert(team_challenges).values({
+                    team_id: teamID,
+                    challenge_id: challengeID,
+                    event_id: eventID,
+                    solved_by: userID,
+                    solved_at: TIMESTAMP,
+                    challenge_uuid: '',
+                    challenge_flag: EXTRACTED_FLAG,
+                    challenge_host: '',
+                    challenge_port: '',
+                    is_container: false,
+                    is_running: false,
+                    is_solved: true
+                });
+                // notify anti cheat
+                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, true, TIMESTAMP);
+                // check notify reporter
+                if ((await this.checkInitialSolve(challengeID)) === true) {
+                    const DATA = await this.getFirstbloodData(challengeID);
+                    if (DATA !== null) {
+                        await FIRSTBLOOD.solve(
+                            DATA.solver || '',
+                            DATA.id || '',
+                            DATA.name || '',
+                            DATA.category || '',
+                            DATA.difficulty || '',
+                            TIMESTAMP
+                        );
+                    }
+                }
+                // flag is valid
+                return true;
+            } else {
+                // notify anti cheat
+                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, true, TIMESTAMP);
+                // flag is incorrect
+                return false;
+            }
+        }
+        // flag is not valid
+        return false;
+    }
+
+    /**
+     * Checks a pool Flag for its validity
+     * @returns true if the flag matches, false if it doesnt
+     */
+    async checkPoolChallengeFlag(
+        teamID: string,
+        eventID: string,
+        challengeID: string,
+        flag: string,
+        userID: string
+    ): Promise<boolean> {
+        const TIMESTAMP = new Date().getTime();
+        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
+        const RES = (
+            await DB_ADAPTER.select()
+                .from(challenges)
+                .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
+        ).at(0);
+        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_flag_pool === true) {
+            if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: teamID,
                     challenge_id: challengeID,

@@ -38,28 +38,29 @@
         { value: 'Medium', name: 'Medium' },
         { value: 'Hard', name: 'Hard' }
     ];
-    let selectedEvent = '';
-    let dependsOnChallenge = '';
-    let selectedDiff = '';
 
     let challengeNeedsFile: boolean = false;
     let challengeNeedsDepend: boolean = false;
     let challengeTemplate = {
         name: '',
         description: '',
+        difficulty: '',
         category: '',
         path: '',
         fileURL: '',
         points: 0,
+        staticFlag: '',
+        event: '',
+        dependsOn: '',
         isContainer: false,
         flagStatic: false,
-        staticFlag: ''
+        flagPool: false
     };
 
     async function createChallenge() {
         const DATA = await requestWrapper(true, {
             type: 'create-challenge',
-            data: { ...challengeTemplate, difficulty: selectedDiff, event: selectedEvent, dependon: dependsOnChallenge }
+            data: { ...challengeTemplate }
         });
         if (DATA.ok) {
             create = false;
@@ -242,7 +243,7 @@
         <Label class="mb-2">Challenge Difficulty</Label>
         <Select
             defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-            bind:value={selectedDiff}
+            bind:value={challengeTemplate.difficulty}
             placeholder=""
         >
             <option selected value="">None</option>
@@ -272,84 +273,99 @@
         />
     </div>
     <div class="mb-6">
-        <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
-    </div>
-    {#if challengeTemplate.isContainer}
-        <div class="mb-6" transition:slide>
-            <Label for="challenge-file" class="mb-2">Compose File</Label>
-            <Input
-                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                id="challenge-file"
-                placeholder="some"
-                bind:value={challengeTemplate.path}
-                required
-            />
-        </div>
-    {/if}
-    <div class="mb-6">
-        <Toggle bind:checked={challengeNeedsFile}>Needs File</Toggle>
-    </div>
-    {#if challengeNeedsFile}
-        <div class="mb-6" transition:slide>
-            <Label for="challenge-url" class="mb-2">File URL</Label>
-            <Input
-                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                id="challenge-url"
-                placeholder="https://example.com/source.zip"
-                bind:value={challengeTemplate.fileURL}
-                required
-            />
-        </div>
-    {/if}
-    <div class="mb-6">
-        <Toggle bind:checked={challengeTemplate.flagStatic}>Needs Static Flag</Toggle>
-    </div>
-    {#if challengeTemplate.flagStatic}
-        <div class="mb-6" transition:slide>
-            <Label for="challenge-static" class="mb-2">Static Flag</Label>
-            <Input
-                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                id="challenge-static"
-                placeholder="3asy-r3v3rs1ng"
-                bind:value={challengeTemplate.staticFlag}
-                required
-            />
-        </div>
-    {/if}
-    <div class="mb-6">
-        <Toggle bind:checked={challengeNeedsDepend}>Depends On</Toggle>
-    </div>
-    {#if challengeNeedsDepend}
-        {#if challenges.length > 0}
-            <div class="mb-6">
-                <Label class="mb-2">Parent Challenge</Label>
-                <Select
-                    defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-                    bind:value={dependsOnChallenge}
-                    placeholder=""
-                >
-                    <option selected value="">None</option>
-                    {#each sortedChallenges as { value, name }}
-                        <option {value}>{name}</option>
-                    {/each}
-                </Select>
+        <Label for="challenge-textarea" class="mb-2">Type</Label>
+        {#if challengeTemplate.flagPool === false && challengeTemplate.flagStatic === false}
+            <div class="mb-6" transition:slide>
+                <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
             </div>
-        {:else}
-            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
-                <span slot="icon">
-                    <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
-                    <span class="sr-only">Info</span>
-                </span>
-                <p class="text-blue-500">No other Challenges created yet.</p>
-            </Alert>
         {/if}
-    {/if}
+        {#if challengeTemplate.isContainer}
+            <div transition:slide>
+                <Label for="challenge-file" class="mb-2">Compose File</Label>
+                <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                    id="challenge-file"
+                    placeholder="some"
+                    bind:value={challengeTemplate.path}
+                    required
+                />
+            </div>
+        {/if}
+        {#if challengeTemplate.flagPool === false && challengeTemplate.isContainer === false}
+            <div class="mb-6" transition:slide>
+                <Toggle bind:checked={challengeTemplate.flagStatic}>Needs Static Flag</Toggle>
+            </div>
+        {/if}
+        {#if challengeTemplate.flagStatic}
+            <div transition:slide>
+                <Label for="challenge-static" class="mb-2">Static Flag</Label>
+                <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                    id="challenge-static"
+                    placeholder="3asy-r3v3rs1ng"
+                    bind:value={challengeTemplate.staticFlag}
+                    required
+                />
+            </div>
+        {/if}
+        {#if challengeTemplate.flagStatic === false && challengeTemplate.isContainer === false}
+            <div transition:slide>
+                <Toggle bind:checked={challengeTemplate.flagPool}>Needs Pool Flag</Toggle>
+            </div>
+        {/if}
+    </div>
+    <div class="mb-6">
+        <Label for="challenge-textarea" class="mb-2">Additions</Label>
+        <div class="mb-6">
+            <Toggle bind:checked={challengeNeedsFile}>Needs File</Toggle>
+        </div>
+        {#if challengeNeedsFile}
+            <div class="mb-6" transition:slide>
+                <Label for="challenge-url" class="mb-2">File URL</Label>
+                <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                    id="challenge-url"
+                    placeholder="https://example.com/source.zip"
+                    bind:value={challengeTemplate.fileURL}
+                    required
+                />
+            </div>
+        {/if}
+        <div class="mb-6">
+            <Toggle bind:checked={challengeNeedsDepend}>Depends On</Toggle>
+        </div>
+        {#if challengeNeedsDepend}
+            {#if challenges.length > 0}
+                <div class="mb-6">
+                    <Label class="mb-2">Parent Challenge</Label>
+                    <Select
+                        defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                        bind:value={challengeTemplate.dependsOn}
+                        placeholder=""
+                    >
+                        <option selected value="">None</option>
+                        {#each sortedChallenges as { value, name }}
+                            <option {value}>{name}</option>
+                        {/each}
+                    </Select>
+                </div>
+            {:else}
+                <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                    <span slot="icon">
+                        <InfoCircle slot="icon" class="text-blue-500 w-5 h-5" />
+                        <span class="sr-only">Info</span>
+                    </span>
+                    <p class="text-blue-500">No other Challenges created yet.</p>
+                </Alert>
+            {/if}
+        {/if}
+    </div>
     {#if events.length > 0}
         <div class="mb-6" transition:slide>
             <Label class="mb-2">Assign To Event</Label>
             <Select
                 defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-                bind:value={selectedEvent}
+                bind:value={challengeTemplate.event}
                 placeholder=""
             >
                 <option selected value="">None</option>
@@ -372,16 +388,18 @@
             <div>
                 <Button
                     on:click={createChallenge}
-                    disabled={selectedDiff === '' ||
-                        selectedEvent === '' ||
+                    disabled={challengeTemplate.difficulty === '' ||
+                        challengeTemplate.event === '' ||
                         challengeTemplate.name === '' ||
                         challengeTemplate.description === '' ||
                         challengeTemplate.category === '' ||
                         challengeTemplate.points === 0 ||
                         (challengeTemplate.staticFlag === '' && challengeTemplate.flagStatic) ||
-                        (dependsOnChallenge === '' && challengeNeedsDepend) ||
+                        (challengeTemplate.dependsOn === '' && challengeNeedsDepend) ||
                         (challengeTemplate.fileURL === '' && challengeNeedsFile) ||
-                        (challengeTemplate.path === '' && challengeTemplate.staticFlag === '') ||
+                        (challengeTemplate.path === '' &&
+                            challengeTemplate.staticFlag === '' &&
+                            challengeTemplate.flagPool === false) ||
                         (challengeTemplate.path === '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button

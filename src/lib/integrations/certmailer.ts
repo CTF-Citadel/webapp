@@ -53,7 +53,7 @@ class CertMailer {
             }
         });
         this.#SENDER = process.env.EMAIL_NAME || '';
-        this.#CERTPATH = process.env.CERTIFICATE_FOLDER || '';
+        this.#CERTPATH = process.env.DATA_FOLDER || '';
     }
 
     /**

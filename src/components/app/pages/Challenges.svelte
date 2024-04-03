@@ -45,9 +45,9 @@
         return /^TH{.*}$/.test(input);
     }
 
-    async function checkFlag(challenge_id: string, input: string, staticFlag: boolean) {
+    async function checkFlag(challenge_id: string, input: string, type: 'static' | 'dynamic' | 'pool') {
         successFlag[challenge_id] = -1;
-        const TYPE = staticFlag ? 'check-flag-static' : 'check-flag';
+        const TYPE = `check-flag-${type}`;
         const DATA = await requestWrapper(false, {
             type: TYPE,
             data: {
@@ -229,40 +229,37 @@
                                                 ?.challenge_host}
                                         </p>
                                     </div>
+                                {:else if deploymentStatus[challenge.id] === 3}
+                                    <div class="mb-6 text-center" transition:slide>
+                                        <Alert class="my-2" color="green">
+                                            <span class="font-bold">Queued!</span><br />
+                                            Check back soon.
+                                        </Alert>
+                                    </div>
+                                {:else if deploymentStatus[challenge.id] === 2}
+                                    <div class="mb-6 text-center" transition:slide>
+                                        <Alert class="my-2" color="red">
+                                            <span class="font-bold">Failed!</span><br />
+                                            Contact Admin if this repeats.
+                                        </Alert>
+                                    </div>
                                 {:else}
-                                    
-                                    {#if deploymentStatus[challenge.id] === 3}
-                                        <div class="mb-6 text-center" transition:slide>
-                                            <Alert class="my-2" color="green">
-                                                <span class="font-bold">Queued!</span><br />
-                                                Check back soon.
-                                            </Alert>
-                                        </div>
-                                    {:else if deploymentStatus[challenge.id] === 2}
-                                        <div class="mb-6 text-center" transition:slide>
-                                            <Alert class="my-2" color="red">
-                                                <span class="font-bold">Failed!</span><br />
-                                                Contact Admin if this repeats.
-                                            </Alert>
-                                        </div>
-                                    {:else}
-                                        <div class="mb-6 text-center" transition:slide>
-                                            <Label class="mb-2">This Challenge needs a Container</Label>
-                                            <Button
-                                                disabled={deploymentStatus[challenge.id] === 1 ||
-                                                    deploymentStatus[challenge.id] === 3}
-                                                on:click={() => {
-                                                    deployChallenge(challenge.id);
-                                                }}
-                                            >
-                                                {#if deploymentStatus[challenge.id] === 1}
-                                                    <Spinner class="mr-3" size="4" />Requesting ..
-                                                {:else}
-                                                    Request
-                                                {/if}
-                                            </Button>
-                                        </div>
-                                    {/if}
+                                    <div class="mb-6 text-center" transition:slide>
+                                        <Label class="mb-2">This Challenge needs a Container</Label>
+                                        <Button
+                                            disabled={deploymentStatus[challenge.id] === 1 ||
+                                                deploymentStatus[challenge.id] === 3}
+                                            on:click={() => {
+                                                deployChallenge(challenge.id);
+                                            }}
+                                        >
+                                            {#if deploymentStatus[challenge.id] === 1}
+                                                <Spinner class="mr-3" size="4" />Requesting ..
+                                            {:else}
+                                                Request
+                                            {/if}
+                                        </Button>
+                                    </div>
                                 {/if}
                             {/if}
                             <div class="mb-6">
@@ -281,8 +278,15 @@
                                         !checkFlagInput(challengeInputs[challenge.id]) ||
                                         successFlag[challenge.id] === 0}
                                     on:click={() =>
-                                        checkFlag(challenge.id, challengeInputs[challenge.id], challenge.flag_static)}
-                                    >Submit</Button
+                                        checkFlag(
+                                            challenge.id,
+                                            challengeInputs[challenge.id],
+                                            challenge.flag_static
+                                                ? 'static'
+                                                : challenge.needs_flag_pool
+                                                  ? 'pool'
+                                                  : 'dynamic'
+                                        )}>Submit</Button
                                 >
                             </div>
                             {#if successFlag[challenge.id] === 0}

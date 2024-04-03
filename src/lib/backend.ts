@@ -141,16 +141,29 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     correct: STATIC_CORRECT
                 };
                 break;
-            case 'check-flag':
-                response = await HANLDER.checkChallengeFlag(
+            case 'check-flag-pool':
+                response = await HANLDER.checkPoolChallengeFlag(
+                    json.data.teamID,
+                    json.data.eventID,
+                    json.data.challengeID,
+                    json.data.flag,
+                    json.data.userID
+                );
+                const POOL_CORRECT = response === true ? true : false;
+                response = {
+                    correct: POOL_CORRECT
+                };
+                break;
+            case 'check-flag-dynamic':
+                response = await HANLDER.checkDynamicChallengeFlag(
                     json.data.teamID,
                     json.data.challengeID,
                     json.data.flag,
                     json.data.userID
                 );
-                const FLAG_CORRECT = response === true ? true : false;
+                const DYNAMIC_CORRECT = response === true ? true : false;
                 response = {
-                    correct: FLAG_CORRECT
+                    correct: DYNAMIC_CORRECT
                 };
                 break;
         }
@@ -231,9 +244,10 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.fileURL,
                     json.data.event,
                     json.data.points,
-                    json.data.dependon,
+                    json.data.dependsOn,
                     json.data.flagStatic,
-                    json.data.staticFlag
+                    json.data.staticFlag,
+                    json.data.flagPool
                 );
                 break;
             case 'create-event':
