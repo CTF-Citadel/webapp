@@ -23,7 +23,7 @@
         TableHead,
         TableHeadCell
     } from 'flowbite-svelte';
-    import { requestWrapper, COUNTRIES } from '../../../lib/helpers';
+    import { validAlphanumeric, validJoinToken, requestWrapper, COUNTRIES } from '../../../lib/helpers';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import type { TeamsType } from '../../../lib/schema';
@@ -35,6 +35,7 @@
     let loading = true;
     let hasTeam = false;
     let hasCreated = false;
+    let canLeaveTeam = false;
     let thisTeam: TeamsType;
     let teamMembers: { id: string; username: string; user_avatar: string; user_affiliation: string }[] = [];
     let teams: { id: string; team_name: string; team_description: string; team_country_code: string }[] = [];
@@ -55,27 +56,30 @@
             hasTeam = true;
             await refreshTeamInfo();
             await refreshTeamMembers();
+            await refreshLeavable();
         }
         loading = false;
     });
 
     async function refreshTeams() {
         const DATA = await requestWrapper(false, { type: 'teams' });
-        const JSON = await DATA.json();
-        teams = JSON.data;
+        teams = (await DATA.json()).data;
     }
 
     async function refreshTeamInfo() {
         const DATA = await requestWrapper(false, { type: 'team-info', data: { id: session.user_team_id } });
-        const JSON = await DATA.json();
-        thisTeam = JSON.data;
+        thisTeam = (await DATA.json()).data;
         hasCreated = session.id === thisTeam.team_creator;
     }
 
     async function refreshTeamMembers() {
         const DATA = await requestWrapper(false, { type: 'team-members', data: { id: session.user_team_id } });
-        const JSON = await DATA.json();
-        teamMembers = JSON.data;
+        teamMembers = (await DATA.json()).data;
+    }
+
+    async function refreshLeavable() {
+        const DATA = await requestWrapper(false, { type: 'check-leave', data: { teamID: session.user_team_id, userID: session.id } });
+        canLeaveTeam = (await DATA.json()).data;
     }
 
     async function resetToken() {
@@ -98,8 +102,8 @@
             data: {
                 session: sessionID,
                 creator: session.id,
-                name: inputs.teamName,
-                description: inputs.teamDesc,
+                name: inputs.teamName.slice(0, 50),
+                description: inputs.teamDesc.slice(0, 100),
                 country: inputs.teamCountry
             }
         });
@@ -113,7 +117,7 @@
     async function joinTeam() {
         const DATA = await requestWrapper(false, {
             type: 'join-team',
-            data: { session: sessionID, user: session.id, token: inputs.teamToken }
+            data: { session: sessionID, userID: session.id, token: inputs.teamToken.slice(0, 20) }
         });
         if (DATA.ok) {
             menus.join = false;
@@ -183,7 +187,11 @@
     <svelte:fragment slot="footer">
         <Button
             on:click={createTeam}
-            disabled={inputs.teamName === '' || inputs.teamDesc === '' || inputs.teamCountry === ''}>Create</Button
+            disabled={inputs.teamName === '' ||
+                !validAlphanumeric(inputs.teamName, 50, true) ||
+                inputs.teamDesc === '' ||
+                !validAlphanumeric(inputs.teamDesc, 100) ||
+                inputs.teamCountry === ''}>Create</Button
         >
         <Button
             on:click={() => {
@@ -219,7 +227,8 @@
         />
     </div>
     <svelte:fragment slot="footer">
-        <Button on:click={joinTeam} disabled={inputs.teamToken === ''}>Join</Button>
+        <Button on:click={joinTeam} disabled={inputs.teamToken === '' || !validJoinToken(inputs.teamToken)}>Join</Button
+        >
         <Button
             on:click={() => {
                 menus.join = false;
@@ -309,7 +318,7 @@
                                 size="lg"
                                 class="mt-4"
                                 on:click={leaveTeam}
-                                disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator}
+                                disabled={teamMembers.length > 1 && session.id === thisTeam.team_creator && canLeaveTeam === true}
                             >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>

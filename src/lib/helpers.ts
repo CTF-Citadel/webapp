@@ -1,5 +1,4 @@
 import type { WrapperFormat } from './backend';
-import { generateId } from 'lucia';
 
 export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
     const DEST = privileged ? '/admin' : '/user';
@@ -11,7 +10,9 @@ export async function requestWrapper(privileged: boolean, request: WrapperFormat
 
 // generator
 export function generateRandomString(length: number) {
-    return generateId(length);
+    return Array.from(crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2))), (b) =>
+        ('0' + (b & 0xff).toString(16)).slice(-2)
+    ).join('');
 }
 
 // expiration check
@@ -19,8 +20,14 @@ export function isWithinExpiration(expiryUnixEpoch: number) {
     return Date.now() < expiryUnixEpoch ? true : false;
 }
 
+export function validAlphanumeric(input: string, length: number, spaceless: boolean = false): boolean {
+    return spaceless
+        ? /^[a-zA-Z0-9]*$/.test(input) && input.length <= length
+        : /^[a-zA-Z0-9\s]*$/.test(input) && input.length <= length;
+}
+
 export function validJoinToken(input: string): boolean {
-    return /^[a-zA-Z0-9_]{4,24}$/.test(input);
+    return /^CTD-[A-Z0-9]{20,20}$/.test(input);
 }
 
 export function validUsername(input: string): boolean {

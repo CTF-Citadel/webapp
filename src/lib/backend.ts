@@ -92,6 +92,12 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'reset-team-token':
                 response = await HANLDER.resetTeamToken(json.data.session, json.data.teamID);
                 break;
+            case 'reset-password':
+                response = await HANLDER.resetPassword(json.data.session, json.data.password);
+                break;
+            case 'update-fullname':
+                response = await HANLDER.changeUserFullName(json.data.session, json.data.first, json.data.last);
+                break;
             case 'create-team':
                 const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
                 if (!HAS_CREATED) {
@@ -108,13 +114,16 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 }
                 break;
             case 'join-team':
-                const IS_JOINED = await HANLDER.checkUserInTeam(json.data.user);
+                const IS_JOINED = await HANLDER.checkUserInTeam(json.data.userID);
                 if (!IS_JOINED) {
                     const TEAM_ID = await HANLDER.checkTeamToken(json.data.token);
                     if (TEAM_ID !== false) {
                         response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
                     }
                 }
+                break;
+            case 'check-leave':
+                response = await HANLDER.checkTeamLeavable(json.data.teamID, json.data.userID);
                 break;
             case 'leave-team':
                 response = await HANLDER.leaveTeam(json.data.session, json.data.teamID);

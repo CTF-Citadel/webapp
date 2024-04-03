@@ -1,8 +1,9 @@
 import { DB_ADAPTER } from './db';
 import { challenges, events, team_challenges, team_events, teams, users } from './schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, sql, gt, lt } from 'drizzle-orm';
+import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
-import { generateRandomString } from './helpers';
+import { generateRandomString, validAlphanumeric, validPassword } from './helpers';
 import type { ChallengesType } from './schema';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
@@ -400,6 +401,42 @@ class Actions {
     }
 
     /**
+     * Reset a users password
+     * @returns true if success, false if not
+     */
+    async resetPassword(sessionID: string, password: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user && validPassword(password)) {
+            const PASSWORD_HASH = await new Argon2id().hash(password);
+            await DB_ADAPTER.update(users)
+                .set({
+                    hashed_password: PASSWORD_HASH
+                })
+                .where(eq(users.id, user.id));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Changes a users first and lastname
+     * @returns true if success, false if not
+     */
+    async changeUserFullName(sessionID: string, firstName: string, lastName: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user && validAlphanumeric(firstName, 30) && validAlphanumeric(lastName, 30)) {
+            await DB_ADAPTER.update(users)
+                .set({
+                    user_firstname: firstName,
+                    user_lastname: lastName
+                })
+                .where(eq(users.id, user.id));
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Creates a new Challenge
      * @returns void
      */
@@ -707,6 +744,32 @@ class Actions {
     }
 
     /**
+     * Checks if a user is able to leave the team
+     * @returns void
+     */
+    async checkTeamLeavable(teamID: string, userID: string) {
+        const TIMESTAMP = new Date().getTime();
+        const ONGOING_EVENTS = (
+            await DB_ADAPTER.select()
+                .from(team_events)
+                .fullJoin(events, eq(team_events.event_id, events.id))
+                .where(
+                    and(
+                        eq(team_events.team_id, teamID),
+                        lt(events.event_start, TIMESTAMP),
+                        gt(events.event_end, TIMESTAMP)
+                    )
+                )
+        ).length;
+        const POINTS_ADDED = (
+            await DB_ADAPTER.select()
+                .from(team_challenges)
+                .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.solved_by, userID)))
+        ).length;
+        return ONGOING_EVENTS === 0 && POINTS_ADDED === 0;
+    }
+
+    /**
      * Validates and adds a user to a team
      * @returns void
      */
@@ -748,7 +811,8 @@ class Actions {
         const TEAM = await this.getTeamInfo(teamID);
         const MEMBERS = await this.getTeamMembers(teamID);
         if (user && TEAM !== null && MEMBERS.length > 0) {
-            if (TEAM.team_creator !== user.id || MEMBERS.length === 1) {
+            const IS_ABLE = await this.checkTeamLeavable(teamID, user.id);
+            if ((TEAM.team_creator !== user.id && IS_ABLE === true) || (MEMBERS.length === 1 && IS_ABLE === true)) {
                 await DB_ADAPTER.update(users)
                     .set({
                         user_team_id: ''

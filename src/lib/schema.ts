@@ -10,6 +10,8 @@ export const users = pgTable('users', {
     user_team_id: text('user_team_id').notNull(),
     user_avatar: text('user_avatar').notNull(),
     user_affiliation: text('user_affiliation').notNull(),
+    user_firstname: text('user_firstname').notNull(),
+    user_lastname: text('user_lastname').notNull(),
     is_verified: boolean('is_verified').notNull(),
     is_blocked: boolean('is_blocked').notNull()
 });

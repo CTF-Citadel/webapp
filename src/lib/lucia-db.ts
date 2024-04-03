@@ -37,6 +37,8 @@ export const safeCreateUser = async (userName: string, userEmail: string, userPa
             user_team_id: '',
             user_avatar: 'wolf',
             user_affiliation: '',
+            user_firstname: '',
+            user_lastname: '',
             is_verified: DISABLE_EMAIL_VERIFY,
             is_blocked: false
         });
