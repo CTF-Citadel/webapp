@@ -6,7 +6,7 @@ const DYN_K: number = parseInt(process.env.SCORING_K || '12');
  * @returns Number
  */
 function dynDeductor(points: number, solves: number) {
-    return Math.max(points / 10, Number(points * Math.min(1, DYN_K / (DYN_K + solves - 1)) ** DYN_E));
+    return Math.floor(Math.max(points / 10, Number(points * Math.min(1, DYN_K / (DYN_K + solves - 1)) ** DYN_E)));
 }
 
 /**

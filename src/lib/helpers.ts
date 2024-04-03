@@ -35,9 +35,9 @@ export function validUsername(input: string): boolean {
 }
 
 export function validPassword(input: string): boolean {
-    if (!/^[a-zA-Z0-9_@$!%*?&#^]+$/.test(input)) return false;
+    if (!/^[a-zA-Z0-9_@$!%*?&#^§{}()]+$/.test(input)) return false;
     // min 8 characters, max 96 characters, at least one uppercase letter, one lowercase letter, one number and one special character
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^]{12,96}$/.test(input);
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^§{}()])[A-Za-z\d@$!%*?&#^§{}()]{12,128}$/.test(input);
 }
 
 export function validEmail(input: string, enforce: boolean = false, domain: string = ''): boolean {
