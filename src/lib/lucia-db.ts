@@ -12,11 +12,11 @@ const DISABLE_EMAIL_VERIFY = Boolean(process.env.DISABLE_EMAIL_VERIFY || false);
 const EXPIRES_IN = 1000 * 60 * 15;
 
 /**
-     * Create a new user from signup request
-     * @returns ID and Session Cookie if successful
-     * @throws 'AUTH_NAME_EXISTS' if non unique
-     * @throws 'AUTH_EMAIL_EXISTS' if non unique
-     */
+ * Create a new user from signup request
+ * @returns ID and Session Cookie if successful
+ * @throws 'AUTH_NAME_EXISTS' if non unique
+ * @throws 'AUTH_EMAIL_EXISTS' if non unique
+ */
 export const safeCreateUser = async (userName: string, userEmail: string, userPassword: string) => {
     const IS_INITIAL = (await DB_ADAPTER.select().from(users)).length === 0;
     const NAME_EXISTS = (await DB_ADAPTER.select().from(users).where(eq(users.username, userName))).length > 0;

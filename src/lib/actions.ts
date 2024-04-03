@@ -4,32 +4,26 @@ import { and, eq, sql } from 'drizzle-orm';
 import { lucia } from './lucia';
 import { generateRandomString } from './helpers';
 import type { ChallengesType } from './schema';
+import Infra from './integrations/infra';
+import M0n1t0r from './integrations/m0n1t0r';
+import F1rstbl00d from './integrations/f1rstbl00d';
 
-// read from env
-const BACKEND_HOST = process.env.BACKEND_HOST;
-const BACKEND_PORT = process.env.BACKEND_PORT;
-const BACKEND_PSK = process.env.BACKEND_PSK;
+const INFRA = new Infra();
+const MONITOR = new M0n1t0r();
+const FIRSTBLOOD = new F1rstbl00d();
 
 /**
  * Handler for Database related actions
  */
 class Actions {
-    #BACKEND_URL: string;
-    #BACKEND_HEADERS: { [key: string]: string };
-    constructor() {
-        this.#BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
-        this.#BACKEND_HEADERS = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${BACKEND_PSK}`
-        };
-    }
-
     /**
      * Validate if an event exists by id
      * @returns Event Name if it exists, False if it doesn't
      */
     async checkEventExist(eventID: string) {
-        const RES = (await DB_ADAPTER.select({ name: events.event_name }).from(events).where(eq(events.id, eventID))).at(0);
+        const RES = (
+            await DB_ADAPTER.select({ name: events.event_name }).from(events).where(eq(events.id, eventID))
+        ).at(0);
         return RES === undefined ? false : RES.name;
     }
 
@@ -90,6 +84,38 @@ class Actions {
     }
 
     /**
+     * Validate if challenge is solved initially
+     * @returns True if its the first solve, false if not
+     */
+    async checkInitialSolve(challengeID: string) {
+        const RES = await DB_ADAPTER.select()
+            .from(team_challenges)
+            .where(eq(team_challenges.challenge_id, challengeID));
+        return RES.length === 1 ? true : false;
+    }
+
+    /**
+     * Fetches info needed for firstblood notify
+     * @returns Firstblood Info Dict
+     */
+    async getFirstbloodData(challengeID: string) {
+        const RES = (
+            await DB_ADAPTER.select({
+                id: team_challenges.challenge_id,
+                name: challenges.challenge_name,
+                category: challenges.challenge_category,
+                difficulty: challenges.challenge_difficulty,
+                solver: users.username
+            })
+                .from(team_challenges)
+                .where(eq(team_challenges.challenge_id, challengeID))
+                .fullJoin(users, eq(users.id, team_challenges.solved_by))
+                .fullJoin(challenges, eq(challenges.id, team_challenges.challenge_id))
+        ).at(0);
+        return RES !== undefined ? RES : null;
+    }
+
+    /**
      * Fetches all Users
      * @returns List of Users
      */
@@ -121,15 +147,20 @@ class Actions {
      * @returns User Info if found, else null
      */
     async getUserProfile(userID: string) {
-        const RES = (await DB_ADAPTER.select({
-            username: users.username,
-            avatar: users.user_avatar,
-            affiliation: users.user_affiliation,
-            role: users.user_role,
-            team_id: users.user_team_id,
-            team_name: teams.team_name,
-            team_country: teams.team_country_code
-        }).from(users).where(eq(users.id, userID)).fullJoin(teams, eq(users.user_team_id, teams.id))).at(0);
+        const RES = (
+            await DB_ADAPTER.select({
+                username: users.username,
+                avatar: users.user_avatar,
+                affiliation: users.user_affiliation,
+                role: users.user_role,
+                team_id: users.user_team_id,
+                team_name: teams.team_name,
+                team_country: teams.team_country_code
+            })
+                .from(users)
+                .where(eq(users.id, userID))
+                .fullJoin(teams, eq(users.user_team_id, teams.id))
+        ).at(0);
         return RES === undefined ? null : RES;
     }
 
@@ -138,18 +169,24 @@ class Actions {
      * @returns User Info if found, else null
      */
     async getTeamProfile(teamID: string) {
-        const TEAM = (await DB_ADAPTER.select({
-            name: teams.team_name,
-            description: teams.team_description,
-            country: teams.team_country_code,
-        }).from(teams).where(eq(teams.id, teamID))).at(0);
+        const TEAM = (
+            await DB_ADAPTER.select({
+                name: teams.team_name,
+                description: teams.team_description,
+                country: teams.team_country_code
+            })
+                .from(teams)
+                .where(eq(teams.id, teamID))
+        ).at(0);
         const MEMBERS = await DB_ADAPTER.select({
             id: users.id,
             username: users.username,
             avatar: users.user_avatar
-        }).from(users).where(eq(users.user_team_id, teamID))
+        })
+            .from(users)
+            .where(eq(users.user_team_id, teamID));
         if (MEMBERS.length > 0 && TEAM !== undefined) {
-            return { ...TEAM, members: MEMBERS }
+            return { ...TEAM, members: MEMBERS };
         }
         return null;
     }
@@ -442,11 +479,12 @@ class Actions {
 
     /**
      * Deploys a new Challenge
-     * @returns true if deployed, false if not
+     * @returns true if queued, false if not
      */
     async deployTeamChallenge(genFlag: string, teamID: string, challengeID: string, eventID: string): Promise<boolean> {
-        const RES = await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID));
-        if (RES.length > 0) {
+        const TIMESTAMP = new Date().getTime();
+        const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
+        if (RES !== undefined) {
             // note deployment
             await DB_ADAPTER.insert(team_challenges).values({
                 team_id: teamID,
@@ -462,26 +500,14 @@ class Actions {
                 is_running: false,
                 is_solved: false
             });
-            // then fetch with promise
-            fetch(`${this.#BACKEND_URL}/challenge`, {
-                method: 'POST',
-                headers: this.#BACKEND_HEADERS,
-                body: JSON.stringify({
-                    challenge: RES[0].container_file,
-                    environment_variables: JSON.stringify({
-                        FLAG: genFlag
-                    })
-                }),
-                signal: AbortSignal.timeout(90000)
-            })
-                .then(async (REQ) => {
-                    // on success update the challenge
-                    const DEPLOY_DATA = await REQ.json();
+            INFRA.deploy(RES.container_file, genFlag).then(async (data) => {
+                // on success update the challenge
+                if (data !== false) {
                     await DB_ADAPTER.update(team_challenges)
                         .set({
-                            challenge_uuid: DEPLOY_DATA.instance_id,
-                            challenge_flag: DEPLOY_DATA.details.FLAG,
-                            challenge_host: `${DEPLOY_DATA.instance_id}.${BACKEND_HOST}`,
+                            challenge_uuid: data.id,
+                            challenge_flag: data.flag,
+                            challenge_host: data.host,
                             is_running: true
                         })
                         .where(
@@ -491,8 +517,9 @@ class Actions {
                                 eq(team_challenges.challenge_id, challengeID)
                             )
                         );
-                })
-                .catch(async (e) => {
+                    // notify anti cheat
+                    await MONITOR.initiation(data.flag, teamID, challengeID, TIMESTAMP);
+                } else {
                     // on fail, remove the entry
                     await DB_ADAPTER.delete(team_challenges).where(
                         and(
@@ -501,12 +528,9 @@ class Actions {
                             eq(team_challenges.challenge_id, challengeID)
                         )
                     );
-                    if (e instanceof Error) {
-                        console.error(e.message);
-                    } else {
-                        console.error((e as Error).message);
-                    }
-                });
+                }
+            });
+            // challenge is queued
             return true;
         }
         return false;
@@ -516,39 +540,26 @@ class Actions {
      * Checks a Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkChallengeFlag(
-        teamID: string,
-        challengeID: string,
-        flag: string,
-        userID: string,
-        timestamp: number
-    ): Promise<boolean> {
+    async checkChallengeFlag(teamID: string, challengeID: string, flag: string, userID: string): Promise<boolean> {
+        const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
-        const RES = await DB_ADAPTER.select()
-            .from(team_challenges)
-            .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
-        if (
-            RES.length > 0 &&
-            /^TH{.*}$/.test(flag) &&
-            RES[0].is_running === true &&
-            RES[0].challenge_flag === EXTRACTED_FLAG
-        ) {
-            await DB_ADAPTER.update(team_challenges)
-                .set({
-                    solved_by: userID,
-                    solved_at: timestamp,
-                    is_solved: true
-                })
-                .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
-            // shut down the container
-            fetch(`${this.#BACKEND_URL}/container?container_id=${RES[0].challenge_uuid}`, {
-                method: 'DELETE',
-                headers: this.#BACKEND_HEADERS,
-                signal: AbortSignal.timeout(10000)
-            })
-                .then(async (response) => {
-                    // container is down
-                    if (response.ok) {
+        const RES = (
+            await DB_ADAPTER.select()
+                .from(team_challenges)
+                .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)))
+        ).at(0);
+        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
+            if (RES.challenge_flag === EXTRACTED_FLAG) {
+                await DB_ADAPTER.update(team_challenges)
+                    .set({
+                        solved_by: userID,
+                        solved_at: TIMESTAMP,
+                        is_solved: true
+                    })
+                    .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
+                // shut down the container
+                INFRA.shutdown(RES.challenge_uuid).then(async (ok) => {
+                    if (ok === true) {
                         await DB_ADAPTER.update(team_challenges)
                             .set({
                                 is_running: false
@@ -557,17 +568,31 @@ class Actions {
                                 and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID))
                             );
                     }
-                })
-                .catch(async (e) => {
-                    // something went wrong
-                    if (e instanceof Error) {
-                        console.error(e.message);
-                    } else {
-                        console.error((e as Error).message);
-                    }
                 });
-            // flag is valid
-            return true;
+                // notify anti cheat
+                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, false, TIMESTAMP);
+                // check notify reporter
+                if ((await this.checkInitialSolve(challengeID)) === true) {
+                    const DATA = await this.getFirstbloodData(challengeID);
+                    if (DATA !== null) {
+                        await FIRSTBLOOD.solve(
+                            DATA.solver || '',
+                            DATA.id || '',
+                            DATA.name || '',
+                            DATA.category || '',
+                            DATA.difficulty || '',
+                            TIMESTAMP
+                        );
+                    }
+                }
+                // flag is valid
+                return true;
+            } else {
+                // notify anti cheat
+                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, false, TIMESTAMP);
+                // flag is incorrect
+                return false;
+            }
         }
         // flag is not valid
         return false;
@@ -582,36 +607,54 @@ class Actions {
         eventID: string,
         challengeID: string,
         flag: string,
-        userID: string,
-        timestamp: number
+        userID: string
     ): Promise<boolean> {
+        const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = await DB_ADAPTER.select()
             .from(challenges)
             .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)));
-        if (
-            RES.length > 0 &&
-            /^TH{.*}$/.test(flag) &&
-            RES[0].flag_static === true &&
-            RES[0].static_flag === EXTRACTED_FLAG
-        ) {
-            // insert new since static
-            await DB_ADAPTER.insert(team_challenges).values({
-                team_id: teamID,
-                challenge_id: challengeID,
-                event_id: eventID,
-                solved_by: userID,
-                solved_at: timestamp,
-                challenge_uuid: '',
-                challenge_flag: EXTRACTED_FLAG,
-                challenge_host: '',
-                challenge_port: '',
-                is_container: false,
-                is_running: false,
-                is_solved: true
-            });
-            // flag is valid
-            return true;
+        if (RES.length > 0 && /^TH{.*}$/.test(flag) && RES[0].flag_static === true) {
+            if (RES[0].static_flag === EXTRACTED_FLAG) {
+                // insert new since static
+                await DB_ADAPTER.insert(team_challenges).values({
+                    team_id: teamID,
+                    challenge_id: challengeID,
+                    event_id: eventID,
+                    solved_by: userID,
+                    solved_at: TIMESTAMP,
+                    challenge_uuid: '',
+                    challenge_flag: EXTRACTED_FLAG,
+                    challenge_host: '',
+                    challenge_port: '',
+                    is_container: false,
+                    is_running: false,
+                    is_solved: true
+                });
+                // notify anti cheat
+                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, true, TIMESTAMP);
+                // check notify reporter
+                if ((await this.checkInitialSolve(challengeID)) === true) {
+                    const DATA = await this.getFirstbloodData(challengeID);
+                    if (DATA !== null) {
+                        await FIRSTBLOOD.solve(
+                            DATA.solver || '',
+                            DATA.id || '',
+                            DATA.name || '',
+                            DATA.category || '',
+                            DATA.difficulty || '',
+                            TIMESTAMP
+                        );
+                    }
+                }
+                // flag is valid
+                return true;
+            } else {
+                // notify anti cheat
+                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, true, TIMESTAMP);
+                // flag is incorrect
+                return false;
+            }
         }
         // flag is not valid
         return false;
@@ -649,7 +692,7 @@ class Actions {
      * @returns void
      */
     async createTeam(userID: string, teamName: string, teamDesc: string, teamCountry: string) {
-        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length;
         // only create if name is unique
         if (TEAMS_WITH_NAME === 0) {
             await DB_ADAPTER.insert(teams).values({

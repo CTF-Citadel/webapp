@@ -1,8 +1,5 @@
 import Actions from './actions';
-import AntiCheat from './anticheat';
 
-const AC_ENABLE = Boolean(process.env.M0N1T0R_ENABLE) || false;
-const AC = new AntiCheat();
 const HANLDER = new Actions();
 
 export type WrapperFormat = {
@@ -82,9 +79,6 @@ export async function normalWrapper(request: Request): Promise<Response> {
                     json.data.challengeID,
                     json.data.eventID
                 );
-                if (response !== false && AC_ENABLE === true) {
-                    AC.flagInitial(GEN_FLAG, json.data.teamID, json.data.challengeID, Date.now());
-                }
                 break;
             case 'get-deployed':
                 response = await HANLDER.getDeployedChallenge(json.data.teamID, json.data.eventID);
@@ -126,61 +120,29 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.leaveTeam(json.data.session, json.data.teamID);
                 break;
             case 'check-flag-static':
-                const TIMESTAMP_STATIC = Date.now();
                 response = await HANLDER.checkStaticChallengeFlag(
                     json.data.teamID,
                     json.data.eventID,
                     json.data.challengeID,
                     json.data.flag,
-                    json.data.userID,
-                    TIMESTAMP_STATIC
+                    json.data.userID
                 );
-                if (response) {
-                    if (AC_ENABLE === true) {
-                        AC.flagSubmit(
-                            json.data.flag,
-                            json.data.teamID,
-                            json.data.userID,
-                            json.data.challengeID,
-                            TIMESTAMP_STATIC
-                        );
-                    }
-                    response = {
-                        correct: true
-                    };
-                } else {
-                    response = {
-                        correct: false
-                    };
-                }
+                const STATIC_CORRECT = response === true ? true : false;
+                response = {
+                    correct: STATIC_CORRECT
+                };
                 break;
             case 'check-flag':
-                const TIMESTAMP = Date.now();
                 response = await HANLDER.checkChallengeFlag(
                     json.data.teamID,
                     json.data.challengeID,
                     json.data.flag,
-                    json.data.userID,
-                    TIMESTAMP
+                    json.data.userID
                 );
-                if (response) {
-                    if (AC_ENABLE === true) {
-                        AC.flagSubmit(
-                            json.data.flag,
-                            json.data.teamID,
-                            json.data.userID,
-                            json.data.challengeID,
-                            TIMESTAMP
-                        );
-                    }
-                    response = {
-                        correct: true
-                    };
-                } else {
-                    response = {
-                        correct: false
-                    };
-                }
+                const FLAG_CORRECT = response === true ? true : false;
+                response = {
+                    correct: FLAG_CORRECT
+                };
                 break;
         }
     } catch (e: unknown) {

@@ -45,9 +45,9 @@ services:
       DB_USER: 'root'
       DB_PASS: 'CHANGEME'
       # deployment endpoint
-      BACKEND_HOST: 'remote.example.com'
-      BACKEND_PORT: 443
-      BACKEND_PSK: 'CHANGEME'
+      INFRA_HOST: 'remote.example.com'
+      INFRA_PORT: 443
+      INFRA_PSK: 'CHANGEME'
       # anticheat endpoint
       M0N1T0R_ENABLE: false
       M0N1T0R_HOST: 'm0n1t0r'
@@ -61,6 +61,7 @@ services:
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
+      CERTIFICATE_FOLDER: '/some/valid/path'
       DISABLE_EMAIL_VERIFY: false
       ENFORCE_EMAIL_DOMAIN: false
       ENFORCE_DOMAIN: 'example.com'
