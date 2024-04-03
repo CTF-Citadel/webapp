@@ -39,7 +39,6 @@ services:
     image: ghcr.io/ctf-citadel/webapp:latest
     hostname: webapp
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./webapp:/data
     environment:
       TZ: Europe/Vienna
