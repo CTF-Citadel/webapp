@@ -826,7 +826,7 @@ class Actions {
      */
     async checkTeamJoinable(teamID: string) {
         const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID))).length;
-        return MEMBERS !== 0 && MEMBERS < 4 ? true : false;
+        return MEMBERS < 4 ? true : false;
     }
 
     /**

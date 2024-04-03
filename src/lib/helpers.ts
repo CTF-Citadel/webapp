@@ -27,7 +27,7 @@ export function validAlphanumeric(input: string, length: number, spaceless: bool
 }
 
 export function validJoinToken(input: string): boolean {
-    return /^CTD-[A-Z0-9]{20,20}$/.test(input);
+    return /^[CTD\-A-Z0-9]{20,20}$/.test(input);
 }
 
 export function validUsername(input: string): boolean {
