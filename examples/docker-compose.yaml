@@ -100,7 +100,7 @@ services:
       DB_NAME: 'm0n1t0r'
       DB_HOST: 'postgres-m0n1t0r'
       DB_USER: 'root'
-      DB_PASSWORD: 'CHANGEME'
+      DB_PW: 'CHANGEME'
     restart: unless-stopped
     profiles:
       - full

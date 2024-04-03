@@ -22,8 +22,8 @@ export function isWithinExpiration(expiryUnixEpoch: number) {
 
 export function validAlphanumeric(input: string, length: number, spaceless: boolean = false): boolean {
     return spaceless
-        ? /^[a-zA-Z0-9]*$/.test(input) && input.length <= length
-        : /^[a-zA-Z0-9\s]*$/.test(input) && input.length <= length;
+        ? /^[a-zA-Z0-9_@$-]*$/.test(input) && input.length <= length
+        : /^[a-zA-Z0-9_@$-\s]*$/.test(input) && input.length <= length;
 }
 
 export function validJoinToken(input: string): boolean {
