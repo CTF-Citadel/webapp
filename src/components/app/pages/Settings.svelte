@@ -3,6 +3,7 @@
   ## Props
   @prop export let sessionID: string = '';
   @prop export let session: any = {};
+  @prop export let ac: boolean = false;
 -->
 
 <script lang="ts">
@@ -15,6 +16,7 @@
 
     export let sessionID: string = '';
     export let session: User;
+    export let ac: boolean = false;
 
     let team: TeamsType | null;
     let loading = true;
@@ -183,7 +185,7 @@
                 SETTINGS
             </h1>
             <div class="flex flex-col flex-1 items-center">
-                <Admin />
+                <Admin withAC={ac} />
             </div>
         {/if}
     {/if}

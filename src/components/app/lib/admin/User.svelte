@@ -29,7 +29,10 @@
             data: {
                 id: editUUID,
                 email: editData?.email,
-                verified: editData?.is_verified
+                verified: editData?.is_verified,
+                role: editData?.user_role,
+                firstname: editData?.user_firstname,
+                lastname: editData?.user_lastname
             }
         });
         if (DATA.ok) {
@@ -86,6 +89,33 @@
                 required
             />
         </div>
+        <div class="mb-6">
+            <Label for="role" class="mb-2">Change User Role</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="role"
+                bind:value={editData.user_role}
+                required
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="first" class="mb-2">Change User Firstname</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="first"
+                bind:value={editData.user_firstname}
+                required
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Lastname</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_lastname}
+                required
+            />
+        </div>
         <div>
             <Label for="verify-check" class="mb-2">Verified</Label>
             <Toggle id="verify-check" bind:checked={editData.is_verified}></Toggle>
@@ -101,8 +131,10 @@
                         color="alternative">Cancel</Button
                     >
                 </div>
-                <Button on:click={() => blockUser()} color="red"><EyeSlash class="w-4" /></Button>
-                <Button on:click={() => deleteUser()} color="red"><TrashBinOutline class="w-4" /></Button>
+                <div>
+                    <Button on:click={() => blockUser()} color="red"><EyeSlash class="w-4" /></Button>
+                    <Button on:click={() => deleteUser()} color="red"><TrashBinOutline class="w-4" /></Button>
+                </div>
             </div>
         </svelte:fragment>
     </Modal>

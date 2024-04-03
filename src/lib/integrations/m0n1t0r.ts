@@ -4,7 +4,7 @@ class M0n1t0r {
     #M0N1T0R_HEADERS: { [key: string]: string };
     constructor() {
         this.#ENABLED = Boolean(process.env.M0N1T0R_ENABLE || false);
-        this.#M0N1T0R_URL = `${process.env.M0N1T0R_HOST}:${process.env.M0N1T0R_PORT}`;
+        this.#M0N1T0R_URL = `http://${process.env.M0N1T0R_HOST}:${process.env.M0N1T0R_PORT}`;
         this.#M0N1T0R_HEADERS = {
             'Content-Type': 'application/json'
         };
@@ -21,6 +21,31 @@ class M0n1t0r {
         if (!this.#ENABLED) return -1;
         try {
             let RESP = await fetch(`${this.#M0N1T0R_URL}/poisoned`, {
+                method: 'GET',
+                headers: this.#M0N1T0R_HEADERS
+            });
+            if (RESP.ok === true) {
+                const DATA: string[] = await RESP.json();
+                return DATA.length > 0 ? DATA : [];
+            }
+            return false;
+        } catch (e: any) {
+            console.error(e)
+            return false;
+        }
+    }
+
+    /**
+     * #### Infallible ####
+     * Fetch current flag data from m0n1t0r AntiCheat
+     * @returns -1 if disabled
+     * @returns Data List if success
+     * @returns false if error
+     */
+    async flagged(): Promise<-1 | string[] | false> {
+        if (!this.#ENABLED) return -1;
+        try {
+            let RESP = await fetch(`${this.#M0N1T0R_URL}/flagged`, {
                 method: 'GET',
                 headers: this.#M0N1T0R_HEADERS
             });

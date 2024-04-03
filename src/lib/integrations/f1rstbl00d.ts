@@ -4,9 +4,10 @@ class F1rstbl00d {
     #F1RSTBL00D_HEADERS: { [key: string]: string };
     constructor() {
         this.#ENABLED = Boolean(process.env.F1RSTBL00D_ENABLE || false);
-        this.#F1RSTBL00D_URL = `${process.env.F1RSTBL00D_HOST}:${process.env.F1RSTBL00D_PORT}`;
+        this.#F1RSTBL00D_URL = `http://${process.env.F1RSTBL00D_HOST}:${process.env.F1RSTBL00D_PORT}`;
         this.#F1RSTBL00D_HEADERS = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.F1RSTBL00D_PSK}`
         };
     }
 
@@ -16,15 +17,15 @@ class F1rstbl00d {
      * @returns -1 if disabled
      * @returns true if success, false if not
      */
-    async solve(userName: string, challengeID: string, challengeName: string, challengeCategory: string, challengeDifficulty: string, timestamp: number): Promise<-1 | boolean> {
+    async solve(userName: string, eventID: string, challengeID: string, challengeName: string, challengeCategory: string, challengeDifficulty: string, timestamp: number): Promise<-1 | boolean> {
         if (!this.#ENABLED) return -1;
         try {
-            let RESP = await fetch(`${this.#F1RSTBL00D_URL}/initiate_flag`, {
+            let RESP = await fetch(`${this.#F1RSTBL00D_URL}/firstbloods/add`, {
                 method: 'POST',
                 headers: this.#F1RSTBL00D_HEADERS,
                 body: JSON.stringify({
-                    date: timestamp,
                     username: userName,
+                    event_id: eventID,
                     challenge_id: challengeID,
                     challenge_name: challengeName,
                     challenge_category: challengeCategory,

@@ -56,6 +56,7 @@ services:
       F1RSTBL00D_ENABLE: false
       F1RSTBL00D_HOST: 'f1rstbl00d'
       F1RSTBL00D_PORT: 80
+      F1RSTBL00D_PSK: 'CHANGEME'
       # platform specific
       INSTANCE_NAME: 'testCTF'
       EMAIL_SERVICE: 'hotmail'

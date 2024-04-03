@@ -8,6 +8,8 @@ import { DUMMY_SESSION } from '../lib/helpers';
 let session = DUMMY_SESSION;
 let sessionID = 'some-id';
 
+const AC_ENABLED = Boolean(process.env.M0N1T0R_ENABLE || false);
+
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
     if (Astro.locals.user.is_blocked) {
@@ -29,6 +31,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <GeneralSettings session={session} sessionID={sessionID} client:visible />
+        <GeneralSettings session={session} sessionID={sessionID} ac={AC_ENABLED} client:visible />
     </div>
 </Layout>

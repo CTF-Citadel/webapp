@@ -105,6 +105,7 @@ class Actions {
         const RES = (
             await DB_ADAPTER.select({
                 id: team_challenges.challenge_id,
+                event: team_challenges.event_id,
                 name: challenges.challenge_name,
                 category: challenges.challenge_category,
                 difficulty: challenges.challenge_difficulty,
@@ -623,6 +624,7 @@ class Actions {
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
+                            DATA.event || '',
                             DATA.id || '',
                             DATA.name || '',
                             DATA.category || '',
@@ -686,6 +688,7 @@ class Actions {
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
+                            DATA.event || '',
                             DATA.id || '',
                             DATA.name || '',
                             DATA.category || '',
@@ -749,6 +752,7 @@ class Actions {
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
+                            DATA.event || '',
                             DATA.id || '',
                             DATA.name || '',
                             DATA.category || '',
@@ -952,11 +956,14 @@ class Actions {
      * Updates a Users properties
      * @returns void
      */
-    async updateUser(userID: string, userEmail: string, isVerified: boolean) {
+    async updateUser(userID: string, userEmail: string, isVerified: boolean, role: string, firstName: string, lastName: string) {
         await DB_ADAPTER.update(users)
             .set({
                 email: userEmail,
-                is_verified: isVerified
+                is_verified: isVerified,
+                user_role: role,
+                user_firstname: firstName,
+                user_lastname: lastName
             })
             .where(eq(users.id, userID));
     }

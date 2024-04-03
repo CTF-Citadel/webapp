@@ -283,7 +283,14 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 );
                 break;
             case 'update-user':
-                response = await HANLDER.updateUser(json.data.id, json.data.email, json.data.verified);
+                response = await HANLDER.updateUser(
+                    json.data.id,
+                    json.data.email,
+                    json.data.verified,
+                    json.data.role,
+                    json.data.firstname,
+                    json.data.lastname
+                );
                 break;
             case 'update-event':
                 response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description);

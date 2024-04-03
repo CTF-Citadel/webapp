@@ -32,6 +32,9 @@
     import SubEvent from './admin/Event.svelte';
     import SubUser from './admin/User.svelte';
     import SubTeam from './admin/Team.svelte';
+    import AntiCheat from './admin/AntiCheat.svelte';
+
+    export let withAC: boolean = false;
 
     let teams: TeamsType[] = [];
     let events: EventsType[] = [];
@@ -48,7 +51,8 @@
         teams: false,
         events: false,
         challenges: false,
-        assignments: false
+        assignments: false,
+        anticheat: false
     };
     let edit = {
         user: false,
@@ -530,6 +534,11 @@
                     </Alert>
                 {/if}
             </TabItem>
+            {#if withAC === true}
+                <TabItem title="M0n1t0r" bind:open={tabStates.anticheat}>
+                    <AntiCheat />
+                </TabItem>
+            {/if}
         </Tabs>
     {/if}
 </div>
