@@ -53,14 +53,20 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'team-profile':
                 response = await HANLDER.getTeamProfile(json.data.teamID);
                 break;
-            case 'event-solves':
-                response = await HANLDER.getAllSolvesByEvent(json.data.eventID);
+            case 'team-solves':
+                response = await HANLDER.getTeamSolvesByEvent(json.data.eventID);
+                break;
+            case 'user-solves':
+                response = await HANLDER.getUserSolvesByEvent(json.data.eventID);
                 break;
             case 'team-scores':
                 response = await HANLDER.getTeamPointsByEvent(json.data.eventID);
                 break;
             case 'user-scores':
                 response = await HANLDER.getUserPointsByEvent(json.data.eventID);
+                break;
+            case 'challenge-solves':
+                response = await HANLDER.getChallengeSolvesByEvent(json.data.eventID);
                 break;
             case 'team-events':
                 response = await HANLDER.getTeamEvents(json.data.id);

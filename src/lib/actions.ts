@@ -5,6 +5,7 @@ import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
 import { generateRandomString, validAlphanumeric, validPassword } from './helpers';
 import { checkLocalPoolMatch } from './storage';
+import { adjustDynamic, getTotalByName } from './scoring';
 import type { ChallengesType } from './schema';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
@@ -304,80 +305,80 @@ class Actions {
 
     /**
      * Fetches Points per Team based on Event ID
-     * @returns
-     * ```
-     * {
-     *     id: string | null;
-     *     name: string | null;
-     *     points: number | null;
-     * }[]
-     * ```
      */
     async getTeamPointsByEvent(eventID: string) {
+        const RES = await this.getTeamSolvesByEvent(eventID);
+        const ADJUSTED = getTotalByName(RES);
+        return ADJUSTED.length > 0 ? ADJUSTED : [];
+    }
+
+    /**
+     * Fetches Points per User based on Event ID
+     */
+    async getUserPointsByEvent(eventID: string) {
+        const RES = await this.getUserSolvesByEvent(eventID);
+        const ADJUSTED = getTotalByName(RES);
+        return ADJUSTED.length > 0 ? ADJUSTED : [];
+    }
+
+    /**
+     * Fetches Number of solves for all challenges in event
+     */
+    async getChallengeSolvesByEvent(eventID: string) {
         const RES = await DB_ADAPTER.select({
+            id: team_challenges.challenge_id,
+            solves: sql<number>`cast(count(${team_challenges.challenge_id}) as int)`
+        })
+            .from(team_challenges)
+            .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
+            .groupBy(team_challenges.challenge_id);
+        return RES.length > 0 ? RES : [];
+    }
+
+    /**
+     * Fetches Solves per Team based on Event ID
+     */
+    async getTeamSolvesByEvent(eventID: string) {
+        const SOLVES = await this.getChallengeSolvesByEvent(eventID);
+        const DATA = await DB_ADAPTER.select({
             id: team_challenges.team_id,
             name: teams.team_name,
-            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+            challenge_id: challenges.id,
+            timestamp: team_challenges.solved_at,
+            points_gained: challenges.base_points
         })
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.team_id, teams.team_name);
-        return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
+            .groupBy(team_challenges.team_id, teams.team_name, challenges.id, team_challenges.solved_at);
+        if (DATA.length > 0 && SOLVES.length > 0) {
+            return adjustDynamic(DATA, SOLVES);
+        }
+        return [];
     }
 
     /**
-     * Fetches Points per User based on Event ID
-     * @returns
-     * ```
-     * {
-     *     id: string | null;
-     *     name: string | null;
-     *     points: number | null;
-     * }[]
-     * ```
+     * Fetches Solves per User based on Event ID
      */
-    async getUserPointsByEvent(eventID: string) {
-        const RES = await DB_ADAPTER.select({
+    async getUserSolvesByEvent(eventID: string) {
+        const SOLVES = await this.getChallengeSolvesByEvent(eventID);
+        const DATA = await DB_ADAPTER.select({
             id: users.id,
             name: users.username,
-            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+            challenge_id: challenges.id,
+            timestamp: team_challenges.solved_at,
+            points_gained: challenges.base_points
         })
             .from(team_challenges)
             .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .fullJoin(users, eq(team_challenges.solved_by, users.id))
             .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
-            .groupBy(users.id);
-        return RES.length > 0 ? RES.sort((a, b) => b.points - a.points) : [];
-    }
-
-    /**
-     * Fetches Solves per Team based on Event ID
-     * @returns
-     * ```
-     * {
-     *     id: string | null;
-     *     name: string | null;
-     *     timestamp: number | null;
-     *     points_gained: number | null;
-     * }[]
-     * ```
-     */
-    async getAllSolvesByEvent(eventID: string) {
-        const RES = await DB_ADAPTER.select({
-            id: team_challenges.team_id,
-            name: teams.team_name,
-            timestamp: team_challenges.solved_at,
-            points_gained: challenges.base_points,
-            total_points: sql<number>`cast(sum(${challenges.base_points}) as int)`
-        })
-            .from(team_challenges)
-            .fullJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
-            .fullJoin(teams, eq(team_challenges.team_id, teams.id))
-            .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.team_id, teams.team_name, challenges.base_points, team_challenges.solved_at);
-        return RES.length > 0 ? RES : [];
+            .groupBy(users.id, challenges.id, team_challenges.solved_at);
+        if (DATA.length > 0 && SOLVES.length > 0) {
+            return adjustDynamic(DATA, SOLVES);
+        }
+        return [];
     }
 
     /**
@@ -816,6 +817,15 @@ class Actions {
     }
 
     /**
+     * Checks if a team is able to be joined
+     * @returns void
+     */
+    async checkTeamJoinable(teamID: string) {
+        const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID))).length;
+        return MEMBERS !== 0 && MEMBERS < 4 ? true : false;
+    }
+
+    /**
      * Checks if a user is able to leave the team
      * @returns void
      */
@@ -846,8 +856,9 @@ class Actions {
      * @returns void
      */
     async joinTeam(sessionID: string, teamID: string) {
+        const JOINABLE = await this.checkTeamJoinable(teamID);
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user) {
+        if (user && JOINABLE === true) {
             await DB_ADAPTER.update(users)
                 .set({
                     user_team_id: teamID

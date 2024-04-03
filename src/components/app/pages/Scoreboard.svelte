@@ -28,8 +28,10 @@
     let loading: boolean = true;
     let events: EventsType[] = [];
     let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
-    let teamScores: { id: string; name: string; points: number }[] = [];
-    let userScores: { id: string; name: string; points: number }[] = [];
+    let userSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
+    let teamScores: { id: string; name: string; total_points: number }[] = [];
+    let userScores: { id: string; name: string; total_points: number }[] = [];
+    let challengeSolves: { id: string, solves: number }[] = [];
     let seriesData: { x: number; y: number }[];
     let dataAggregator: { [key: string]: typeof seriesData } = {};
     let plotData: { name: string; data: typeof seriesData }[] = [];
@@ -182,8 +184,10 @@
     }
 
     async function refreshEventScoring(id: string) {
-        const SOLVES = await requestWrapper(false, { type: 'event-solves', data: { eventID: id } });
-        teamSolves = (await SOLVES.json()).data;
+        const TEAM_SOLVES = await requestWrapper(false, { type: 'team-solves', data: { eventID: id } });
+        teamSolves = (await TEAM_SOLVES.json()).data;
+        const USER_SOLVES = await requestWrapper(false, { type: 'team-solves', data: { eventID: id } });
+        userSolves = (await USER_SOLVES.json()).data;
         const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
         userScores = (await USER.json()).data;
         const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
@@ -230,7 +234,7 @@
                                         {entry.name}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.points}
+                                        {entry.total_points}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}
@@ -259,7 +263,7 @@
                                         {entry.name}
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.points}
+                                        {entry.total_points}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}

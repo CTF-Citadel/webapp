@@ -4,8 +4,9 @@ class Infra {
     #INFRA_HEADERS: { [key: string]: string };
     constructor() {
         this.#DOMAIN = process.env.INFRA_HOST || '';
-        this.#INFRA_URL = `${process.env.INFRA_HOST}:${process.env.INFRA_PORT}`;
+        this.#INFRA_URL = `https://${process.env.INFRA_HOST}`;
         this.#INFRA_HEADERS = {
+            Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.INFRA_PSK}`
         };
@@ -16,7 +17,7 @@ class Infra {
      * Request a new container deployment
      * @returns Deployed data if success, False if not
      */
-    async deploy(name: string, flag: string): Promise<{ id: string, flag: string, host: string } | false> {
+    async deploy(name: string, flag: string): Promise<{ id: string; flag: string; host: string } | false> {
         try {
             const RESP = await fetch(`${this.#INFRA_URL}/challenge`, {
                 method: 'POST',
@@ -35,11 +36,11 @@ class Infra {
                     id: DATA.instance_id,
                     flag: DATA.details.FLAG,
                     host: `${DATA.instance_id}.${this.#DOMAIN}`
-                }
+                };
             }
             return false;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -52,13 +53,13 @@ class Infra {
     async shutdown(id: string): Promise<Boolean> {
         try {
             const RESP = await fetch(`${this.#INFRA_URL}/container?container_id=${id}`, {
-                method: 'GET',
+                method: 'DELETE',
                 headers: this.#INFRA_HEADERS,
                 signal: AbortSignal.timeout(20000)
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -77,7 +78,7 @@ class Infra {
             });
             return RESP.ok === true ? 'healthy' : false;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }

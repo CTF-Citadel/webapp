@@ -29,6 +29,7 @@
         is_running: boolean;
     }[] = [];
     let solvedChallenges: string[] = [];
+    let challengeSolves: { [key: string]: number } = {};
     let challengeInputs: { [key: string]: string } = {};
     let categories: { [key: string]: ChallengesType[] } = {};
 
@@ -38,6 +39,7 @@
         });
         await refreshDeployedChallenges();
         await refreshSolvedChallenges();
+        await refreshSolveScores();
         loading = false;
     });
 
@@ -107,7 +109,6 @@
             data: { eventID: uuid, teamID: session.user_team_id }
         });
         deployments = (await DATA.json()).data;
-        console.log(deployments);
     }
 
     async function refreshSolvedChallenges() {
@@ -116,6 +117,15 @@
         solvedChallenges = [];
         for (let entry of JSON.data) {
             solvedChallenges.push(entry.id);
+        }
+    }
+
+    async function refreshSolveScores() {
+        const DATA = await requestWrapper(false, { type: 'challenge-solves', data: { eventID: uuid } });
+        const JSON: { id: string, solves: number }[] = (await DATA.json()).data;
+        challengeSolves = {};
+        for (let entry of JSON) {
+            challengeSolves[entry.id] = entry.solves;
         }
     }
 
@@ -312,6 +322,9 @@
                                 </Alert>
                             </div>
                         {/if}
+                        <div class="mt-6">
+                            <p>Solves: {challengeSolves[challenge.id] || 0}</p>
+                        </div>
                     </Card>
                 {/each}
             </div>
