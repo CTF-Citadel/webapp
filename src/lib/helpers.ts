@@ -54,6 +54,10 @@ export const DUMMY_SESSION = {
     email: 'some-email',
     user_role: 'admin',
     user_team_id: 'someTeam',
+    user_avatar: 'wolf',
+    user_affiliation: '',
+    user_firstname: '',
+    user_lastname: '',
     is_blocked: false,
     is_verified: true
 };
