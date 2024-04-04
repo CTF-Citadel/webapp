@@ -41,7 +41,7 @@
     });
 
     async function refreshUserTeam() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: sessionID } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { session: sessionID } });
         const JSON = await DATA.json();
         team = JSON.data;
     }

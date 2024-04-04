@@ -22,6 +22,21 @@ const MAILER = new CertMailer();
  */
 class Actions {
     /**
+     * Validate if an event exists in timerange by id
+     * @returns Event Name if it exists, False if it doesn't
+     */
+    async checkValidEventExist(eventID: string) {
+        const CURRENT_DATE = new Date().getTime();
+        const RES = (
+            await DB_ADAPTER.select({ name: events.event_name, start: events.event_start, end: events.event_end }).from(events).where(eq(events.id, eventID))
+        ).at(0);
+        if (RES !== undefined) {
+            return CURRENT_DATE >= RES.start && CURRENT_DATE <= RES.end ? RES.name : false;
+        }
+        return false;
+    }
+
+    /**
      * Validate if an event exists by id
      * @returns Event Name if it exists, False if it doesn't
      */
@@ -573,8 +588,9 @@ class Actions {
      * @returns true if queued, false if not
      */
     async deployTeamChallenge(sessionID: string, challengeID: string, eventID: string): Promise<boolean> {
+        const VALID = await this.checkValidEventExist(eventID);
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null) return false;
+        if (user === null && VALID !== false) return false;
         const GEN_FLAG = crypto.randomUUID();
         const TIMESTAMP = new Date().getTime();
         const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
@@ -647,7 +663,8 @@ class Actions {
                 )
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
-            if (RES.challenge_flag === EXTRACTED_FLAG) {
+            const VALID = await this.checkValidEventExist(RES.event_id);
+            if (RES.challenge_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.update(team_challenges)
                     .set({
                         solved_by: user.id,
@@ -725,7 +742,8 @@ class Actions {
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.flag_static === true) {
-            if (RES.static_flag === EXTRACTED_FLAG) {
+            const VALID = await this.checkValidEventExist(RES.event_id);
+            if (RES.static_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: user.user_team_id,
                     challenge_id: challengeID,
@@ -790,7 +808,8 @@ class Actions {
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_flag_pool === true) {
-            if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true) {
+            const VALID = await this.checkValidEventExist(RES.event_id);
+            if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true &&  VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: user.user_team_id,
                     challenge_id: challengeID,

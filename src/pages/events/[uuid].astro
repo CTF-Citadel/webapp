@@ -24,7 +24,7 @@ if (!import.meta.env.DEV) {
 }
 
 const ACTION = new DatabaseActions();
-const EVENT = await ACTION.checkEventExist(uuid || '');
+const EVENT = await ACTION.checkValidEventExist(uuid || '');
 if (EVENT === false) {
     // early exit to 404
     return Astro.redirect('/404');
