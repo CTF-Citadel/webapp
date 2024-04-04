@@ -95,7 +95,7 @@ export function getTotalByName(
  * @returns Sorted and Adjusted Points
  */
 export function backFillTotal(
-    data: { id: string; name: string; total_points: number }[],
+    data: { id: string; name: string; avg_time: number; total_points: number }[],
     backfillData: { id: string; name: string }[]
 ) {
     for (let entry of backfillData) {
@@ -103,6 +103,7 @@ export function backFillTotal(
             data.push({
                 id: entry.id,
                 name: entry.name,
+                avg_time: 0,
                 total_points: 0
             });
         }
