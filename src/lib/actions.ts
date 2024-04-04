@@ -1296,7 +1296,11 @@ class Actions {
      * @returns void
      */
     async sendCertUserMails(list: any[]) {
-        await MAILER.batchSendAttendance(list);
+        MAILER.batchSendAttendance(list).then((res) => {
+            if (res === true) {
+                console.log(list.length + " Emails Sent.")
+            }
+        });
     }
 }
 
