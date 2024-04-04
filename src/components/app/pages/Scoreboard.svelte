@@ -187,10 +187,8 @@
         teamSolves = (await TEAM_SOLVES.json()).data;
         const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
         userScores = (await USER.json()).data;
-        console.log(userScores);
         const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
         teamScores = (await TEAM.json()).data;
-        console.log(teamScores);
     }
 
     function msToHMS(unix: number) {
@@ -216,8 +214,8 @@
                 divider={false}
                 defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
                 contentClass=""
-                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
-                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 font-bold text-primary-200"
+                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-500"
             >
                 <TabItem title="Teams" bind:open={tabs.teams}>
                     <Table
@@ -262,6 +260,7 @@
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
+                            <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
                             {#each userScores as entry}
@@ -277,6 +276,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.total_points}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {msToHMS(entry.avg_time)}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}

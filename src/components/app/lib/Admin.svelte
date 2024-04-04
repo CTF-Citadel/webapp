@@ -286,8 +286,8 @@
                 divider={false}
                 defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 pb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
                 contentClass=""
-                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
-                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 font-bold text-primary-200"
+                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-500"
             >
                 <TabItem title="Actions" bind:open={tabStates.actions}>
                     <Actions bind:sortedEvents></Actions>

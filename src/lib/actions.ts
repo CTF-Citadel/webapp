@@ -1025,7 +1025,6 @@ class Actions {
      * @returns void
      */
     async updateEvent(eventID: string, eventName: string, eventDesc: string, start: number, end: number) {
-        console.log(eventID);
         await DB_ADAPTER.update(events)
             .set({
                 event_name: eventName,
@@ -1047,7 +1046,8 @@ class Actions {
         cat: string,
         diff: string,
         points: number,
-        event: string
+        event: string,
+        depends: string
     ) {
         await DB_ADAPTER.update(challenges)
             .set({
@@ -1056,7 +1056,8 @@ class Actions {
                 challenge_category: cat,
                 challenge_difficulty: diff,
                 base_points: points,
-                event_id: event
+                event_id: event,
+                depends_on: depends
             })
             .where(eq(challenges.id, id));
     }

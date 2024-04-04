@@ -78,7 +78,8 @@
                 category: editData?.challenge_category,
                 difficulty: editData?.challenge_difficulty,
                 event: editData?.event_id,
-                points: editData?.base_points
+                points: editData?.base_points,
+                depends: editData?.depends_on
             }
         });
         if (DATA.ok) {
@@ -164,6 +165,19 @@
                 type="number"
                 bind:value={editData.base_points}
             />
+        </div>
+        <div>
+            <Label class="mb-2">Change Dependency</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={editData.depends_on}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each sortedChallenges as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         </div>
         <div>
             <Label class="mb-2">Change Event Assignment</Label>

@@ -26,7 +26,6 @@
         });
         if (DATA.ok) {
             batchUsers = (await DATA.json()).data;
-            console.log(batchUsers);
             DISPATCH('refresh');
         }
     }

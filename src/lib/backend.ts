@@ -279,7 +279,8 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.category,
                     json.data.difficulty,
                     json.data.points,
-                    json.data.event
+                    json.data.event,
+                    json.data.depends
                 );
                 break;
             case 'update-user':
