@@ -64,8 +64,12 @@ class Actions {
      * @returns The team's ID if exists and valid, else false
      */
     async checkTeamToken(teamToken: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, teamToken));
-        return RES.length === 0 ? false : RES[0].id;
+        const RES = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, teamToken))).at(0);
+        if (RES !== undefined) {
+            const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, RES.id))).length;
+            return MEMBERS < 4 ? RES.id : false;
+        }
+        return false;
     }
 
     /**
@@ -887,15 +891,6 @@ class Actions {
     }
 
     /**
-     * Checks if a team is able to be joined
-     * @returns void
-     */
-    async checkTeamJoinable(teamID: string) {
-        const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID))).length;
-        return MEMBERS < 4 ? true : false;
-    }
-
-    /**
      * Checks if a user is able to leave the team
      * @returns boolean
      */
@@ -930,9 +925,8 @@ class Actions {
     async joinTeam(sessionID: string, token: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
-        const JOINABLE = await this.checkTeamJoinable(user.user_team_id);
         const TOKEN = await this.checkTeamToken(token);
-        if (JOINABLE === true && TOKEN !== false) {
+        if (TOKEN !== false) {
             await DB_ADAPTER.update(users)
                 .set({
                     user_team_id: TOKEN
@@ -1298,7 +1292,7 @@ class Actions {
     async sendCertUserMails(list: any[]) {
         MAILER.batchSendAttendance(list).then((res) => {
             if (res === true) {
-                console.log(list.length + " Emails Sent.")
+                console.log(list.length + ' Emails Sent.');
             }
         });
     }
