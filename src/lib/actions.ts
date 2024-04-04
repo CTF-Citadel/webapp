@@ -1127,6 +1127,38 @@ class Actions {
             await DB_ADAPTER.delete(events).where(eq(events.id, eventID));
         }
     }
+
+    /**
+     * Get all Anti Cheat events
+     * @returns Data List or zero length list
+     */
+    async getAntiCheatEvents() {
+        const DATA = await MONITOR.flagged();
+        if (DATA !== -1 && DATA !== false) {
+            return DATA.length > 0 ? DATA : []
+        }
+        return [];
+    }
+
+    /**
+     * Get all Anti Cheat poisoned flags
+     * @returns Data List or zero length list
+     */
+    async getAntiCheatPoisoned() {
+        const DATA = await MONITOR.poisons();
+        if (DATA !== -1 && DATA !== false) {
+            return DATA.length > 0 ? DATA : []
+        }
+        return [];
+    }
+
+    /**
+     * Get all Anti Cheat poisoned flags
+     * @returns void
+     */
+    async createAntiCheatPoison(list: string[]) {
+        await MONITOR.infect(list);
+    }
 }
 
 export default Actions;

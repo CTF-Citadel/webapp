@@ -317,6 +317,15 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             case 'delete-team':
                 response = await HANLDER.deleteTeam(json.data.id);
                 break;
+            case 'get-ac-events':
+                response = await HANLDER.getAntiCheatEvents();
+                break;
+            case 'get-ac-poisoned':
+                response = await HANLDER.getAntiCheatPoisoned();
+                break;
+            case 'create-ac-poisoned':
+                response = await HANLDER.createAntiCheatPoison(json.data.flags);
+                break;
         }
     } catch (e: unknown) {
         errorStatus = true;
