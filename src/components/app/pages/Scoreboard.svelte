@@ -28,8 +28,8 @@
     let loading: boolean = true;
     let events: EventsType[] = [];
     let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
-    let teamScores: { id: string; name: string; total_points: number }[] = [];
-    let userScores: { id: string; name: string; total_points: number }[] = [];
+    let teamScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
+    let userScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
     let seriesData: { x: number; y: number }[];
     let dataAggregator: { [key: string]: typeof seriesData } = {};
     let plotData: { name: string; data: typeof seriesData }[] = [];
@@ -192,6 +192,14 @@
         teamScores = (await TEAM.json()).data;
         console.log(teamScores);
     }
+
+    function msToHMS(unix: number) {
+        let date = new Date(unix);
+        let hours = date.getUTCHours();
+        let minutes = date.getUTCMinutes();
+        let seconds = date.getUTCSeconds();
+        return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    }
 </script>
 
 <div class="flex-1 max-w-screen-2xl px-4">
@@ -220,6 +228,7 @@
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
+                            <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
                             {#each teamScores as entry}
@@ -235,6 +244,9 @@
                                     </TableBodyCell>
                                     <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.total_points}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {msToHMS(entry.avg_time)}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}
