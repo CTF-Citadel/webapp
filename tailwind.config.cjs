@@ -10,21 +10,21 @@ module.exports = {
     theme: {
         extend: {
             backgroundImage: {
-                'gradient-dark': "linear-gradient(260deg, #440025, transparent 10%), linear-gradient(80deg, #440025, transparent 10%);",
-                'gradient-light': "linear-gradient(260deg, #ff82cf, transparent 10%), linear-gradient(80deg, #ff82cf, transparent 10%);",
+                'gradient-dark': "linear-gradient(260deg, #022048, transparent 10%), linear-gradient(80deg, #022048, transparent 10%);",
+                'gradient-light': "linear-gradient(260deg, #0447a3, transparent 10%), linear-gradient(80deg, #0447a3, transparent 10%);",
             },
             colors: {
                 primary: {
-                    50: '#e93296',
-                    100: '#e61989',
-                    200: '#e4007c',
-                    300: '#cd006f',
-                    400: '#b60063',
-                    500: '#9f0056',
-                    600: '#88004a',
-                    700: '#72003e',
-                    800: '#5b0031',
-                    900: '#440025',
+                    50: '#044fb5',
+                    100: '#0447a3',
+                    200: '#033f91',
+                    300: '#03377f',
+                    400: '#022f6d',
+                    500: '#02285b',
+                    600: '#022048',
+                    700: '#011836',
+                    800: '#011024',
+                    900: '#000812',
                 }
             },
             spacing: {
