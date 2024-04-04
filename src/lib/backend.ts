@@ -110,7 +110,6 @@ export async function normalWrapper(request: Request): Promise<Response> {
             case 'update-teamdata':
                 response = await HANLDER.updateTeamData(
                     json.data.session,
-                    json.data.teamID,
                     json.data.name,
                     json.data.description
                 );

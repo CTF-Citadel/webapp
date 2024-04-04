@@ -958,9 +958,10 @@ class Actions {
      * Update a team's data token by ID
      * @returns void
      */
-    async updateTeamData(sessionID: string, teamID: string, name: string, description: string) {
+    async updateTeamData(sessionID: string, name: string, description: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        const TEAM = await this.getTeamInfo(teamID);
+        if (user === null) return;
+        const TEAM = await this.getTeamInfo(sessionID);
         const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, name))).length;
         if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.team_name === name)) {
             if (TEAM.team_creator === user.id) {
@@ -969,7 +970,7 @@ class Actions {
                         team_name: name,
                         team_description: description
                     })
-                    .where(eq(teams.id, teamID));
+                    .where(eq(teams.id, user.user_team_id));
             }
         }
     }

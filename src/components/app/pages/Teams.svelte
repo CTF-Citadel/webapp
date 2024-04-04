@@ -123,7 +123,6 @@
             type: 'update-teamdata',
             data: {
                 session: sessionID,
-                teamID: thisTeam.id,
                 name: inputs.teamName.slice(0, 50),
                 description: inputs.teamDesc.slice(0, 100)
             }
