@@ -9,6 +9,42 @@ function dynDeductor(points: number, solves: number) {
 }
 
 /**
+ * Get average of number array
+ * @returns Average Number
+ */
+function calculateAverage(numbers: number[]) {
+    if (numbers.length === 0) return 0;
+    let sum = 0;
+    for (var i = 0; i < numbers.length; i++) {
+        sum += numbers[i];
+    }
+    return sum / numbers.length;
+}
+
+/**
+ * Get Average time of solves
+ * @returns Adjusted Solve Data
+ */
+function getAvgTime(data: { id: string; name: string; timestamp: number; points_gained: number }[], start: number) {
+    let temp: { id: string; name: string; avg_time: number; points_gained: number }[] = [];
+    for (let entry of data) {
+        const DATA = data
+            .filter((key) => key.id === entry.id)
+            .map((key) => {
+                return key.timestamp - start;
+            });
+        const AVG = calculateAverage(DATA);
+        temp.push({
+            id: entry.id,
+            name: entry.name,
+            avg_time: AVG,
+            points_gained: entry.points_gained
+        })
+    }
+    return temp;
+}
+
+/**
  * Dynamic Scoring adjustment function
  * @returns Adjusted Solve Data
  */
@@ -36,18 +72,22 @@ export function adjustDynamic(
  * All up points aggregator
  * @returns Sorted and Adjusted Points
  */
-export function getTotalByName(data: { id: string; name: string; timestamp: number; points_gained: number }[]) {
-    const DATA = data.reduce<{ id: string; name: string; total_points: number }[]>((acc, curr) => {
-        const { id, name, points_gained } = curr;
+export function getTotalByName(
+    data: { id: string; name: string; timestamp: number; points_gained: number }[],
+    start: number
+) {
+    const TIME_ADJUSTED = getAvgTime(data, start);
+    const DATA = TIME_ADJUSTED.reduce<{ id: string; name: string; avg_time: number; total_points: number }[]>((acc, curr) => {
+        const { id, name, avg_time, points_gained } = curr;
         const existingEntry = acc.find((entry) => entry.id === id && entry.name === name);
         if (existingEntry) {
             existingEntry.total_points += points_gained;
         } else {
-            acc.push({ id, name, total_points: points_gained });
+            acc.push({ id, name, avg_time, total_points: points_gained });
         }
         return acc;
     }, []);
-    return DATA.sort((a, b) => b.total_points - a.total_points);
+    return DATA.sort((a, b) => b.total_points !== a.total_points ? b.total_points - a.total_points : a.avg_time - b.avg_time );
 }
 
 /**

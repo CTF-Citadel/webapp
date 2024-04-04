@@ -347,8 +347,16 @@ class Actions {
             .from(team_events)
             .innerJoin(teams, eq(teams.id, team_events.team_id))
             .where(eq(team_events.event_id, eventID));
+        const EVENT_START = (
+            await DB_ADAPTER.select({
+                start: events.event_start
+            })
+                .from(events)
+                .where(eq(events.id, eventID))
+        ).at(0);
+        if (EVENT_START === undefined) return [];
         const RES = await this.getTeamSolvesByEvent(eventID);
-        const ADJUSTED = backFillTotal(getTotalByName(RES), TEAMS);
+        const ADJUSTED = backFillTotal(getTotalByName(RES, EVENT_START.start), TEAMS);
         return ADJUSTED.length > 0 ? ADJUSTED : [];
     }
 
@@ -363,8 +371,16 @@ class Actions {
             .from(team_events)
             .innerJoin(users, eq(users.user_team_id, team_events.team_id))
             .where(eq(team_events.event_id, eventID));
+        const EVENT_START = (
+            await DB_ADAPTER.select({
+                start: events.event_start
+            })
+                .from(events)
+                .where(eq(events.id, eventID))
+        ).at(0);
+        if (EVENT_START === undefined) return [];
         const RES = await this.getUserSolvesByEvent(eventID);
-        const ADJUSTED = backFillTotal(getTotalByName(RES), USERS);
+        const ADJUSTED = backFillTotal(getTotalByName(RES, EVENT_START.start), USERS);
         return ADJUSTED.length > 0 ? ADJUSTED : [];
     }
 
@@ -614,11 +630,7 @@ class Actions {
      * Checks a Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkDynamicChallengeFlag(
-        sessionID: string,
-        challengeID: string,
-        flag: string
-    ): Promise<boolean> {
+    async checkDynamicChallengeFlag(sessionID: string, challengeID: string, flag: string): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
@@ -626,7 +638,9 @@ class Actions {
         const RES = (
             await DB_ADAPTER.select()
                 .from(team_challenges)
-                .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID)))
+                .where(
+                    and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID))
+                )
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
             if (RES.challenge_flag === EXTRACTED_FLAG) {
@@ -636,7 +650,12 @@ class Actions {
                         solved_at: TIMESTAMP,
                         is_solved: true
                     })
-                    .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID)));
+                    .where(
+                        and(
+                            eq(team_challenges.team_id, user.user_team_id),
+                            eq(team_challenges.challenge_id, challengeID)
+                        )
+                    );
                 // shut down the container
                 INFRA.shutdown(RES.challenge_uuid).then(async (ok) => {
                     if (ok === true) {
@@ -645,7 +664,10 @@ class Actions {
                                 is_running: false
                             })
                             .where(
-                                and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID))
+                                and(
+                                    eq(team_challenges.team_id, user.user_team_id),
+                                    eq(team_challenges.challenge_id, challengeID)
+                                )
                             );
                     }
                 });
@@ -849,16 +871,18 @@ class Actions {
         if (TEAMS_WITH_NAME === 0 && HAS_CREATED === false) {
             const GEN_ID = crypto.randomUUID();
             const TEAM_TOKEN = 'CTD-' + generateRandomString(16).toUpperCase();
-            await DB_ADAPTER.insert(teams).values({
-                id: GEN_ID,
-                team_creator: user.id,
-                team_join_token: TEAM_TOKEN,
-                team_name: teamName,
-                team_description: teamDesc,
-                team_country_code: teamCountry
-            }).then(async () => {
-                await this.joinTeam(sessionID, TEAM_TOKEN);
-            });
+            await DB_ADAPTER.insert(teams)
+                .values({
+                    id: GEN_ID,
+                    team_creator: user.id,
+                    team_join_token: TEAM_TOKEN,
+                    team_name: teamName,
+                    team_description: teamDesc,
+                    team_country_code: teamCountry
+                })
+                .then(async () => {
+                    await this.joinTeam(sessionID, TEAM_TOKEN);
+                });
         }
     }
 
