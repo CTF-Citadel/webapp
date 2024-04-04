@@ -10,10 +10,12 @@ import type { ChallengesType } from './schema';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
 import F1rstbl00d from './integrations/f1rstbl00d';
+import CertMailer from './integrations/certmailer';
 
 const INFRA = new Infra();
 const MONITOR = new M0n1t0r();
 const FIRSTBLOOD = new F1rstbl00d();
+const MAILER = new CertMailer();
 
 /**
  * Handler for Database related actions
@@ -1133,18 +1135,27 @@ class Actions {
      * Updates a Team Challenge per ID
      * @returns void
      */
-    async updateTeamChallenge(challengeID: string, teamID: string, eventID: string, containerID: string, containerHost: string, containerFlag: string) {
-        await DB_ADAPTER.update(team_challenges).set({
-            challenge_flag: containerFlag,
-            challenge_uuid: containerID,
-            challenge_host: containerHost
-        }).where(
-            and(
-                eq(team_challenges.challenge_id, challengeID),
-                eq(team_challenges.event_id, eventID),
-                eq(team_challenges.team_id, teamID)
-            )
-        );
+    async updateTeamChallenge(
+        challengeID: string,
+        teamID: string,
+        eventID: string,
+        containerID: string,
+        containerHost: string,
+        containerFlag: string
+    ) {
+        await DB_ADAPTER.update(team_challenges)
+            .set({
+                challenge_flag: containerFlag,
+                challenge_uuid: containerID,
+                challenge_host: containerHost
+            })
+            .where(
+                and(
+                    eq(team_challenges.challenge_id, challengeID),
+                    eq(team_challenges.event_id, eventID),
+                    eq(team_challenges.team_id, teamID)
+                )
+            );
     }
 
     /**
@@ -1217,6 +1228,38 @@ class Actions {
      */
     async createAntiCheatPoison(list: string[]) {
         await MONITOR.infect(list);
+    }
+
+    /**
+     * Get eligible users for cert email
+     * @returns void
+     */
+    async getValidCertUsers(eventID: string) {
+        const RES = await DB_ADAPTER.select({
+            email: users.email,
+            first_name: users.user_firstname,
+            last_name: users.user_lastname
+        })
+            .from(team_events)
+            .innerJoin(users, eq(team_events.team_id, users.user_team_id))
+            .where(and(eq(team_events.event_id, eventID), eq(users.is_verified, true)));
+        if (RES.length > 0) {
+            return RES.map((entry) => {
+                return {
+                    email: entry.email,
+                    fullName: `${entry.last_name.toUpperCase()} ${entry.first_name}`
+                };
+            });
+        }
+        return [];
+    }
+
+    /**
+     * Send cert mail to users
+     * @returns void
+     */
+    async sendCertUserMails(list: any[]) {
+        await MAILER.batchSendAttendance(list);
     }
 }
 

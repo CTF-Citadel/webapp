@@ -365,6 +365,12 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             case 'create-ac-poisoned':
                 response = await HANLDER.createAntiCheatPoison(json.data.flags);
                 break;
+            case 'get-cert-users':
+                response = await HANLDER.getValidCertUsers(json.data.eventID);
+                break;
+            case 'send-certs':
+                response = await HANLDER.sendCertUserMails(json.data.list);
+                break;
         }
     } catch (e: unknown) {
         errorStatus = true;

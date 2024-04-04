@@ -41,6 +41,7 @@
     import SubTeam from './admin/Team.svelte';
     import AntiCheat from './admin/AntiCheat.svelte';
     import Submissions from './admin/Submissions.svelte';
+    import Actions from './admin/Actions.svelte';
 
     export let withAC: boolean = false;
 
@@ -56,7 +57,8 @@
     let editUUID: string = '';
     let marked = new Set<string>();
     let tabStates = {
-        users: true,
+        actions: true,
+        users: false,
         teams: false,
         events: false,
         challenges: false,
@@ -287,6 +289,9 @@
                 activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
                 inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
             >
+                <TabItem title="Actions" bind:open={tabStates.actions}>
+                    <Actions bind:sortedEvents></Actions>
+                </TabItem>
                 <TabItem title="Users" bind:open={tabStates.users}>
                     {#if users.length > 0}
                         <Table

@@ -21,24 +21,6 @@ const ATTENDANCE_TEMPLATE: string = `<html>
         <p>Sincerely, <br>The ${INSTANCE_NAME} Team</p>
     </body>
 </html>`;
-const WINNERS_TEMPLATE: string = `<html>
-<head>
-    <title>Winners Certificate</title>
-</head>
-    <body>
-        <table width="100%" cellspacing="0" cellpadding="0">
-            <tr>
-                <td align="center">
-                    <h1 style="text-align: center;">Winners Certificate</h1>
-                </td>
-            </tr>
-        </table>
-        <p>Thank you for participating at the recent ${INSTANCE_NAME} event and congratulations for making it under the top players.</p>
-        <p>Your can find your winners certificate attached to this email.</p>
-        <p>If you have any further questions regarding this email or the attachment sent, please contact a platform administrator.</p>
-        <p>Sincerely, <br>The ${INSTANCE_NAME} Team</p>
-    </body>
-</html>`;
 
 class CertMailer {
     #SENDER: string;
@@ -67,13 +49,12 @@ class CertMailer {
         const pdfBytes = await fs.readFile(`${this.#CERTPATH.replace(/\/$/, '')}/attendance.pdf`);
         const pdfDoc = await PDFDocument.load(pdfBytes);
         const form = pdfDoc.getForm();
-        for (const [key, value] of Object.entries(data)) {
-            const field = form.getTextField(key);
-            if (field) {
-                field.setText(value);
-            }
+        const field = form.getTextField('fullName');
+        if (field) {
+            field.setText(data.fullName);
         }
-        const MODDED = await pdfDoc.save();
+        form.flatten();
+        const MODDED = await pdfDoc.save({ useObjectStreams: false });
         const FILENAME = `${INSTANCE_NAME}_${data.fullName}_${
             attendance ? 'Attendance' : 'Certificate'
         }.pdf`;
@@ -89,8 +70,8 @@ class CertMailer {
     async batchSendAttendance(
         userList: { email: string; fullName: string }[]
     ): Promise<boolean> {
-        try {
-            for (let user of userList) {
+        for (let user of userList) {
+            try {
                 // prep the PDF
                 const { PATH, FILENAME } = await this.preparePDF(user, true);
                 // send it
@@ -106,44 +87,12 @@ class CertMailer {
                         }
                     ]
                 });
+            } catch (e: any) {
+                console.error(e);
+                continue;
             }
-            return true;
-        } catch (e: any) {
-            console.error(e);
-            return false;
         }
-    }
-
-    /**
-     * Send winners certs to a list of user emails
-     * @returns true if success, false if not
-     */
-    async batchSendWinners(
-        userList: { email: string; fullName: string; placement: string; }[]
-    ): Promise<boolean> {
-        try {
-            for (let user of userList) {
-                // prep the PDF
-                const { PATH, FILENAME } = await this.preparePDF(user, true);
-                // send it
-                await this.#TRANSPORTER.sendMail({
-                    from: this.#SENDER,
-                    to: user.email,
-                    subject: 'Winners Certificate',
-                    html: WINNERS_TEMPLATE,
-                    attachments: [
-                        {
-                            filename: FILENAME,
-                            path: PATH
-                        }
-                    ]
-                });
-            }
-            return true;
-        } catch (e: any) {
-            console.error(e);
-            return false;
-        }
+        return true;
     }
 }
 
