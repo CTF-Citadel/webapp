@@ -64,7 +64,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="team_name"
                 bind:value={editData.team_name}
-                required
             />
         </div>
         <div class="mb-6">
@@ -73,7 +72,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="team_desc"
                 bind:value={editData.team_description}
-                required
             />
         </div>
         <svelte:fragment slot="footer">

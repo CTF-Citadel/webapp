@@ -68,7 +68,6 @@
                 name="email"
                 autocomplete="email"
                 placeholder="name@example.com"
-                required
             />
         </Label>
         <Label class="space-y-2">
@@ -81,7 +80,6 @@
                 name="password"
                 autocomplete="password"
                 placeholder="••••••••••"
-                required
             />
         </Label>
         <div class="text-sm font-medium text-gray-500 dark:text-gray-300">

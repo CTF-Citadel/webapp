@@ -5,7 +5,7 @@ import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
 import { generateRandomString, validAlphanumeric, validPassword } from './helpers';
 import { checkLocalPoolMatch } from './storage';
-import { adjustDynamic, getTotalByName } from './scoring';
+import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import type { ChallengesType } from './schema';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
@@ -316,8 +316,15 @@ class Actions {
      * Fetches Points per Team based on Event ID
      */
     async getTeamPointsByEvent(eventID: string) {
+        const TEAMS = await DB_ADAPTER.select({
+            id: teams.id,
+            name: teams.team_name,
+        })
+            .from(team_events)
+            .innerJoin(teams, eq(teams.id, team_events.team_id))
+            .where(eq(team_events.event_id, eventID));
         const RES = await this.getTeamSolvesByEvent(eventID);
-        const ADJUSTED = getTotalByName(RES);
+        const ADJUSTED = backFillTotal(getTotalByName(RES), TEAMS);
         return ADJUSTED.length > 0 ? ADJUSTED : [];
     }
 
@@ -325,8 +332,15 @@ class Actions {
      * Fetches Points per User based on Event ID
      */
     async getUserPointsByEvent(eventID: string) {
+        const USERS = await DB_ADAPTER.select({
+            id: users.id,
+            name: users.username,
+        })
+            .from(team_events)
+            .innerJoin(users, eq(users.user_team_id, team_events.team_id))
+            .where(eq(team_events.event_id, eventID));
         const RES = await this.getUserSolvesByEvent(eventID);
-        const ADJUSTED = getTotalByName(RES);
+        const ADJUSTED = backFillTotal(getTotalByName(RES), USERS);
         return ADJUSTED.length > 0 ? ADJUSTED : [];
     }
 
@@ -946,11 +960,13 @@ class Actions {
      * Updates an Event's properties
      * @returns void
      */
-    async updateEvent(eventID: string, eventName: string, eventDesc: string) {
+    async updateEvent(eventID: string, eventName: string, eventDesc: string, start: number, end: number) {
         await DB_ADAPTER.update(events)
             .set({
                 event_name: eventName,
-                event_description: eventDesc
+                event_description: eventDesc,
+                event_start: start,
+                event_end: end
             })
             .where(eq(events.id, eventID));
     }
@@ -966,8 +982,7 @@ class Actions {
         cat: string,
         diff: string,
         points: number,
-        event: string,
-        children: string
+        event: string
     ) {
         await DB_ADAPTER.update(challenges)
             .set({

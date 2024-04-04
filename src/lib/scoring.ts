@@ -1,12 +1,11 @@
-const DYN_E: number = parseFloat(process.env.SCORING_E || '1.2');
-const DYN_K: number = parseInt(process.env.SCORING_K || '12');
+const DYN_K: number = parseInt(process.env.SCORING_K || '24');
 
 /**
  * Adjust points based on number of solves
  * @returns Number
  */
 function dynDeductor(points: number, solves: number) {
-    return Math.floor(Math.max(points / 10, Number(points * Math.min(1, DYN_K / (DYN_K + solves - 1)) ** DYN_E)));
+    return Math.floor(Math.max(points / 10, Number(points * Math.min(1, DYN_K / (DYN_K + solves - 1)) ** 1.2)));
 }
 
 /**
@@ -49,4 +48,24 @@ export function getTotalByName(data: { id: string; name: string; timestamp: numb
         return acc;
     }, []);
     return DATA.sort((a, b) => b.total_points - a.total_points);
+}
+
+/**
+ * Add teams or users who have not scored yet
+ * @returns Sorted and Adjusted Points
+ */
+export function backFillTotal(
+    data: { id: string; name: string; total_points: number }[],
+    backfillData: { id: string; name: string }[]
+) {
+    for (let entry of backfillData) {
+        if (data.find((key) => key.id === entry.id) === undefined) {
+            data.push({
+                id: entry.id,
+                name: entry.name,
+                total_points: 0
+            });
+        }
+    }
+    return data;
 }

@@ -281,8 +281,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                     json.data.category,
                     json.data.difficulty,
                     json.data.points,
-                    json.data.event,
-                    json.data.children
+                    json.data.event
                 );
                 break;
             case 'update-user':
@@ -298,7 +297,7 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 );
                 break;
             case 'update-event':
-                response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description);
+                response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description, json.data.start, json.data.end);
                 break;
             case 'delete-event':
                 response = await HANLDER.deleteEvent(json.data.id);

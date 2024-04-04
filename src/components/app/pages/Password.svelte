@@ -56,7 +56,6 @@
                     name="password"
                     autocomplete="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password.length > 0 && !validPassword(inputs.password)}
@@ -85,7 +84,6 @@
                     name="password"
                     autocomplete="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password_repeat.length > 0 && !checkInput()}

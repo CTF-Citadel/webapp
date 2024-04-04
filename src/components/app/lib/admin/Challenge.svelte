@@ -122,7 +122,6 @@
                 id="chal_name"
                 placeholder="name"
                 bind:value={editData.challenge_name}
-                required
             />
         </div>
         <div class="mb-6">
@@ -155,7 +154,6 @@
                 id="chal_name"
                 placeholder="Linux/Web/OSINT/..."
                 bind:value={editData.challenge_category}
-                required
             />
         </div>
         <div class="mb-6">
@@ -165,7 +163,6 @@
                 id="challenge-name"
                 type="number"
                 bind:value={editData.base_points}
-                required
             />
         </div>
         <div>
@@ -226,7 +223,6 @@
             id="challenge-name"
             placeholder="Petition"
             bind:value={challengeTemplate.name}
-            required
         />
     </div>
     <div class="mb-6">
@@ -259,7 +255,6 @@
             id="challenge-name"
             placeholder="Linux/Web/OSINT/..."
             bind:value={challengeTemplate.category}
-            required
         />
     </div>
     <div class="mb-6">
@@ -269,7 +264,6 @@
             id="challenge-name"
             type="number"
             bind:value={challengeTemplate.points}
-            required
         />
     </div>
     <div class="mb-6">
@@ -287,7 +281,6 @@
                     id="challenge-file"
                     placeholder="some"
                     bind:value={challengeTemplate.path}
-                    required
                 />
             </div>
         {/if}
@@ -304,7 +297,6 @@
                     id="challenge-static"
                     placeholder="3asy-r3v3rs1ng"
                     bind:value={challengeTemplate.staticFlag}
-                    required
                 />
             </div>
         {/if}
@@ -327,7 +319,6 @@
                     id="challenge-url"
                     placeholder="https://example.com/source.zip"
                     bind:value={challengeTemplate.fileURL}
-                    required
                 />
             </div>
         {/if}

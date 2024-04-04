@@ -86,7 +86,7 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-col items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
                         <div class="flex flex-col items-center">
                             <Avatar size="xl" src="/img/avatars/wolf.webp" />
                             <h1 class="mt-2 text-xl font-medium">{session.username}</h1>
@@ -106,7 +106,7 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-col justify items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
                         <div class="flex flex-col">
                             <h1 class="mb-6 text-xl font-medium">Personal Data</h1>
                             <div class="mb-6">
@@ -117,7 +117,6 @@
                                     name="first-name"
                                     type="text"
                                     placeholder="John"
-                                    required
                                 />
                             </div>
                             <div class="mb-6">
@@ -128,7 +127,6 @@
                                     name="last-name"
                                     type="text"
                                     placeholder="Doe"
-                                    required
                                 />
                             </div>
                             <div class="mb-6">
@@ -138,7 +136,6 @@
                                     bind:value={inputs.affiliation}
                                     name="affiliation"
                                     type="text"
-                                    required
                                 />
                             </div>
                             <Button
@@ -159,7 +156,7 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-col items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
                         <div class="flex flex-col">
                             <h1 class="mb-6 text-xl font-medium">Reset Password</h1>
                             <div class="mb-6">
@@ -170,7 +167,6 @@
                                     name="pass-first"
                                     type="password"
                                     placeholder="••••••••••"
-                                    required
                                 />
                             </div>
                             <div class="mb-6">
@@ -181,7 +177,6 @@
                                     name="pass-second"
                                     type="password"
                                     placeholder="••••••••••"
-                                    required
                                 />
                             </div>
                             <Button

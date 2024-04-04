@@ -140,7 +140,8 @@
             curve: 'straight'
         },
         grid: {
-            show: true
+            show: true,
+            borderColor: '#555'
         },
         legend: {
             show: true,
@@ -226,6 +227,7 @@
                             {#each teamScores as entry}
                                 <TableBodyRow
                                     color="custom"
+                                    class="hover:bg-neutral-500"
                                     on:click={() => {
                                         window.location.href = `/teams/${entry.id}`;
                                     }}
@@ -255,6 +257,7 @@
                             {#each userScores as entry}
                                 <TableBodyRow
                                     color="custom"
+                                    class="hover:bg-neutral-500"
                                     on:click={() => {
                                         window.location.href = `/users/${entry.id}`;
                                     }}

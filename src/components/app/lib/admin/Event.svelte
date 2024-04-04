@@ -22,7 +22,14 @@
     // dispatcher
     const DISPATCH = createEventDispatcher();
 
+    let editDateStart = new Date().toISOString().split('T')[0];
+    let editDateEnd = new Date().toISOString().split('T')[0];
+
     $: editData = events.find((item) => item['id'] === editUUID);
+    $: if (editData) {
+        editDateStart = convertToInputDateTime(editData.event_start);
+        editDateEnd = convertToInputDateTime(editData.event_end);
+    }
 
     let eventTemplate = {
         name: '',
@@ -32,6 +39,21 @@
         start: '',
         end: ''
     };
+
+    function convertToInputDateTime(unix: number) {
+        let date = new Date(unix);
+        return (
+            date.getFullYear() +
+            '-' +
+            (date.getMonth() + 1).toString().padStart(2, '0') +
+            '-' +
+            date.getDate().toString().padStart(2, '0') +
+            'T' +
+            date.getHours().toString().padStart(2, '0') +
+            ':' +
+            date.getMinutes().toString().padStart(2, '0')
+        );
+    }
 
     async function createEvent() {
         let tempStart = { ...datePicker };
@@ -55,7 +77,9 @@
             data: {
                 id: editUUID,
                 name: editData?.event_name,
-                description: editData?.event_description
+                description: editData?.event_description,
+                start: new Date(editDateStart).getTime(),
+                end: new Date(editDateEnd).getTime()
             }
         });
         if (DATA.ok) {
@@ -97,7 +121,6 @@
                 id="event_name"
                 placeholder="name"
                 bind:value={editData.event_name}
-                required
             />
         </div>
         <div>
@@ -109,6 +132,60 @@
                 rows="4"
                 bind:value={editData.event_description}
             />
+        </div>
+        <div class="mb-6">
+            <Label class="mb-2">Change Event Start</Label>
+            <div class="relative">
+                <input
+                    type="datetime-local"
+                    class="block w-full py-2 px-3 bg-neutral-100 dark:bg-neutral-900"
+                    bind:value={editDateStart}
+                />
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg
+                        class="h-5 w-5 text-neutral-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M20 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0z"
+                        >
+                        </path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="mb-6">
+            <Label class="mb-2">Change Event End</Label>
+            <div class="relative">
+                <input
+                    type="datetime-local"
+                    class="block w-full py-2 px-3 bg-neutral-100 dark:bg-neutral-900"
+                    bind:value={editDateEnd}
+                />
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg
+                        class="h-5 w-5 text-neutral-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M20 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0zm0 0h0z"
+                        >
+                        </path>
+                    </svg>
+                </div>
+            </div>
         </div>
         <svelte:fragment slot="footer">
             <div class="flex flex-row justify-between w-full">
@@ -147,7 +224,6 @@
             id="event-name"
             placeholder="myCTF"
             bind:value={eventTemplate.name}
-            required
         />
     </div>
     <div class="mb-6">

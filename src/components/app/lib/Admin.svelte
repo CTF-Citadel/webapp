@@ -40,7 +40,7 @@
     let events: EventsType[] = [];
     let users: UsersType[] = [];
     let challenges: ChallengesType[] = [];
-    let teamEvents: { event_id: string; event_name: string; team_id: string; team_name: string; }[] = [];
+    let teamEvents: { event_id: string; event_name: string; team_id: string; team_name: string }[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
     let sortedChallenges: { value: string; name: string }[] = [];
     let loading: boolean = true;
@@ -246,135 +246,190 @@
     Main Tab
 -->
 
-<div class="w-full h-full flex-1 max-w-screen-2xl px-4">
+<div class="p-4 max-w-full">
     {#if loading}
         <div class="text-center">
             <Spinner size={'16'} />
         </div>
     {:else}
-        <Tabs
-            divider={false}
-            defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
-            contentClass=""
-            activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
-            inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-        >
-            <TabItem title="Users" bind:open={tabStates.users}>
-                {#if users.length > 0}
-                    <Table
-                        color="custom"
-                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
-                    >
-                        <TableHead>
-                            <TableHeadCell>ID</TableHeadCell>
-                            <TableHeadCell>Username</TableHeadCell>
-                            <TableHeadCell>Email</TableHeadCell>
-                            <TableHeadCell>Type</TableHeadCell>
-                            <TableHeadCell>Verified</TableHeadCell>
-                            <TableHeadCell>Team ID</TableHeadCell>
-                            <TableHeadCell>Blocked</TableHeadCell>
-                            <TableHeadCell />
-                        </TableHead>
-                        <TableBody>
-                            {#each users as entry}
-                                <TableBodyRow class="custom">
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.username}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.email}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.user_role}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.is_verified}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.user_team_id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.is_blocked}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        <Button
-                                            color="alternative"
-                                            on:click={() => {
-                                                editUUID = entry.id;
-                                                edit.user = true;
-                                            }}><PenSolid class="w-4" /></Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
-                {:else}
-                    <Alert class="m-4" color="blue">
-                        <span>
-                            <span class="font-bold">Info!</span><br />
-                            No Users found
-                        </span>
-                    </Alert>
-                {/if}
-            </TabItem>
-            <TabItem title="Teams" bind:open={tabStates.teams}>
-                {#if teams.length > 0}
-                    {#key marked.size}
+        <div class="flex-1">
+            <Tabs
+                divider={false}
+                defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 pb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
+                contentClass=""
+                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-primary-600 dark:text-primary-500"
+                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+            >
+                <TabItem title="Users" bind:open={tabStates.users}>
+                    {#if users.length > 0}
                         <Table
                             color="custom"
                             class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
                         >
                             <TableHead>
-                                <TableHeadCell>
-                                    <Checkbox
-                                        on:change={() => checkAll(teams)}
-                                        checked={marked.size === teams.length}
-                                    />
-                                </TableHeadCell>
                                 <TableHeadCell>ID</TableHeadCell>
-                                <TableHeadCell>Creator ID</TableHeadCell>
-                                <TableHeadCell>Name</TableHeadCell>
-                                <TableHeadCell>Description</TableHeadCell>
-                                <TableHeadCell>Country</TableHeadCell>
-                                <TableHeadCell>Token</TableHeadCell>
+                                <TableHeadCell>Username</TableHeadCell>
+                                <TableHeadCell>Email</TableHeadCell>
+                                <TableHeadCell>Type</TableHeadCell>
+                                <TableHeadCell>Verified</TableHeadCell>
+                                <TableHeadCell>Team ID</TableHeadCell>
+                                <TableHeadCell>Blocked</TableHeadCell>
                                 <TableHeadCell />
                             </TableHead>
                             <TableBody>
-                                {#each teams as entry}
-                                    <TableBodyRow>
-                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            <Checkbox
-                                                on:change={() => checkEvent(entry.id)}
-                                                checked={marked.has(entry.id)}
-                                            />
-                                        </TableBodyCell>
+                                {#each users as entry}
+                                    <TableBodyRow class="custom">
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_creator}
+                                            {entry.username}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_name}
+                                            {entry.email}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_description}
+                                            {entry.user_role}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_country_code}
+                                            {entry.is_verified}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_join_token}
+                                            {entry.user_team_id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.is_blocked}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            <Button
+                                                color="alternative"
+                                                on:click={() => {
+                                                    editUUID = entry.id;
+                                                    edit.user = true;
+                                                }}><PenSolid class="w-4" /></Button
+                                            >
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Users found
+                            </span>
+                        </Alert>
+                    {/if}
+                </TabItem>
+                <TabItem title="Teams" bind:open={tabStates.teams}>
+                    {#if teams.length > 0}
+                        {#key marked.size}
+                            <Table
+                                color="custom"
+                                class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                            >
+                                <TableHead>
+                                    <TableHeadCell>
+                                        <Checkbox
+                                            on:change={() => checkAll(teams)}
+                                            checked={marked.size === teams.length}
+                                        />
+                                    </TableHeadCell>
+                                    <TableHeadCell>ID</TableHeadCell>
+                                    <TableHeadCell>Creator ID</TableHeadCell>
+                                    <TableHeadCell>Name</TableHeadCell>
+                                    <TableHeadCell>Description</TableHeadCell>
+                                    <TableHeadCell>Country</TableHeadCell>
+                                    <TableHeadCell>Token</TableHeadCell>
+                                    <TableHeadCell />
+                                </TableHead>
+                                <TableBody>
+                                    {#each teams as entry}
+                                        <TableBodyRow>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                <Checkbox
+                                                    on:change={() => checkEvent(entry.id)}
+                                                    checked={marked.has(entry.id)}
+                                                />
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.id}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.team_creator}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.team_name}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.team_description}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.team_country_code}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                {entry.team_join_token}
+                                            </TableBodyCell>
+                                            <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                                <Button
+                                                    on:click={() => {
+                                                        editUUID = entry.id;
+                                                        edit.team = true;
+                                                    }}>Edit</Button
+                                                >
+                                            </TableBodyCell>
+                                        </TableBodyRow>
+                                    {/each}
+                                </TableBody>
+                            </Table>
+                        {/key}
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Teams found.
+                            </span>
+                        </Alert>
+                    {/if}
+                </TabItem>
+                <TabItem title="Events" bind:open={tabStates.events}>
+                    {#if events.length > 0}
+                        <Table
+                            color="custom"
+                            class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        >
+                            <TableHead>
+                                <TableHeadCell>ID</TableHeadCell>
+                                <TableHeadCell>Name</TableHeadCell>
+                                <TableHeadCell>Description</TableHeadCell>
+                                <TableHeadCell>Starts</TableHeadCell>
+                                <TableHeadCell>Ends</TableHeadCell>
+                                <TableHeadCell />
+                            </TableHead>
+                            <TableBody>
+                                {#each events as entry}
+                                    <TableBodyRow>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.event_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.event_description}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {new Date(entry.event_start).toLocaleString('eu')}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {new Date(entry.event_end).toLocaleString('eu')}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             <Button
                                                 on:click={() => {
                                                     editUUID = entry.id;
-                                                    edit.team = true;
+                                                    edit.event = true;
                                                 }}>Edit</Button
                                             >
                                         </TableBodyCell>
@@ -382,171 +437,118 @@
                                 {/each}
                             </TableBody>
                         </Table>
-                    {/key}
-                {:else}
-                    <Alert class="m-4" color="blue">
-                        <span>
-                            <span class="font-bold">Info!</span><br />
-                            No Teams found.
-                        </span>
-                    </Alert>
-                {/if}
-            </TabItem>
-            <TabItem title="Events" bind:open={tabStates.events}>
-                {#if events.length > 0}
-                    <Table
-                        color="custom"
-                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
-                    >
-                        <TableHead>
-                            <TableHeadCell>ID</TableHeadCell>
-                            <TableHeadCell>Name</TableHeadCell>
-                            <TableHeadCell>Description</TableHeadCell>
-                            <TableHeadCell>Starts</TableHeadCell>
-                            <TableHeadCell>Ends</TableHeadCell>
-                            <TableHeadCell />
-                        </TableHead>
-                        <TableBody>
-                            {#each events as entry}
-                                <TableBodyRow>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_name}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_description}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {new Date(entry.event_start).toLocaleString('eu')}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {new Date(entry.event_end).toLocaleString('eu')}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        <Button
-                                            on:click={() => {
-                                                editUUID = entry.id;
-                                                edit.event = true;
-                                            }}>Edit</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
-                {:else}
-                    <Alert class="m-4" color="blue">
-                        <span>
-                            <span class="font-bold">Info!</span><br />
-                            No Events found.
-                        </span>
-                    </Alert>
-                {/if}
-            </TabItem>
-            <TabItem title="Assignments" bind:open={tabStates.assignments}>
-                {#if teamEvents.length > 0}
-                    <Table
-                        color="custom"
-                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
-                    >
-                        <TableHead>
-                            <TableHeadCell>Team</TableHeadCell>
-                            <TableHeadCell>Team ID</TableHeadCell>
-                            <TableHeadCell>Event</TableHeadCell>
-                            <TableHeadCell>Event ID</TableHeadCell>
-                            <TableHeadCell />
-                        </TableHead>
-                        <TableBody>
-                            {#each teamEvents as entry}
-                                <TableBodyRow>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.team_name}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.team_id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_name}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.event_id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        <Button
-                                            on:click={() => {
-                                                unassignEvent(entry.event_id, entry.team_id);
-                                            }}>Delete</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
-                {:else}
-                    <Alert class="m-4" color="blue">
-                        <span>
-                            <span class="font-bold">Info!</span><br />
-                            No Assigned Events found.
-                        </span>
-                    </Alert>
-                {/if}
-            </TabItem>
-            <TabItem title="Challenges" bind:open={tabStates.challenges}>
-                {#if challenges.length > 0}
-                    <Table
-                        color="custom"
-                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
-                    >
-                        <TableHead>
-                            <TableHeadCell>ID</TableHeadCell>
-                            <TableHeadCell>Name</TableHeadCell>
-                            <TableHeadCell>Description</TableHeadCell>
-                            <TableHeadCell>Category</TableHeadCell>
-                            <TableHeadCell />
-                        </TableHead>
-                        <TableBody>
-                            {#each challenges as entry}
-                                <TableBodyRow>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.id}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.challenge_name}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.challenge_description}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        {entry.challenge_category}
-                                    </TableBodyCell>
-                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                        <Button
-                                            on:click={() => {
-                                                editUUID = entry.id;
-                                                edit.challenge = true;
-                                            }}>Edit</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
-                {:else}
-                    <Alert class="m-4" color="blue">
-                        <span>
-                            <span class="font-bold">Info!</span><br />
-                            No Teams found.
-                        </span>
-                    </Alert>
-                {/if}
-            </TabItem>
-            {#if withAC === true}
-                <TabItem title="M0n1t0r" bind:open={tabStates.anticheat}>
-                    <AntiCheat />
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Events found.
+                            </span>
+                        </Alert>
+                    {/if}
                 </TabItem>
-            {/if}
-        </Tabs>
+                <TabItem title="Assignments" bind:open={tabStates.assignments}>
+                    {#if teamEvents.length > 0}
+                        <Table
+                            color="custom"
+                            class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        >
+                            <TableHead>
+                                <TableHeadCell>Team</TableHeadCell>
+                                <TableHeadCell>Team ID</TableHeadCell>
+                                <TableHeadCell>Event</TableHeadCell>
+                                <TableHeadCell>Event ID</TableHeadCell>
+                                <TableHeadCell />
+                            </TableHead>
+                            <TableBody>
+                                {#each teamEvents as entry}
+                                    <TableBodyRow>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.event_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.event_id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            <Button
+                                                on:click={() => {
+                                                    unassignEvent(entry.event_id, entry.team_id);
+                                                }}>Delete</Button
+                                            >
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Assigned Events found.
+                            </span>
+                        </Alert>
+                    {/if}
+                </TabItem>
+                <TabItem title="Challenges" bind:open={tabStates.challenges}>
+                    {#if challenges.length > 0}
+                        <Table
+                            color="custom"
+                            class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        >
+                            <TableHead>
+                                <TableHeadCell>ID</TableHeadCell>
+                                <TableHeadCell>Name</TableHeadCell>
+                                <TableHeadCell>Description</TableHeadCell>
+                                <TableHeadCell>Category</TableHeadCell>
+                                <TableHeadCell />
+                            </TableHead>
+                            <TableBody>
+                                {#each challenges as entry}
+                                    <TableBodyRow>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.challenge_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.challenge_description}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.challenge_category}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            <Button
+                                                on:click={() => {
+                                                    editUUID = entry.id;
+                                                    edit.challenge = true;
+                                                }}>Edit</Button
+                                            >
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Teams found.
+                            </span>
+                        </Alert>
+                    {/if}
+                </TabItem>
+                {#if withAC === true}
+                    <TabItem title="M0n1t0r" bind:open={tabStates.anticheat}>
+                        <AntiCheat />
+                    </TabItem>
+                {/if}
+            </Tabs>
+        </div>
     {/if}
 </div>

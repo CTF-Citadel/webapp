@@ -279,7 +279,6 @@
                                     id="flag-submit"
                                     placeholder="TH&lcub;&rcub;"
                                     bind:value={challengeInputs[challenge.id]}
-                                    required
                                 />
                             </div>
                             <div>

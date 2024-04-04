@@ -38,7 +38,6 @@
                     name="email"
                     autocomplete="email"
                     placeholder="name@example.com"
-                    required
                 />
             </Label>
             {#if authResponse && authResponse.error !== 'None'}

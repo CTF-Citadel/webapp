@@ -22,8 +22,8 @@ export function isWithinExpiration(expiryUnixEpoch: number) {
 
 export function validAlphanumeric(input: string, length: number, spaceless: boolean = false): boolean {
     return spaceless
-        ? /^[a-zA-Z0-9_@$-]*$/.test(input) && input.length <= length
-        : /^[a-zA-Z0-9_@$-\s]*$/.test(input) && input.length <= length;
+        ? /^[a-zA-Z0-9_@$-()\[\]:]*$/.test(input) && input.length <= length
+        : /^[a-zA-Z0-9_@$-()\[\]:\s]*$/.test(input) && input.length <= length;
 }
 
 export function validJoinToken(input: string): boolean {
@@ -61,6 +61,11 @@ export const DUMMY_SESSION = {
     is_blocked: false,
     is_verified: true
 };
+
+export const USER_ROLES = [
+    { value: 'admin', name: 'Admin' },
+    { value: 'user', name: 'User' }
+];
 
 export const AVATARS = [
     { value: 'wolf', name: 'Wolf' },

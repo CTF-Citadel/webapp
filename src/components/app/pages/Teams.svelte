@@ -179,7 +179,6 @@
             name="team-name"
             type="text"
             placeholder="BugHunters"
-            required
         />
     </div>
     <div class="mb-6">
@@ -245,7 +244,6 @@
             name="team-token"
             type="text"
             placeholder="CTD-X7X5K8..."
-            required
         />
     </div>
     <svelte:fragment slot="footer">
@@ -309,59 +307,64 @@
                         {/if}
                         <p>Description: <b>{thisTeam.team_description}</b></p>
                         <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
-                        <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
-                        <h1>Members: <b>{teamMembers.length}</b></h1>
+                        
+                        {#if teamMembers.length < 4}
+                            <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
+                            <h1>Members: <b>{teamMembers.length}</b></h1>
+                        {:else}
+                            <h1>Members: <b>{teamMembers.length} (FULL)</b></h1>
+                        {/if}
                         {#if teamMembers.length > 0}
                             <div class="flex flex-col m-4">
                                 <table>
                                     <tr class="text-center border-b-2">
-                                        <th class="border-x-2 p-2"><b>Username</b></th>
-                                        <th class="border-x-2 p-2"><b>Affiliation</b></th>
+                                        <th class="border-r-2 p-2"><b>Username</b></th>
+                                        <th class="p-2"><b>Affiliation</b></th>
                                     </tr>
                                     {#each teamMembers as member}
                                         <tr class="text-center">
-                                            <td class="border-x-2 p-2"
+                                            <td class="border-r-2 p-2"
                                                 >{member.username}
                                                 {member.id === thisTeam.team_creator ? '(Owner)' : ''}</td
                                             >
-                                            <td class="border-x-2 p-2">{member.user_affiliation}</td>
+                                            <td class="p-2">{member.user_affiliation}</td>
                                         </tr>
                                     {/each}
                                 </table>
                             </div>
                         {/if}
-                        <div class="mb-6">
-                            <Label for="team-name" class="mb-2">Team Name</Label>
-                            <Input
-                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                                bind:value={inputs.teamName}
-                                name="team-name"
-                                required
-                            />
-                        </div>
-                        <div class="mb-6">
-                            <Label for="team-desc" class="mb-2">Team Description</Label>
-                            <Input
-                                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                                bind:value={inputs.teamDesc}
-                                name="team-desc"
-                                required
-                            />
-                        </div>
+                        {#if hasCreated}
+                            <div class="mb-6">
+                                <Label for="team-name" class="mb-2">Team Name</Label>
+                                <Input
+                                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                    bind:value={inputs.teamName}
+                                    name="team-name"
+                                />
+                            </div>
+                            <div class="mb-6">
+                                <Label for="team-desc" class="mb-2">Team Description</Label>
+                                <Input
+                                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                                    bind:value={inputs.teamDesc}
+                                    name="team-desc"
+                                />
+                            </div>
+                        {/if}
                         <div class="flex flex-row justify-center items-center space-x-4">
-                            <Button
-                                size="lg"
-                                class="mt-4"
-                                on:click={updateTeamData}
-                                disabled={inputs.teamName === '' ||
-                                    inputs.teamDesc === '' ||
-                                    !validAlphanumeric(inputs.teamName, 50, true) ||
-                                    !validAlphanumeric(inputs.teamDesc, 100) ||
-                                    (inputs.teamName == thisTeam.team_name &&
-                                        inputs.teamDesc == thisTeam.team_description)}
-                                >Save Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" /></Button
-                            >
                             {#if hasCreated}
+                                <Button
+                                    size="lg"
+                                    class="mt-4"
+                                    on:click={updateTeamData}
+                                    disabled={inputs.teamName === '' ||
+                                        inputs.teamDesc === '' ||
+                                        !validAlphanumeric(inputs.teamName, 50, true) ||
+                                        !validAlphanumeric(inputs.teamDesc, 100) ||
+                                        (inputs.teamName == thisTeam.team_name &&
+                                            inputs.teamDesc == thisTeam.team_description)}
+                                    >Save Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" /></Button
+                                >
                                 <Button size="lg" class="mt-4" on:click={resetToken}>
                                     Reset Token <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                                 </Button>
@@ -370,9 +373,7 @@
                                 size="lg"
                                 class="mt-4"
                                 on:click={leaveTeam}
-                                disabled={teamMembers.length > 1 &&
-                                    session.id === thisTeam.team_creator &&
-                                    canLeaveTeam === true}
+                                disabled={teamMembers.length > 1 || !canLeaveTeam}
                             >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>
@@ -387,36 +388,40 @@
                 OTHER TEAMS
             </h1>
             {#if teams.length > 0}
-                <Table
-                    color="custom"
-                    class="bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                    hoverable
-                >
-                    <TableHead>
-                        <TableHeadCell>Name</TableHeadCell>
-                        <TableHeadCell>Description</TableHeadCell>
-                        <TableHeadCell>Country</TableHeadCell>
-                    </TableHead>
-                    <TableBody>
-                        {#each teams as entry}
-                            <TableBodyRow
-                                on:click={() => {
-                                    window.location.href = `/teams/${entry.id}`;
-                                }}
-                            >
-                                <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                    {entry.team_name}
-                                </TableBodyCell>
-                                <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                    {entry.team_description}
-                                </TableBodyCell>
-                                <TableBodyCell class="text-center text-neutral-900 dark:text-neutral-100">
-                                    <span class="fi fi-{entry.team_country_code.toLowerCase()}"></span>
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        {/each}
-                    </TableBody>
-                </Table>
+                <div class="p-4 max-w-full">
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                        hoverable
+                    >
+                        <TableHead>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>Description</TableHeadCell>
+                            <TableHeadCell>Country</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {#each teams as entry}
+                                <TableBodyRow
+                                    color="custom"
+                                    class="hover:bg-neutral-500"
+                                    on:click={() => {
+                                        window.location.href = `/teams/${entry.id}`;
+                                    }}
+                                >
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.team_name}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.team_description}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-center text-neutral-900 dark:text-neutral-100">
+                                        <span class="fi fi-{entry.team_country_code.toLowerCase()}"></span>
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        </TableBody>
+                    </Table>
+                </div>
             {:else}
                 <div class="flex flex-col flex-1 justify-center text-center w-full h-full">
                     <div>

@@ -60,7 +60,6 @@
                     type="text"
                     name="username"
                     placeholder="myuniqueuser"
-                    required
                 />
             </Label>
             {#if inputs.username.length > 0 && !validUsername(inputs.username)}
@@ -86,7 +85,6 @@
                     name="email"
                     placeholder="name@example.com"
                     autocomplete="email"
-                    required
                 />
             </Label>
             {#if inputs.email.length > 0 && !validEmail(inputs.email)}
@@ -107,7 +105,6 @@
                     type="password"
                     name="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password.length > 0 && !validPassword(inputs.password)}

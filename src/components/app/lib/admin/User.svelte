@@ -7,8 +7,8 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
-    import { Button, Modal, Input, Label, Toggle } from 'flowbite-svelte';
+    import { requestWrapper, USER_ROLES } from '../../../../lib/helpers';
+    import { Button, Modal, Input, Label, Toggle, Select } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import EyeSlash from 'flowbite-svelte-icons/EyeSlashSolid.svelte';
@@ -88,17 +88,19 @@
                 id="email"
                 bind:value={editData.email}
                 placeholder="name@example.com"
-                required
             />
         </div>
         <div class="mb-6">
-            <Label for="role" class="mb-2">Change User Role</Label>
-            <Input
-                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-                id="role"
+            <Label class="mb-2">Change User Role</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
                 bind:value={editData.user_role}
-                required
-            />
+                placeholder=""
+            >
+                {#each USER_ROLES as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         </div>
         <div class="mb-6">
             <Label for="first" class="mb-2">Change User Firstname</Label>
@@ -106,7 +108,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="first"
                 bind:value={editData.user_firstname}
-                required
             />
         </div>
         <div class="mb-6">
@@ -115,7 +116,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
                 bind:value={editData.user_lastname}
-                required
             />
         </div>
         <div class="mb-6">
@@ -124,7 +124,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
                 bind:value={editData.user_affiliation}
-                required
             />
         </div>
         <div class="mb-6">
@@ -133,7 +132,6 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
                 bind:value={editData.user_team_id}
-                required
             />
         </div>
         <div>
