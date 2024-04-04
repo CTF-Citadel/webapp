@@ -3,7 +3,7 @@ import { challenges, events, team_challenges, team_events, teams, users } from '
 import { and, eq, sql, gt, lt } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
-import { generateRandomString, validAlphanumeric, validPassword } from './helpers';
+import { generateRandomString, validAlphanumeric, validPassword, AVATARS } from './helpers';
 import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import type { ChallengesType } from './schema';
@@ -252,6 +252,18 @@ class Actions {
     }
 
     /**
+     * Fetches all Team Challenges
+     * @returns List of Events
+     */
+    async getAllTeamChallenges() {
+        const RES = await DB_ADAPTER.select()
+            .from(team_challenges)
+            .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
+            .innerJoin(teams, eq(team_challenges.team_id, teams.id));
+        return RES.length > 0 ? RES : [];
+    }
+
+    /**
      * Fetches all Challenges
      * @returns List of Challenges
      */
@@ -318,7 +330,7 @@ class Actions {
     async getTeamPointsByEvent(eventID: string) {
         const TEAMS = await DB_ADAPTER.select({
             id: teams.id,
-            name: teams.team_name,
+            name: teams.team_name
         })
             .from(team_events)
             .innerJoin(teams, eq(teams.id, team_events.team_id))
@@ -334,7 +346,7 @@ class Actions {
     async getUserPointsByEvent(eventID: string) {
         const USERS = await DB_ADAPTER.select({
             id: users.id,
-            name: users.username,
+            name: users.username
         })
             .from(team_events)
             .innerJoin(users, eq(users.user_team_id, team_events.team_id))
@@ -933,6 +945,21 @@ class Actions {
     }
 
     /**
+     * Update a users avatar by ID
+     * @returns void
+     */
+    async updateUserAvatar(sessionID: string, avatar: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user && AVATARS.find((entry) => entry.title === avatar) !== undefined) {
+            await DB_ADAPTER.update(users)
+                .set({
+                    user_avatar: avatar
+                })
+                .where(eq(users.id, user.id));
+        }
+    }
+
+    /**
      * Validates and removes a user from his team
      * @returns void
      */
@@ -1089,6 +1116,38 @@ class Actions {
     }
 
     /**
+     * Deletes a Team Challenge per ID
+     * @returns void
+     */
+    async deleteTeamChallenge(challengeID: string, teamID: string, eventID: string) {
+        await DB_ADAPTER.delete(team_challenges).where(
+            and(
+                eq(team_challenges.challenge_id, challengeID),
+                eq(team_challenges.event_id, eventID),
+                eq(team_challenges.team_id, teamID)
+            )
+        );
+    }
+
+    /**
+     * Updates a Team Challenge per ID
+     * @returns void
+     */
+    async updateTeamChallenge(challengeID: string, teamID: string, eventID: string, containerID: string, containerHost: string, containerFlag: string) {
+        await DB_ADAPTER.update(team_challenges).set({
+            challenge_flag: containerFlag,
+            challenge_uuid: containerID,
+            challenge_host: containerHost
+        }).where(
+            and(
+                eq(team_challenges.challenge_id, challengeID),
+                eq(team_challenges.event_id, eventID),
+                eq(team_challenges.team_id, teamID)
+            )
+        );
+    }
+
+    /**
      * Toggles Blocking of a user per ID
      * @returns void
      */
@@ -1135,7 +1194,7 @@ class Actions {
     async getAntiCheatEvents() {
         const DATA = await MONITOR.flagged();
         if (DATA !== -1 && DATA !== false) {
-            return DATA.length > 0 ? DATA : []
+            return DATA.length > 0 ? DATA : [];
         }
         return [];
     }
@@ -1147,7 +1206,7 @@ class Actions {
     async getAntiCheatPoisoned() {
         const DATA = await MONITOR.poisons();
         if (DATA !== -1 && DATA !== false) {
-            return DATA.length > 0 ? DATA : []
+            return DATA.length > 0 ? DATA : [];
         }
         return [];
     }

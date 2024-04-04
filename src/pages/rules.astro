@@ -6,7 +6,7 @@ import { DUMMY_SESSION } from '../lib/helpers';
 import RulesPage from '../components/app/pages/Rules.svelte';
 
 // get from env
-const DISCORD_URL = import.meta.env.DISCORD_URL || '';
+const DISCORD_URL = process.env.DISCORD_URL || '';
 
 let session = DUMMY_SESSION;
 
@@ -23,7 +23,7 @@ if (!import.meta.env.DEV) {
 }
 ---
 
-<Layout title="Teams">
+<Layout title="Rules">
     <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center">
         <RulesPage discord={DISCORD_URL} />

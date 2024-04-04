@@ -9,8 +9,8 @@
 <script lang="ts">
     import Admin from '../lib/Admin.svelte';
     import { onMount } from 'svelte';
-    import { requestWrapper, validAlphanumeric, validPassword } from '../../../lib/helpers';
-    import { Card, Spinner, Avatar, Input, Label, Button } from 'flowbite-svelte';
+    import { requestWrapper, validAlphanumeric, validPassword, AVATARS } from '../../../lib/helpers';
+    import { Card, Spinner, Avatar, Input, Label, Button, Modal, Carousel } from 'flowbite-svelte';
     import type { TeamsType } from '../../../lib/schema';
     import type { User } from 'lucia';
 
@@ -20,6 +20,9 @@
 
     let team: TeamsType | null;
     let loading = true;
+    let currentAvatar = '';
+    let editAvatar: boolean = false;
+    let avatarIndex: number = 0;
     let inputs = {
         password: '',
         passwordRepeat: '',
@@ -33,6 +36,7 @@
         inputs.firstName = session.user_firstname;
         inputs.lastName = session.user_lastname;
         inputs.affiliation = session.user_affiliation;
+        currentAvatar = session.user_avatar;
         loading = false;
     });
 
@@ -57,6 +61,20 @@
         }
     }
 
+    async function updateUserAvatar() {
+        const DATA = await requestWrapper(false, {
+            type: 'update-useravatar',
+            data: {
+                session: sessionID,
+                avatar: AVATARS[avatarIndex].title
+            }
+        });
+        if (DATA.ok) {
+            editAvatar = false;
+            window.location.reload();
+        }
+    }
+
     async function resetPassword() {
         const DATA = await requestWrapper(false, {
             type: 'reset-password',
@@ -70,6 +88,44 @@
         }
     }
 </script>
+
+<!--
+    Avatar Modal
+-->
+
+<Modal
+    size="sm"
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    bind:open={editAvatar}
+    title="Edit Event"
+>
+    <div class="mb-6">
+        <Carousel images={AVATARS} let:Controls bind:index={avatarIndex}>
+            <Controls />
+        </Carousel>
+    </div>
+    <svelte:fragment slot="footer">
+        <div class="flex flex-row justify-between w-full">
+            <div>
+                <Button on:click={updateUserAvatar}>Update</Button>
+                <Button
+                    on:click={() => {
+                        editAvatar = false;
+                    }}
+                    color="alternative">Cancel</Button
+                >
+            </div>
+        </div>
+    </svelte:fragment>
+</Modal>
+
+<!--
+    Main
+-->
 
 <div class="flex flex-col flex-grow flex-1 max-w-screen-2xl px-4">
     {#if loading}
@@ -86,9 +142,23 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div
+                        class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900"
+                    >
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <div class="flex flex-col items-center">
-                            <Avatar size="xl" src="/img/avatars/wolf.webp" />
+                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                            <span
+                                on:click={() => {
+                                    editAvatar = true;
+                                }}
+                            >
+                                <Avatar
+                                    size="xl"
+                                    src="/img/avatars/{currentAvatar}.webp"
+                                    class="ring-2 ring-transparent hover:ring-primary-500 hover:dark:ring-primary-500"
+                                />
+                            </span>
                             <h1 class="mt-2 text-xl font-medium">{session.username}</h1>
                             <span class="text-sm text-gray-500 dark:text-gray-400">{session.user_role}</span>
                             {#if team !== null}
@@ -106,7 +176,9 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div
+                        class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900"
+                    >
                         <div class="flex flex-col">
                             <h1 class="mb-6 text-xl font-medium">Personal Data</h1>
                             <div class="mb-6">
@@ -146,9 +218,9 @@
                                     !validAlphanumeric(inputs.firstName, 30, true) ||
                                     inputs.affiliation === '' ||
                                     !validAlphanumeric(inputs.affiliation, 30, true) ||
-                                    inputs.firstName == session.user_firstname &&
-                                    inputs.lastName == session.user_lastname && 
-                                    inputs.affiliation == session.user_affiliation}>Save</Button
+                                    (inputs.firstName == session.user_firstname &&
+                                        inputs.lastName == session.user_lastname &&
+                                        inputs.affiliation == session.user_affiliation)}>Save</Button
                             >
                         </div>
                     </div>
@@ -156,7 +228,9 @@
                 <Card
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
-                    <div class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900">
+                    <div
+                        class="flex flex-1 flex-col justify-center items-center p-6 dark:text-neutral-100 text-neutral-900"
+                    >
                         <div class="flex flex-col">
                             <h1 class="mb-6 text-xl font-medium">Reset Password</h1>
                             <div class="mb-6">

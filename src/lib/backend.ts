@@ -102,10 +102,23 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.resetPassword(json.data.session, json.data.password);
                 break;
             case 'update-userdata':
-                response = await HANLDER.changeUserData(json.data.session, json.data.first, json.data.last, json.data.affiliation);
+                response = await HANLDER.changeUserData(
+                    json.data.session,
+                    json.data.first,
+                    json.data.last,
+                    json.data.affiliation
+                );
                 break;
             case 'update-teamdata':
-                response = await HANLDER.updateTeamData(json.data.session, json.data.teamID, json.data.name, json.data.description);
+                response = await HANLDER.updateTeamData(
+                    json.data.session,
+                    json.data.teamID,
+                    json.data.name,
+                    json.data.description
+                );
+                break;
+            case 'update-useravatar':
+                response = await HANLDER.updateUserAvatar(json.data.session, json.data.avatar);
                 break;
             case 'create-team':
                 const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
@@ -239,6 +252,9 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
             case 'team-events':
                 response = await HANLDER.getAllTeamEvents();
                 break;
+            case 'team-challenges':
+                response = await HANLDER.getAllTeamChallenges();
+                break;
             case 'challenges':
                 response = await HANLDER.getAllChallenges();
                 break;
@@ -297,7 +313,13 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 );
                 break;
             case 'update-event':
-                response = await HANLDER.updateEvent(json.data.id, json.data.name, json.data.description, json.data.start, json.data.end);
+                response = await HANLDER.updateEvent(
+                    json.data.id,
+                    json.data.name,
+                    json.data.description,
+                    json.data.start,
+                    json.data.end
+                );
                 break;
             case 'delete-event':
                 response = await HANLDER.deleteEvent(json.data.id);
@@ -307,6 +329,23 @@ export async function privilegedWrapper(request: Request): Promise<Response> {
                 break;
             case 'delete-user':
                 response = await HANLDER.deleteUser(json.data.id);
+                break;
+            case 'delete-team-challenge':
+                response = await HANLDER.deleteTeamChallenge(
+                    json.data.challengeID,
+                    json.data.teamID,
+                    json.data.eventID
+                );
+                break;
+            case 'update-team-challenge':
+                response = await HANLDER.updateTeamChallenge(
+                    json.data.challengeID,
+                    json.data.teamID,
+                    json.data.eventID,
+                    json.data.containerID,
+                    json.data.containerHost,
+                    json.data.containerFlag
+                );
                 break;
             case 'block-user':
                 response = await HANLDER.toggleBlockUser(json.data.id);

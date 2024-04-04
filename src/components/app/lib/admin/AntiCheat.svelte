@@ -1,22 +1,39 @@
 <!--
   @component
+  @prop export let teams: TeamsType[] = [];
 -->
 
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { Spinner, Input, Button, Label, Alert, Card } from 'flowbite-svelte';
     import { requestWrapper } from '../../../../lib/helpers';
+    import type { TeamsType } from '../../../../lib/schema';
+    import { createEventDispatcher } from 'svelte';
+
+    // from parent
+    export let teams: TeamsType[] = [];
+
+    // dispatcher
+    const DISPATCH = createEventDispatcher();
 
     let loading: boolean = true;
     let rawData: { team_id: string; suspicion_lvl: 1 | 2 | 3; marks: { flag_share_team: string; reason: string }[] }[] =
         [];
     let rawPoison: string[] = [];
     let newPoison: string = '';
+    let refreshTimeout: NodeJS.Timeout;
 
     onMount(async () => {
         await refreshAntiCheatEvents();
         await refreshPoisoned();
         loading = false;
+        refreshTimeout = setInterval(async () => {
+            await refreshAntiCheatEvents();
+        }, 5000);
+    });
+
+    onDestroy(() => {
+        clearInterval(refreshTimeout);
     });
 
     async function refreshAntiCheatEvents() {
@@ -39,6 +56,7 @@
         if (DATA.ok) {
             loading = true;
             await refreshPoisoned();
+            DISPATCH('refresh');
             loading = false;
         }
     }
@@ -59,7 +77,7 @@
             class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
         >
             <div class="flex flex-1 flex-col justify-center space-y-4">
-                <div class="flex-1 text-center">
+                <div class="flex-1 text-center text-neutral-900 dark:text-neutral-100">
                     <h1 class="text-lg font-bold mb-6">Actions</h1>
                     <div class="mb-6">
                         <Label for="flag-poison" class="mb-2">Poisoned Flag</Label>
@@ -73,7 +91,7 @@
                     </div>
                     <Button on:click={newPoisoned} disabled={newPoison === ''}>Create</Button>
                 </div>
-                <div class="flex-1 text-center">
+                <div class="flex-1 text-center text-neutral-900 dark:text-neutral-100">
                     <h1 class="text-lg font-bold mb-6">Active Poisons</h1>
                     {#if rawPoison.length > 0}
                         {#each rawPoison as event}
@@ -92,16 +110,28 @@
                         </Alert>
                     {/if}
                 </div>
-                <div class="flex-1 text-center">
+                <div class="flex-1 text-center text-neutral-900 dark:text-neutral-100">
                     <h1 class="text-lg font-bold mb-6">Events</h1>
                     {#if rawData.length > 0}
                         {#each rawData as event}
-                            <Alert border class="m-4" color="{event.suspicion_lvl === 1 ? 'orange'  : event.suspicion_lvl === 2 ? 'yellow' : 'red' }">
+                            <Alert
+                                border
+                                class="m-4"
+                                color={event.suspicion_lvl === 1
+                                    ? 'orange'
+                                    : event.suspicion_lvl === 2
+                                      ? 'yellow'
+                                      : 'red'}
+                            >
                                 <span>
-                                    <span class="font-bold">{event.team_id}</span><br />
+                                    <span class="font-bold"
+                                        >{teams.find((entry) => entry.id === event.team_id) !== undefined
+                                            ? teams.find((entry) => entry.id === event.team_id)?.team_name
+                                            : event.team_id}</span
+                                    ><br />
                                     Marks: {event.marks.length}
-                                    {#each event.marks as mark}
-                                        <div id="mark-{btoa(mark.reason)}">{mark.reason}</div>
+                                    {#each [...new Set(event.marks.map(item => item.reason))] as mark}
+                                        <div>{mark}</div>
                                     {/each}
                                 </span>
                             </Alert>

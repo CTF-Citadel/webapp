@@ -25,7 +25,14 @@
     import UserGroup from 'flowbite-svelte-icons/UsersGroupSolid.svelte';
     import CalendarPlus from 'flowbite-svelte-icons/CalendarMonthSolid.svelte';
     import AssignTo from 'flowbite-svelte-icons/CodePullRequestSolid.svelte';
-    import type { UsersType, EventsType, TeamsType, ChallengesType, TeamEventsType } from '../../../lib/schema';
+    import type {
+        UsersType,
+        EventsType,
+        TeamsType,
+        ChallengesType,
+        TeamEventsType,
+        TeamChallengesType
+    } from '../../../lib/schema';
     // subcomponents
     import SubAssignment from './admin/Assignment.svelte';
     import SubChallenge from './admin/Challenge.svelte';
@@ -33,6 +40,7 @@
     import SubUser from './admin/User.svelte';
     import SubTeam from './admin/Team.svelte';
     import AntiCheat from './admin/AntiCheat.svelte';
+    import Submissions from './admin/Submissions.svelte';
 
     export let withAC: boolean = false;
 
@@ -41,6 +49,7 @@
     let users: UsersType[] = [];
     let challenges: ChallengesType[] = [];
     let teamEvents: { event_id: string; event_name: string; team_id: string; team_name: string }[] = [];
+    let teamChallenges: { team_challenges: TeamChallengesType; teams: TeamsType; challenges: ChallengesType }[] = [];
     let sortedEvents: { value: string; name: string }[] = [];
     let sortedChallenges: { value: string; name: string }[] = [];
     let loading: boolean = true;
@@ -52,13 +61,15 @@
         events: false,
         challenges: false,
         assignments: false,
-        anticheat: false
+        anticheat: false,
+        submission: false
     };
     let edit = {
         user: false,
         team: false,
         event: false,
-        challenge: false
+        challenge: false,
+        submission: false
     };
     let create = {
         event: false,
@@ -72,6 +83,7 @@
         await refreshTeams();
         await refreshUsers();
         await refreshChallenges();
+        await refreshTeamChallenges();
         loading = false;
     });
 
@@ -101,6 +113,12 @@
         const DATA = await requestWrapper(true, { type: 'team-events' });
         const JSON = await DATA.json();
         teamEvents = JSON.data;
+    }
+
+    async function refreshTeamChallenges() {
+        const DATA = await requestWrapper(true, { type: 'team-challenges' });
+        const JSON = await DATA.json();
+        teamChallenges = JSON.data;
     }
 
     async function refreshEvents() {
@@ -241,6 +259,15 @@
         await refreshUsers();
     }}
 ></SubUser>
+
+<Submissions
+    bind:edit={edit.submission}
+    bind:teamChallenges
+    bind:editUUID
+    on:refresh={async () => {
+        await refreshTeamChallenges();
+    }}
+></Submissions>
 
 <!--
     Main Tab
@@ -494,6 +521,67 @@
                         </Alert>
                     {/if}
                 </TabItem>
+                <TabItem title="Submissions" bind:open={tabStates.submission}>
+                    {#if teamChallenges.length > 0}
+                        <Table
+                            color="custom"
+                            class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        >
+                            <TableHead>
+                                <TableHeadCell>Challenge ID</TableHeadCell>
+                                <TableHeadCell>Challenge</TableHeadCell>
+                                <TableHeadCell>Team</TableHeadCell>
+                                <TableHeadCell>Container ID</TableHeadCell>
+                                <TableHeadCell>Container Host</TableHeadCell>
+                                <TableHeadCell>Container Running</TableHeadCell>
+                                <TableHeadCell>Solved</TableHeadCell>
+                                <TableHeadCell />
+                            </TableHead>
+                            <TableBody>
+                                {#each teamChallenges as entry}
+                                    <TableBodyRow>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.challenges.id}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.challenges.challenge_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.teams.team_name}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_challenges.challenge_uuid}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_challenges.challenge_host}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_challenges.is_running}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            {entry.team_challenges.is_solved}
+                                        </TableBodyCell>
+                                        <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                            <Button
+                                                on:click={() => {
+                                                    editUUID = `${entry.team_challenges.challenge_id}/${entry.team_challenges.team_id}/${entry.team_challenges.event_id}`;
+                                                    edit.submission = true;
+                                                }}>Edit</Button
+                                            >
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {:else}
+                        <Alert class="m-4" color="blue">
+                            <span>
+                                <span class="font-bold">Info!</span><br />
+                                No Submissions found.
+                            </span>
+                        </Alert>
+                    {/if}
+                </TabItem>
                 <TabItem title="Challenges" bind:open={tabStates.challenges}>
                     {#if challenges.length > 0}
                         <Table
@@ -545,7 +633,12 @@
                 </TabItem>
                 {#if withAC === true}
                     <TabItem title="M0n1t0r" bind:open={tabStates.anticheat}>
-                        <AntiCheat />
+                        <AntiCheat
+                            bind:teams
+                            on:refresh={async () => {
+                                await refreshTeams();
+                            }}
+                        />
                     </TabItem>
                 {/if}
             </Tabs>

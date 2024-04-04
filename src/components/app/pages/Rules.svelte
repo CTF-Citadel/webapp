@@ -79,7 +79,7 @@
         </p>
         <ul class="list-inside text-xl dark:text-neutral-100 text-neutral-900">
             <li>
-                <b>Discord:</b> <a href={discord} class="italic underline text-blue-500">Official Discord</a>
+                <b>Discord:</b> <a href={discord} target="_blank" class="italic underline text-blue-500">Official Discord</a>
             </li>
         </ul>
     </div>

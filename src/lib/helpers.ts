@@ -68,12 +68,12 @@ export const USER_ROLES = [
 ];
 
 export const AVATARS = [
-    { value: 'wolf', name: 'Wolf' },
-    { value: 'cat', name: 'Cat' },
-    { value: 'dog', name: 'Dog' },
-    { value: 'mole', name: 'Mole' },
-    { value: 'male', name: 'Hacker' },
-    { value: 'female', name: 'Hacktress' }
+    { alt: 'Wolf', src: '/img/avatars/wolf.webp', title: 'wolf' },
+    { alt: 'Mole', src: '/img/avatars/mole.webp', title: 'mole' },
+    { alt: 'Hacker', src: '/img/avatars/male.webp', title: 'male' },
+    { alt: 'Hacktress', src: '/img/avatars/female.webp', title: 'female' },
+    { alt: 'Dog', src: '/img/avatars/dog.webp', title: 'dog' },
+    { alt: 'Cat', src: '/img/avatars/cat.webp', title: 'cat' }
 ];
 
 export const COUNTRIES = [
