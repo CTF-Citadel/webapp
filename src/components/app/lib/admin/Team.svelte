@@ -22,7 +22,16 @@
 
     $: editData = teams.find((item) => item['id'] === editUUID);
 
-    async function updateTeam() {}
+    async function updateTeam() {
+        const DATA = await requestWrapper(true, {
+            type: 'update-team',
+            data: { id: editUUID, name: editData?.team_name, description: editData?.team_description }
+        });
+        if (DATA.ok) {
+            edit = false;
+            DISPATCH('refresh');
+        }
+    }
 
     async function deleteTeam() {
         const DATA = await requestWrapper(true, {
@@ -39,11 +48,31 @@
 <!--
     Edit Popups
 -->
-{#if editData != null}
-    <Modal defaultClass="rounded-none" bind:open={edit} title="Edit Team">
+{#if editData !== undefined}
+    <Modal
+        dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+        defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+        backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+        color="none"
+        outsideclose
+        bind:open={edit}
+        title="Edit Team"
+    >
         <div class="mb-6">
             <Label for="team_name" class="mb-2">Change Team Name</Label>
-            <Input id="team_name" placeholder="name" bind:value={editData.team_name} required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="team_name"
+                bind:value={editData.team_name}
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="team_desc" class="mb-2">Change Description</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="team_desc"
+                bind:value={editData.team_description}
+            />
         </div>
         <svelte:fragment slot="footer">
             <div class="flex flex-row justify-between w-full">

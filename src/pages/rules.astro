@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import UserProfile from '../components/app/pages/Profile.svelte';
 import Header from '../components/app/lib/Header.svelte';
 import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
+import RulesPage from '../components/app/pages/Rules.svelte';
+
+// get from env
+const DISCORD_URL = process.env.DISCORD_URL || '';
 
 let session = DUMMY_SESSION;
 
@@ -20,14 +23,9 @@ if (!import.meta.env.DEV) {
 }
 ---
 
-<Layout title="User Settings">
-    <Header
-        username={session.username}
-        interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
-        client:visible
-    />
+<Layout title="Rules">
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center">
-        <UserProfile user={session} client:visible />
+        <RulesPage discord={DISCORD_URL} />
     </div>
 </Layout>

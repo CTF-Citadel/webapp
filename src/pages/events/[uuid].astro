@@ -8,6 +8,7 @@ import { DUMMY_SESSION } from '../../lib/helpers';
 
 const { uuid } = Astro.params;
 let session = DUMMY_SESSION;
+let sessionID = 'some-id';
 
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
@@ -19,25 +20,24 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
     session = { ...Astro.locals.user };
+    sessionID = Astro.locals.session.id;
 }
 
-// check if we access a non-existing challenge
 const ACTION = new DatabaseActions();
-let exists = await ACTION.checkEventExist(uuid || '');
-if (!exists) {
+const EVENT = await ACTION.checkEventExist(uuid || '');
+if (EVENT === false) {
     // early exit to 404
     return Astro.redirect('/404');
 }
 ---
 
-<Layout title="Challenges">
+<Layout title={EVENT}>
     <Header
         username={session.username}
         interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="fade">
-        <Challenge uuid={uuid} team={session.user_team_id} user={session.id} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center">
+        <Challenge uuid={uuid} sessionID={sessionID} client:visible />
     </div>
 </Layout>

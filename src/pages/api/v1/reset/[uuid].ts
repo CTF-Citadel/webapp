@@ -8,11 +8,11 @@ import { Argon2id } from 'oslo/password';
 import { validPassword } from "../../../../lib/helpers";
 
 export const POST: APIRoute = async (context) => {
-    const { id } = context.params;
+    const { uuid } = context.params;
     let errorMessage = 'None';
     let respStatus = 200;
     const DATA = await context.request.json();
-    const USER_ID = await validatePasswordresetTokens(id || "");
+    const USER_ID = await validatePasswordresetTokens(uuid || "");
 
     if (!USER_ID) {
         return new Response("Invalid or Expired Token!", {

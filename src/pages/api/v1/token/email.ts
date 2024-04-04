@@ -16,7 +16,7 @@ export const POST: APIRoute = async (context) => {
             emailSent = true;
         }
     } catch (e: any) {
-        console.log(e);
+        console.error(e);
         errorMessage = 'An error occurred';
     }
     return new Response(

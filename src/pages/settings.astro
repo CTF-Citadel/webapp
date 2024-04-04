@@ -6,6 +6,9 @@ import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
 let session = DUMMY_SESSION;
+let sessionID = 'some-id';
+
+const AC_ENABLED = Boolean(process.env.M0N1T0R_ENABLE || false);
 
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
@@ -16,10 +19,8 @@ if (!import.meta.env.DEV) {
     if (!Astro.locals.user.is_verified) {
         return Astro.redirect('/verify/email');
     }
-    if (Astro.locals.user.user_role != 'admin') {
-        return new Response('Forbidden', { status: 403 });
-    }
     session = { ...Astro.locals.user };
+    sessionID = Astro.locals.session.id;
 }
 ---
 
@@ -27,10 +28,9 @@ if (!import.meta.env.DEV) {
     <Header
         username={session.username}
         interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="fade" class="flex flex-1">
-        <GeneralSettings user={session} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center">
+        <GeneralSettings session={session} sessionID={sessionID} ac={AC_ENABLED} client:visible />
     </div>
 </Layout>

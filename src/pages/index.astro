@@ -24,10 +24,9 @@ if (!import.meta.env.DEV) {
     <Header
         username={session.username}
         interactive={true}
-        admin={session.user_role == 'admin' ? true : false}
         client:visible
     />
-    <div transition:animate="fade" class="flex flex-1 justify-center items-center">
+    <div transition:animate="fade" class="flex flex-1 justify-center">
         <Dashboard client:visible />
     </div>
 </Layout>

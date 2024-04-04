@@ -1,8 +1,8 @@
 ---
 import DatabaseActions from '../../lib/actions';
 import Layout from '../../layouts/Layout.astro';
-import Scoreboard from '../../components/app/pages/Scoreboard.svelte';
 import Header from '../../components/app/lib/Header.svelte';
+import UserPage from '../../components/app/pages/User.svelte';
 import { lucia } from '../../lib/lucia';
 import { DUMMY_SESSION } from '../../lib/helpers';
 
@@ -22,16 +22,16 @@ if (!import.meta.env.DEV) {
 }
 
 const ACTION = new DatabaseActions();
-const EVENT = await ACTION.checkEventExist(uuid || '');
-if (EVENT === false) {
+const USER = await ACTION.checkUserExist(uuid || '');
+if (USER === false) {
     // early exit to 404
     return Astro.redirect('/404');
 }
 ---
 
-<Layout title={`Scores - ${EVENT}`}>
+<Layout title={USER}>
     <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <Scoreboard uuid={uuid} client:visible />
+        <UserPage uuid={uuid} client:visible />
     </div>
 </Layout>

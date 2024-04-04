@@ -18,7 +18,7 @@ export const POST: APIRoute = async (context) => {
         session = { ...context.locals.user };
     }
 
-	if (session.user_role != 'admin') {
+	if (session.user_role !== 'admin') {
         return new Response('Forbidden', { status: 403 });
     } else {
         return await privilegedWrapper(context.request);

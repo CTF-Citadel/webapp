@@ -1,10 +1,16 @@
+<!--
+  @component
+  ## Props
+  @prop export let uuid: string = '';
+-->
+
 <script lang="ts">
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
     import { validPassword } from '../../../lib/helpers';
 
     // from parent
-    export let id = '';
+    export let uuid: string = '';
 
     let authResponse: any;
     let inputs = {
@@ -13,11 +19,11 @@
     };
 
     function checkInput() {
-        return inputs.password == inputs.password_repeat;
+        return inputs.password === inputs.password_repeat;
     }
 
     async function onSubmit() {
-        const RESP = await fetch(`/api/v1/reset/${id}`, {
+        const RESP = await fetch(`/api/v1/reset/${uuid}`, {
             method: 'POST',
             body: JSON.stringify(inputs)
         });
@@ -44,12 +50,12 @@
             <Label class="space-y-2">
                 <span>New Password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password}
                     type="password"
                     name="password"
                     autocomplete="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password.length > 0 && !validPassword(inputs.password)}
@@ -60,7 +66,7 @@
                     </span>
                     <p class="text-red-500">Ensure that these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
-                        <li>At least 8 characters (up to 96)</li>
+                        <li>At least 8 characters (up to 128)</li>
                         <li>At least one digit</li>
                         <li>At least one lowercase character</li>
                         <li>At least one uppercase character</li>
@@ -71,25 +77,25 @@
             <Label class="space-y-2">
                 <span>Repeat Password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password_repeat}
                     on:input={checkInput}
                     type="password"
                     name="password"
                     autocomplete="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password_repeat.length > 0 && !checkInput()}
                 <p class="text-primary-700 dark:text-primary-500">Passwords do not match!</p>
             {/if}
-            {#if authResponse && authResponse.error != 'None'}
+            {#if authResponse && authResponse.error !== 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
             <Button
                 on:click={onSubmit}
                 class="w-full"
-                disabled={!checkInput() || !validPassword(inputs.password) || inputs.password_repeat.length == 0}
+                disabled={!checkInput() || !validPassword(inputs.password) || inputs.password_repeat.length === 0}
                 >Reset Password</Button
             >
         {/if}

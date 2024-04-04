@@ -1,3 +1,9 @@
+<!--
+  @component
+  ## Props
+  @prop export let uuid: string = '';
+-->
+
 <script lang="ts">
     import {
         Tabs,
@@ -22,8 +28,8 @@
     let loading: boolean = true;
     let events: EventsType[] = [];
     let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
-    let teamScores: { id: string; name: string; points: number }[] = [];
-    let userScores: { id: string; name: string; points: number }[] = [];
+    let teamScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
+    let userScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
     let seriesData: { x: number; y: number }[];
     let dataAggregator: { [key: string]: typeof seriesData } = {};
     let plotData: { name: string; data: typeof seriesData }[] = [];
@@ -132,7 +138,8 @@
             curve: 'straight'
         },
         grid: {
-            show: true
+            show: true,
+            borderColor: '#555'
         },
         legend: {
             show: true,
@@ -176,44 +183,68 @@
     }
 
     async function refreshEventScoring(id: string) {
-        const SOLVES = await requestWrapper(false, { type: 'event-solves', data: { eventID: id } });
-        teamSolves = (await SOLVES.json()).data;
+        const TEAM_SOLVES = await requestWrapper(false, { type: 'team-solves', data: { eventID: id } });
+        teamSolves = (await TEAM_SOLVES.json()).data;
         const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
         userScores = (await USER.json()).data;
         const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
         teamScores = (await TEAM.json()).data;
     }
+
+    function msToHMS(unix: number) {
+        let date = new Date(unix);
+        let hours = date.getUTCHours();
+        let minutes = date.getUTCMinutes();
+        let seconds = date.getUTCSeconds();
+        return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    }
 </script>
 
-<div style="width: 80%;">
+<div class="flex-1 max-w-screen-2xl px-4">
     {#if loading}
         <div class="text-center mt-10">
             <Spinner size={'16'} />
         </div>
     {:else}
-        <div class="bg-neutral-100 dark:bg-neutral-900 mt-10">
+        <div class="bg-neutral-200 dark:bg-neutral-900 mt-10">
             <Chart bind:options></Chart>
         </div>
         <div class="my-10">
             <Tabs
+                divider={false}
+                defaultClass="flex flex-wrap flex-row justify-center items-center space-x-2 mb-4 border-b-2 border-neutral-300 dark:border-neutral-800"
                 contentClass=""
-                activeClasses="p-4 text-primary-600 bg-gray-100 dark:bg-gray-800 dark:text-primary-500"
-                inactiveClasses="p-4 text-gray-500 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                activeClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 font-bold text-primary-200"
+                inactiveClasses="px-4 py-2 bg-neutral-300 dark:bg-neutral-800 text-neutral-500"
             >
                 <TabItem title="Teams" bind:open={tabs.teams}>
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        hoverable
+                    >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
+                            <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
                             {#each teamScores as entry}
-                                <TableBodyRow color="custom">
-                                    <TableBodyCell>
+                                <TableBodyRow
+                                    color="custom"
+                                    class="hover:bg-neutral-500"
+                                    on:click={() => {
+                                        window.location.href = `/teams/${entry.id}`;
+                                    }}
+                                >
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.points}
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.total_points}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {msToHMS(entry.avg_time)}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}
@@ -221,19 +252,33 @@
                     </Table>
                 </TabItem>
                 <TabItem title="Users" bind:open={tabs.users}>
-                    <Table>
+                    <Table
+                        color="custom"
+                        class="bg-neutral-300 dark:bg-neutral-800 !text-neutral-900 dark:!text-neutral-100"
+                        hoverable
+                    >
                         <TableHead>
                             <TableHeadCell>Name</TableHeadCell>
                             <TableHeadCell>Points</TableHeadCell>
+                            <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
                             {#each userScores as entry}
-                                <TableBodyRow color="custom">
-                                    <TableBodyCell>
+                                <TableBodyRow
+                                    color="custom"
+                                    class="hover:bg-neutral-500"
+                                    on:click={() => {
+                                        window.location.href = `/users/${entry.id}`;
+                                    }}
+                                >
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                         {entry.name}
                                     </TableBodyCell>
-                                    <TableBodyCell>
-                                        {entry.points}
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {entry.total_points}
+                                    </TableBodyCell>
+                                    <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
+                                        {msToHMS(entry.avg_time)}
                                     </TableBodyCell>
                                 </TableBodyRow>
                             {/each}

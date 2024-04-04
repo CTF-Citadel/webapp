@@ -37,32 +37,34 @@
             DISPATCH('refresh');
         }
     }
-
-    async function unassignEvent(eventID: string, teamID: string) {
-        const DATA = await requestWrapper(true, {
-            type: 'unassign-event',
-            data: {
-                event: eventID,
-                team: teamID
-            }
-        });
-        if (DATA.ok) {
-            DISPATCH('refresh');
-        }
-    }
 </script>
 
 <!--
     Create Popups
 -->
 
-<Modal defaultClass="rounded-none" bind:open={create} title="Assign To">
+<Modal
+    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    color="none"
+    outsideclose
+    bind:open={create}
+    title="Assign To"
+>
     <div>
         {#if events.length > 0}
-            <Label>
-                Select Event
-                <Select class="mt-2" items={sortedEvents} bind:value={selectedEvent} />
-            </Label>
+            <Label class="mb-2">Select Event</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={selectedEvent}
+                placeholder=""
+            >
+                <option selected value="">None</option>
+                {#each sortedEvents as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
         {:else}
             <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
                 <span slot="icon">
@@ -80,7 +82,7 @@
                     on:click={() => {
                         assignEvent(selectedEvent);
                     }}
-                    disabled={selectedEvent == ''}>Assign</Button
+                    disabled={selectedEvent === ''}>Assign</Button
                 >
                 <Button
                     on:click={() => {

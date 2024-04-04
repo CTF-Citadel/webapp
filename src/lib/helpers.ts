@@ -1,5 +1,4 @@
-import type { WrapperFormat } from "./backend";
-import { generateId } from 'lucia';
+import type { WrapperFormat } from './backend';
 
 export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
     const DEST = privileged ? '/admin' : '/user';
@@ -11,12 +10,24 @@ export async function requestWrapper(privileged: boolean, request: WrapperFormat
 
 // generator
 export function generateRandomString(length: number) {
-    return generateId(length);
+    return Array.from(crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2))), (b) =>
+        ('0' + (b & 0xff).toString(16)).slice(-2)
+    ).join('');
 }
 
 // expiration check
 export function isWithinExpiration(expiryUnixEpoch: number) {
-    return Date.now() < expiryUnixEpoch ? true : false
+    return Date.now() < expiryUnixEpoch ? true : false;
+}
+
+export function validAlphanumeric(input: string, length: number, spaceless: boolean = false): boolean {
+    return spaceless
+        ? /^[a-zA-Z0-9_@$-()\[\]:]*$/.test(input) && input.length <= length
+        : /^[a-zA-Z0-9_@$-()\[\]:\s]*$/.test(input) && input.length <= length;
+}
+
+export function validJoinToken(input: string): boolean {
+    return /^[CTD\-A-Z0-9]{20,20}$/.test(input);
 }
 
 export function validUsername(input: string): boolean {
@@ -24,13 +35,17 @@ export function validUsername(input: string): boolean {
 }
 
 export function validPassword(input: string): boolean {
-    if (!/^[a-zA-Z0-9_@$!%*?&#^]+$/.test(input)) return false;
+    if (!/^[a-zA-Z0-9_@$!%*?&#^§{}()]+$/.test(input)) return false;
     // min 8 characters, max 96 characters, at least one uppercase letter, one lowercase letter, one number and one special character
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^]{12,96}$/.test(input);
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^§{}()])[A-Za-z\d@$!%*?&#^§{}()]{12,128}$/.test(input);
 }
 
-export function validEmail(input: string): boolean {
-    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input);
+export function validEmail(input: string, enforce: boolean = false, domain: string = ''): boolean {
+    if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(input) === true) {
+        if (enforce) return input.endsWith(domain);
+        return true;
+    }
+    return false;
 }
 
 export const DUMMY_SESSION = {
@@ -39,9 +54,27 @@ export const DUMMY_SESSION = {
     email: 'some-email',
     user_role: 'admin',
     user_team_id: 'someTeam',
+    user_avatar: 'wolf',
+    user_affiliation: '',
+    user_firstname: '',
+    user_lastname: '',
     is_blocked: false,
     is_verified: true
-}
+};
+
+export const USER_ROLES = [
+    { value: 'admin', name: 'Admin' },
+    { value: 'user', name: 'User' }
+];
+
+export const AVATARS = [
+    { alt: 'Wolf', src: '/img/avatars/wolf.webp', title: 'wolf' },
+    { alt: 'Mole', src: '/img/avatars/mole.webp', title: 'mole' },
+    { alt: 'Hacker', src: '/img/avatars/male.webp', title: 'male' },
+    { alt: 'Hacktress', src: '/img/avatars/female.webp', title: 'female' },
+    { alt: 'Dog', src: '/img/avatars/dog.webp', title: 'dog' },
+    { alt: 'Cat', src: '/img/avatars/cat.webp', title: 'cat' }
+];
 
 export const COUNTRIES = [
     { value: 'AF', name: 'Afghanistan' },

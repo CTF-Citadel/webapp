@@ -4,10 +4,14 @@ import { pgTable, text, timestamp, boolean, bigint, integer, primaryKey } from '
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
     username: text('username').unique().notNull(),
+    email: text('email').unique().notNull(),
     hashed_password: text('hashed_password').notNull(),
     user_role: text('user_role').notNull(),
     user_team_id: text('user_team_id').notNull(),
-    email: text('email').unique().notNull(),
+    user_avatar: text('user_avatar').notNull(),
+    user_affiliation: text('user_affiliation').notNull(),
+    user_firstname: text('user_firstname').notNull(),
+    user_lastname: text('user_lastname').notNull(),
     is_verified: boolean('is_verified').notNull(),
     is_blocked: boolean('is_blocked').notNull()
 });
@@ -64,10 +68,11 @@ export const challenges = pgTable('challenges', {
     base_points: integer('base_points').notNull(),
     container_file: text('container_file').notNull(),
     static_file_url: text('static_file_url').notNull(),
-    needs_container: boolean('needs_container').notNull(),
     static_flag: text('static_flag').notNull(),
+    depends_on: text('depends_on').notNull(),
     flag_static: boolean('flag_static').notNull(),
-    depends_on: text('depends_on').notNull()
+    needs_container: boolean('needs_container').notNull(),
+    needs_flag_pool: boolean('needs_flag_pool').notNull()
 });
 
 export const teams = pgTable('teams', {
@@ -89,10 +94,7 @@ export const team_events = pgTable(
             .notNull(),
         event_id: text('event_id')
             .references(() => events.id)
-            .notNull(),
-        team_points: bigint('team_points', {
-            mode: 'number'
-        }).notNull()
+            .notNull()
     },
     (table) => {
         return {
@@ -121,6 +123,7 @@ export const team_challenges = pgTable(
         solved_at: bigint('solved_at', {
             mode: 'number'
         }).notNull(),
+        is_container: boolean('is_container').notNull(),
         is_solved: boolean('is_solved').notNull(),
         is_running: boolean('is_running').notNull()
     },

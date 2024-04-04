@@ -21,6 +21,9 @@ COPY src ./src
 # Copy public folder
 COPY public ./public
 
+# make data folder
+RUN mkdir -p /data
+
 # build drizzle schema
 RUN npm run generate
 

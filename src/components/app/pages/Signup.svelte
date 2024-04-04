@@ -1,3 +1,7 @@
+<!--
+  @component
+-->
+
 <script lang="ts">
     import { validEmail, validPassword, validUsername } from '../../../lib/helpers';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
@@ -29,6 +33,11 @@
         });
         if (RESP) {
             authResponse = await RESP.json();
+            // verify is set to bypassed
+            if (authResponse.redirect) {
+                // go to dash
+                window.location.href = '/';
+            }
         }
     }
 </script>
@@ -38,12 +47,20 @@
 >
     <div class="flex flex-col space-y-6">
         <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign Up</h3>
-        {#if authResponse && authResponse.verifySent == true}
+        {#if authResponse && authResponse.success === true && authResponse.redirect === false}
             <p>Done, check your Inbox!</p>
+        {:else if authResponse && authResponse.redirect === true}
+            <p>Done, now login!</p>
         {:else}
             <Label class="space-y-2">
                 <span>Your username</span>
-                <Input bind:value={inputs.username} type="text" name="username" placeholder="myuniqueuser" required />
+                <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                    bind:value={inputs.username}
+                    type="text"
+                    name="username"
+                    placeholder="myuniqueuser"
+                />
             </Label>
             {#if inputs.username.length > 0 && !validUsername(inputs.username)}
                 <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
@@ -61,13 +78,13 @@
             <Label class="space-y-2">
                 <span>Email</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.email}
                     on:keydown={onEnterKey}
                     type="email"
                     name="email"
                     placeholder="name@example.com"
                     autocomplete="email"
-                    required
                 />
             </Label>
             {#if inputs.email.length > 0 && !validEmail(inputs.email)}
@@ -82,12 +99,12 @@
             <Label class="space-y-2">
                 <span>Your password</span>
                 <Input
+                    class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     bind:value={inputs.password}
                     on:keydown={onEnterKey}
                     type="password"
                     name="password"
                     placeholder="••••••••••"
-                    required
                 />
             </Label>
             {#if inputs.password.length > 0 && !validPassword(inputs.password)}
@@ -98,7 +115,7 @@
                     </span>
                     <p class="text-red-500">Ensure that these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
-                        <li>At least 8 characters (up to 96)</li>
+                        <li>At least 8 characters (up to 128)</li>
                         <li>At least one digit</li>
                         <li>At least one lowercase character</li>
                         <li>At least one uppercase character</li>
@@ -106,7 +123,7 @@
                     </ul>
                 </Alert>
             {/if}
-            {#if authResponse && authResponse.error != 'None'}
+            {#if authResponse && authResponse.error !== 'None'}
                 <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
             {/if}
             <Button

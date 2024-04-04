@@ -7,8 +7,8 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
-    import { Button, Modal, Input, Label, Toggle } from 'flowbite-svelte';
+    import { requestWrapper, USER_ROLES } from '../../../../lib/helpers';
+    import { Button, Modal, Input, Label, Toggle, Select } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import EyeSlash from 'flowbite-svelte-icons/EyeSlashSolid.svelte';
@@ -29,7 +29,12 @@
             data: {
                 id: editUUID,
                 email: editData?.email,
-                verified: editData?.is_verified
+                verified: editData?.is_verified,
+                role: editData?.user_role,
+                firstname: editData?.user_firstname,
+                lastname: editData?.user_lastname,
+                affiliation: editData?.user_affiliation,
+                team: editData?.user_team_id,
             }
         });
         if (DATA.ok) {
@@ -65,11 +70,69 @@
     Edit Popup
 -->
 
-{#if editData != null}
-    <Modal defaultClass="rounded-none" bind:open={edit} title="Edit User">
+{#if editData !== undefined}
+    <Modal
+        dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+        defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+        backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+        color="none"
+        outsideclose
+        bind:open={edit}
+        title="Edit User"
+    >
         <div class="mb-6">
             <Label for="email" class="mb-2">Change Email address</Label>
-            <Input type="email" id="email" bind:value={editData.email} placeholder="name@example.com" required />
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                type="email"
+                id="email"
+                bind:value={editData.email}
+                placeholder="name@example.com"
+            />
+        </div>
+        <div class="mb-6">
+            <Label class="mb-2">Change User Role</Label>
+            <Select
+                defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
+                bind:value={editData.user_role}
+                placeholder=""
+            >
+                {#each USER_ROLES as { value, name }}
+                    <option {value}>{name}</option>
+                {/each}
+            </Select>
+        </div>
+        <div class="mb-6">
+            <Label for="first" class="mb-2">Change User Firstname</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="first"
+                bind:value={editData.user_firstname}
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Lastname</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_lastname}
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Affiliation</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_affiliation}
+            />
+        </div>
+        <div class="mb-6">
+            <Label for="last" class="mb-2">Change User Team</Label>
+            <Input
+                class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
+                id="last"
+                bind:value={editData.user_team_id}
+            />
         </div>
         <div>
             <Label for="verify-check" class="mb-2">Verified</Label>
@@ -86,8 +149,10 @@
                         color="alternative">Cancel</Button
                     >
                 </div>
-                <Button on:click={() => blockUser()} color="red"><EyeSlash class="w-4" /></Button>
-                <Button on:click={() => deleteUser()} color="red"><TrashBinOutline class="w-4" /></Button>
+                <div>
+                    <Button on:click={() => blockUser()} color="red"><EyeSlash class="w-4" /></Button>
+                    <Button on:click={() => deleteUser()} color="red"><TrashBinOutline class="w-4" /></Button>
+                </div>
             </div>
         </svelte:fragment>
     </Modal>
