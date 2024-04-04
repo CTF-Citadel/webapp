@@ -130,8 +130,15 @@
                                             : event.team_id}</span
                                     ><br />
                                     Marks: {event.marks.length}
-                                    {#each [...new Set(event.marks.map(item => item.reason))] as mark}
-                                        <div>{mark}</div>
+                                    {#each [...new Set(event.marks.map((item) => {
+                                                return { reason: item.reason, team: item.flag_share_team || '' };
+                                            }))] as mark}
+                                        <div>
+                                            {mark.reason} {teams.find((entry) => entry.id === mark.team) !==
+                                            undefined
+                                                ? teams.find((entry) => entry.id === mark.team)?.team_name
+                                                : mark.team}
+                                        </div>
                                     {/each}
                                 </span>
                             </Alert>
