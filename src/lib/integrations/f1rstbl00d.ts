@@ -20,7 +20,7 @@ class F1rstbl00d {
     async solve(userName: string, eventID: string, challengeID: string, challengeName: string, challengeCategory: string, challengeDifficulty: string, timestamp: number): Promise<-1 | boolean> {
         if (!this.#ENABLED) return -1;
         try {
-            let RESP = await fetch(`${this.#F1RSTBL00D_URL}/firstbloods/add`, {
+            let RESP = await fetch(`${this.#F1RSTBL00D_URL}/firstbloods/add/`, {
                 method: 'POST',
                 headers: this.#F1RSTBL00D_HEADERS,
                 body: JSON.stringify({
