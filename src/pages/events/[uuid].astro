@@ -8,6 +8,7 @@ import { DUMMY_SESSION } from '../../lib/helpers';
 
 const { uuid } = Astro.params;
 let session = DUMMY_SESSION;
+let sessionID = 'some-id';
 
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
@@ -19,6 +20,7 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
     session = { ...Astro.locals.user };
+    sessionID = Astro.locals.session.id;
 }
 
 const ACTION = new DatabaseActions();
@@ -36,6 +38,6 @@ if (EVENT === false) {
         client:visible
     />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <Challenge uuid={uuid} session={session} client:visible />
+        <Challenge uuid={uuid} sessionID={sessionID} client:visible />
     </div>
 </Layout>

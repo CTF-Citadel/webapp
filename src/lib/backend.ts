@@ -69,34 +69,32 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.getChallengeSolvesByEvent(json.data.eventID);
                 break;
             case 'team-events':
-                response = await HANLDER.getTeamEvents(json.data.id);
+                response = await HANLDER.getTeamEvents(json.data.session);
                 break;
             case 'challenges':
-                response = await HANLDER.getEventChallenges(json.data.eventID, json.data.teamID);
+                response = await HANLDER.getEventChallenges(json.data.session, json.data.eventID);
                 break;
             case 'solved-challenges':
-                response = await HANLDER.getTeamSolvedChallenges(json.data.id);
+                response = await HANLDER.getTeamSolvedChallenges(json.data.session);
                 break;
             case 'deploy-challenge':
-                const GEN_FLAG = crypto.randomUUID();
                 response = await HANLDER.deployTeamChallenge(
-                    GEN_FLAG,
-                    json.data.teamID,
+                    json.data.session,
                     json.data.challengeID,
                     json.data.eventID
                 );
                 break;
             case 'get-deployed':
-                response = await HANLDER.getDeployedChallenge(json.data.teamID, json.data.eventID);
+                response = await HANLDER.getDeployedChallenge(json.data.session, json.data.eventID);
                 break;
             case 'team-info':
-                response = await HANLDER.getTeamInfo(json.data.id);
+                response = await HANLDER.getTeamInfo(json.data.session);
                 break;
             case 'team-members':
-                response = await HANLDER.getTeamMembers(json.data.id);
+                response = await HANLDER.getTeamMembers(json.data.session);
                 break;
             case 'reset-team-token':
-                response = await HANLDER.resetTeamToken(json.data.session, json.data.teamID);
+                response = await HANLDER.resetTeamToken(json.data.session);
                 break;
             case 'reset-password':
                 response = await HANLDER.resetPassword(json.data.session, json.data.password);
@@ -121,42 +119,28 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 response = await HANLDER.updateUserAvatar(json.data.session, json.data.avatar);
                 break;
             case 'create-team':
-                const HAS_CREATED = await HANLDER.checkHasCreatedTeam(json.data.creator);
-                if (!HAS_CREATED) {
-                    response = await HANLDER.createTeam(
-                        json.data.creator,
-                        json.data.name,
-                        json.data.description,
-                        json.data.country
-                    );
-                    const TEAM_ID = await HANLDER.checkTeamNameExist(json.data.name);
-                    if (TEAM_ID !== false) {
-                        response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
-                    }
-                }
+                response = await HANLDER.createTeam(
+                    json.data.session,
+                    json.data.name,
+                    json.data.description,
+                    json.data.country
+                );
                 break;
             case 'join-team':
-                const IS_JOINED = await HANLDER.checkUserInTeam(json.data.userID);
-                if (!IS_JOINED) {
-                    const TEAM_ID = await HANLDER.checkTeamToken(json.data.token);
-                    if (TEAM_ID !== false) {
-                        response = await HANLDER.joinTeam(json.data.session, TEAM_ID);
-                    }
-                }
+                response = await HANLDER.joinTeam(json.data.session, json.data.token);
                 break;
             case 'check-leave':
-                response = await HANLDER.checkTeamLeavable(json.data.teamID, json.data.userID);
+                response = await HANLDER.checkTeamLeavable(json.data.session);
                 break;
             case 'leave-team':
-                response = await HANLDER.leaveTeam(json.data.session, json.data.teamID);
+                response = await HANLDER.leaveTeam(json.data.session);
                 break;
             case 'check-flag-static':
                 response = await HANLDER.checkStaticChallengeFlag(
-                    json.data.teamID,
+                    json.data.session,
                     json.data.eventID,
                     json.data.challengeID,
-                    json.data.flag,
-                    json.data.userID
+                    json.data.flag
                 );
                 const STATIC_CORRECT = response === true ? true : false;
                 response = {
@@ -165,11 +149,10 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 break;
             case 'check-flag-pool':
                 response = await HANLDER.checkPoolChallengeFlag(
-                    json.data.teamID,
+                    json.data.session,
                     json.data.eventID,
                     json.data.challengeID,
-                    json.data.flag,
-                    json.data.userID
+                    json.data.flag
                 );
                 const POOL_CORRECT = response === true ? true : false;
                 response = {
@@ -178,10 +161,9 @@ export async function normalWrapper(request: Request): Promise<Response> {
                 break;
             case 'check-flag-dynamic':
                 response = await HANLDER.checkDynamicChallengeFlag(
-                    json.data.teamID,
+                    json.data.session,
                     json.data.challengeID,
-                    json.data.flag,
-                    json.data.userID
+                    json.data.flag
                 );
                 const DYNAMIC_CORRECT = response === true ? true : false;
                 response = {

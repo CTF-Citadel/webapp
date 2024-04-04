@@ -143,8 +143,10 @@ class Actions {
      * Fetches Team Info with specific ID
      * @returns Team Dict if found, else null
      */
-    async getTeamInfo(teamID: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, teamID));
+    async getTeamInfo(sessionID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return null;
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, user.user_team_id));
         return RES.length > 0 ? RES[0] : null;
     }
 
@@ -215,7 +217,9 @@ class Actions {
      * Fetches Team Members of Team with ID
      * @returns List of Team Members
      */
-    async getTeamMembers(teamID: string) {
+    async getTeamMembers(sessionID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return [];
         const RES = await DB_ADAPTER.select({
             id: users.id,
             username: users.username,
@@ -223,7 +227,7 @@ class Actions {
             user_affiliation: users.user_affiliation
         })
             .from(users)
-            .where(eq(users.user_team_id, teamID));
+            .where(eq(users.user_team_id, user.user_team_id));
         return RES.length > 0 ? RES : [];
     }
 
@@ -278,11 +282,13 @@ class Actions {
      * Fetches Events assigned to a Team ID
      * @returns List of Events
      */
-    async getTeamEvents(teamID: string) {
+    async getTeamEvents(sessionID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return [];
         const EVENTS = await DB_ADAPTER.select()
             .from(team_events)
             .innerJoin(events, eq(team_events.event_id, events.id))
-            .where(eq(team_events.team_id, teamID));
+            .where(eq(team_events.team_id, user.user_team_id));
         return EVENTS.length > 0 ? EVENTS : [];
     }
 
@@ -290,12 +296,14 @@ class Actions {
      * Fetches solved Challenges assigned to a Team ID
      * @returns List of Challenge ID's
      */
-    async getTeamSolvedChallenges(teamID: string) {
+    async getTeamSolvedChallenges(sessionID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return [];
         const RES = await DB_ADAPTER.select({
             id: team_challenges.challenge_id
         })
             .from(team_challenges)
-            .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.is_solved, true)));
+            .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.is_solved, true)));
         return RES.length > 0 ? RES : [];
     }
 
@@ -303,11 +311,13 @@ class Actions {
      * Fetches Challenges assigned to Event ID
      * @returns List of Challenges
      */
-    async getEventChallenges(eventID: string, teamID: string) {
+    async getEventChallenges(sessionID: string, eventID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return [];
         const RES_CHALLS = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID));
         const RES_SOLVED = await DB_ADAPTER.select({ id: team_challenges.challenge_id })
             .from(team_challenges)
-            .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.is_solved, true)));
+            .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.is_solved, true)));
         let resSanitized: ChallengesType[] = [];
         if (RES_CHALLS.length > 0) {
             for (let challenge of RES_CHALLS) {
@@ -514,30 +524,12 @@ class Actions {
     }
 
     /**
-     * Checks if a specific Challenge is deployed and running
-     * @returns true if deployed, false if not
-     */
-    async checkDeployedChallenge(teamID: string, challengeID: string, eventID: string): Promise<boolean> {
-        const RES = await DB_ADAPTER.select()
-            .from(team_challenges)
-            .where(
-                and(
-                    eq(team_challenges.challenge_id, challengeID),
-                    eq(team_challenges.team_id, teamID),
-                    eq(team_challenges.event_id, eventID),
-                    eq(team_challenges.is_running, true),
-                    eq(team_challenges.is_solved, false)
-                )
-            );
-        return RES.length > 0 ? true : false;
-        // @TODO: Check if still running by fetching backend
-    }
-
-    /**
      * Get all currently deployed or initiated Challenges per Event and Team ID
      * @returns List of cut down info, zero length if no found
      */
-    async getDeployedChallenge(teamID: string, eventID: string) {
+    async getDeployedChallenge(sessionID: string, eventID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return [];
         const RES = await DB_ADAPTER.select({
             challenge_id: team_challenges.challenge_id,
             challenge_host: team_challenges.challenge_host,
@@ -547,7 +539,7 @@ class Actions {
             .from(team_challenges)
             .where(
                 and(
-                    eq(team_challenges.team_id, teamID),
+                    eq(team_challenges.team_id, user.user_team_id),
                     eq(team_challenges.event_id, eventID),
                     eq(team_challenges.is_container, true),
                     eq(team_challenges.is_solved, false)
@@ -560,13 +552,16 @@ class Actions {
      * Deploys a new Challenge
      * @returns true if queued, false if not
      */
-    async deployTeamChallenge(genFlag: string, teamID: string, challengeID: string, eventID: string): Promise<boolean> {
+    async deployTeamChallenge(sessionID: string, challengeID: string, eventID: string): Promise<boolean> {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
+        const GEN_FLAG = crypto.randomUUID();
         const TIMESTAMP = new Date().getTime();
         const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
         if (RES !== undefined) {
             // note deployment
             await DB_ADAPTER.insert(team_challenges).values({
-                team_id: teamID,
+                team_id: user.user_team_id,
                 challenge_id: challengeID,
                 event_id: eventID,
                 solved_by: '',
@@ -579,7 +574,7 @@ class Actions {
                 is_running: false,
                 is_solved: false
             });
-            INFRA.deploy(RES.container_file, genFlag).then(async (data) => {
+            INFRA.deploy(RES.container_file, GEN_FLAG).then(async (data) => {
                 // on success update the challenge
                 if (data !== false) {
                     await DB_ADAPTER.update(team_challenges)
@@ -591,18 +586,18 @@ class Actions {
                         })
                         .where(
                             and(
-                                eq(team_challenges.team_id, teamID),
+                                eq(team_challenges.team_id, user.user_team_id),
                                 eq(team_challenges.event_id, eventID),
                                 eq(team_challenges.challenge_id, challengeID)
                             )
                         );
                     // notify anti cheat
-                    await MONITOR.initiation(data.flag, teamID, challengeID, TIMESTAMP);
+                    await MONITOR.initiation(data.flag, user.user_team_id, challengeID, TIMESTAMP);
                 } else {
                     // on fail, remove the entry
                     await DB_ADAPTER.delete(team_challenges).where(
                         and(
-                            eq(team_challenges.team_id, teamID),
+                            eq(team_challenges.team_id, user.user_team_id),
                             eq(team_challenges.event_id, eventID),
                             eq(team_challenges.challenge_id, challengeID)
                         )
@@ -620,27 +615,28 @@ class Actions {
      * @returns true if the flag matches, false if it doesnt
      */
     async checkDynamicChallengeFlag(
-        teamID: string,
+        sessionID: string,
         challengeID: string,
-        flag: string,
-        userID: string
+        flag: string
     ): Promise<boolean> {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
             await DB_ADAPTER.select()
                 .from(team_challenges)
-                .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)))
+                .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID)))
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
             if (RES.challenge_flag === EXTRACTED_FLAG) {
                 await DB_ADAPTER.update(team_challenges)
                     .set({
-                        solved_by: userID,
+                        solved_by: user.id,
                         solved_at: TIMESTAMP,
                         is_solved: true
                     })
-                    .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID)));
+                    .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID)));
                 // shut down the container
                 INFRA.shutdown(RES.challenge_uuid).then(async (ok) => {
                     if (ok === true) {
@@ -649,12 +645,12 @@ class Actions {
                                 is_running: false
                             })
                             .where(
-                                and(eq(team_challenges.team_id, teamID), eq(team_challenges.challenge_id, challengeID))
+                                and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID))
                             );
                     }
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, false, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, false, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -674,7 +670,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, false, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, false, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -688,12 +684,13 @@ class Actions {
      * @returns true if the flag matches, false if it doesnt
      */
     async checkStaticChallengeFlag(
-        teamID: string,
+        sessionID: string,
         eventID: string,
         challengeID: string,
-        flag: string,
-        userID: string
+        flag: string
     ): Promise<boolean> {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
@@ -704,10 +701,10 @@ class Actions {
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.flag_static === true) {
             if (RES.static_flag === EXTRACTED_FLAG) {
                 await DB_ADAPTER.insert(team_challenges).values({
-                    team_id: teamID,
+                    team_id: user.user_team_id,
                     challenge_id: challengeID,
                     event_id: eventID,
-                    solved_by: userID,
+                    solved_by: user.id,
                     solved_at: TIMESTAMP,
                     challenge_uuid: '',
                     challenge_flag: EXTRACTED_FLAG,
@@ -718,7 +715,7 @@ class Actions {
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, true, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -738,7 +735,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -752,12 +749,13 @@ class Actions {
      * @returns true if the flag matches, false if it doesnt
      */
     async checkPoolChallengeFlag(
-        teamID: string,
+        sessionID: string,
         eventID: string,
         challengeID: string,
-        flag: string,
-        userID: string
+        flag: string
     ): Promise<boolean> {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
         const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
@@ -768,10 +766,10 @@ class Actions {
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_flag_pool === true) {
             if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true) {
                 await DB_ADAPTER.insert(team_challenges).values({
-                    team_id: teamID,
+                    team_id: user.user_team_id,
                     challenge_id: challengeID,
                     event_id: eventID,
-                    solved_by: userID,
+                    solved_by: user.id,
                     solved_at: TIMESTAMP,
                     challenge_uuid: '',
                     challenge_flag: EXTRACTED_FLAG,
@@ -782,7 +780,7 @@ class Actions {
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, teamID, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, true, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -802,7 +800,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, teamID, challengeID, userID, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -842,17 +840,24 @@ class Actions {
      * Creates a new Team
      * @returns void
      */
-    async createTeam(userID: string, teamName: string, teamDesc: string, teamCountry: string) {
+    async createTeam(sessionID: string, teamName: string, teamDesc: string, teamCountry: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
+        const HAS_CREATED = await this.checkHasCreatedTeam(user.id);
         const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length;
         // only create if name is unique
-        if (TEAMS_WITH_NAME === 0) {
+        if (TEAMS_WITH_NAME === 0 && HAS_CREATED === false) {
+            const GEN_ID = crypto.randomUUID();
+            const TEAM_TOKEN = 'CTD-' + generateRandomString(16).toUpperCase();
             await DB_ADAPTER.insert(teams).values({
-                id: crypto.randomUUID(),
-                team_creator: userID,
-                team_join_token: 'CTD-' + generateRandomString(16).toUpperCase(),
+                id: GEN_ID,
+                team_creator: user.id,
+                team_join_token: TEAM_TOKEN,
                 team_name: teamName,
                 team_description: teamDesc,
                 team_country_code: teamCountry
+            }).then(async () => {
+                await this.joinTeam(sessionID, TEAM_TOKEN);
             });
         }
     }
@@ -868,9 +873,11 @@ class Actions {
 
     /**
      * Checks if a user is able to leave the team
-     * @returns void
+     * @returns boolean
      */
-    async checkTeamLeavable(teamID: string, userID: string) {
+    async checkTeamLeavable(sessionID: string) {
+        const { session, user } = await lucia.validateSession(sessionID);
+        if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
         const ONGOING_EVENTS = (
             await DB_ADAPTER.select()
@@ -878,7 +885,7 @@ class Actions {
                 .innerJoin(events, eq(team_events.event_id, events.id))
                 .where(
                     and(
-                        eq(team_events.team_id, teamID),
+                        eq(team_events.team_id, user.user_team_id),
                         lt(events.event_start, TIMESTAMP),
                         gt(events.event_end, TIMESTAMP)
                     )
@@ -887,7 +894,7 @@ class Actions {
         const POINTS_ADDED = (
             await DB_ADAPTER.select()
                 .from(team_challenges)
-                .where(and(eq(team_challenges.team_id, teamID), eq(team_challenges.solved_by, userID)))
+                .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.solved_by, user.id)))
         ).length;
         return ONGOING_EVENTS === 0 && POINTS_ADDED === 0;
     }
@@ -896,13 +903,15 @@ class Actions {
      * Validates and adds a user to a team
      * @returns void
      */
-    async joinTeam(sessionID: string, teamID: string) {
-        const JOINABLE = await this.checkTeamJoinable(teamID);
+    async joinTeam(sessionID: string, token: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user && JOINABLE === true) {
+        if (user === null) return false;
+        const JOINABLE = await this.checkTeamJoinable(user.user_team_id);
+        const TOKEN = await this.checkTeamToken(token);
+        if (JOINABLE === true && TOKEN !== false) {
             await DB_ADAPTER.update(users)
                 .set({
-                    user_team_id: teamID
+                    user_team_id: TOKEN
                 })
                 .where(eq(users.id, user.id));
         }
@@ -912,16 +921,17 @@ class Actions {
      * Resets a team's join token by ID
      * @returns void
      */
-    async resetTeamToken(sessionID: string, teamID: string) {
+    async resetTeamToken(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        const TEAM = await this.getTeamInfo(teamID);
+        if (user === null) return false;
+        const TEAM = await this.getTeamInfo(sessionID);
         if (user && TEAM !== null) {
             if (TEAM.team_creator === user.id) {
                 await DB_ADAPTER.update(teams)
                     .set({
                         team_join_token: 'CTD-' + generateRandomString(16).toUpperCase()
                     })
-                    .where(eq(teams.id, teamID));
+                    .where(eq(teams.id, user.user_team_id));
             }
         }
     }
@@ -965,12 +975,13 @@ class Actions {
      * Validates and removes a user from his team
      * @returns void
      */
-    async leaveTeam(sessionID: string, teamID: string) {
+    async leaveTeam(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        const TEAM = await this.getTeamInfo(teamID);
-        const MEMBERS = await this.getTeamMembers(teamID);
+        if (user === null) return;
+        const TEAM = await this.getTeamInfo(sessionID);
+        const MEMBERS = await this.getTeamMembers(sessionID);
         if (user && TEAM !== null && MEMBERS.length > 0) {
-            const IS_ABLE = await this.checkTeamLeavable(teamID, user.id);
+            const IS_ABLE = await this.checkTeamLeavable(sessionID);
             if ((TEAM.team_creator !== user.id && IS_ABLE === true) || (MEMBERS.length === 1 && IS_ABLE === true)) {
                 await DB_ADAPTER.update(users)
                     .set({
@@ -979,7 +990,7 @@ class Actions {
                     .where(eq(users.id, user.id));
                 // yeet the team if creator is the last one to leave
                 if (TEAM.team_creator === user.id && MEMBERS.length === 1) {
-                    await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
+                    await DB_ADAPTER.delete(teams).where(eq(teams.id, user.user_team_id));
                 }
             }
         }
@@ -990,6 +1001,7 @@ class Actions {
      * @returns void
      */
     async updateEvent(eventID: string, eventName: string, eventDesc: string, start: number, end: number) {
+        console.log(eventID);
         await DB_ADAPTER.update(events)
             .set({
                 event_name: eventName,

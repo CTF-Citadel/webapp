@@ -1,6 +1,7 @@
 <!--
   @component
   ## Props
+  @prop export let sessionID: string = '';
   @prop export let uuid: string = '';
   @prop export let session: any = '';
 -->
@@ -16,7 +17,7 @@
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
 
     export let uuid: string = '';
-    export let session: any = '';
+    export let sessionID: string = '';
 
     let loading: boolean = true;
     let successFlag: { [key: string]: -1 | 0 | 1 } = {};
@@ -53,8 +54,7 @@
         const DATA = await requestWrapper(false, {
             type: TYPE,
             data: {
-                userID: session.id,
-                teamID: session.user_team_id,
+                session: sessionID,
                 eventID: uuid,
                 challengeID: challenge_id,
                 flag: input
@@ -98,7 +98,7 @@
     async function refreshChallenges() {
         const DATA = await requestWrapper(false, {
             type: 'challenges',
-            data: { eventID: uuid, teamID: session.user_team_id }
+            data: { eventID: uuid, session: sessionID }
         });
         challenges = (await DATA.json()).data;
     }
@@ -106,13 +106,13 @@
     async function refreshDeployedChallenges() {
         const DATA = await requestWrapper(false, {
             type: 'get-deployed',
-            data: { eventID: uuid, teamID: session.user_team_id }
+            data: { eventID: uuid, session: sessionID }
         });
         deployments = (await DATA.json()).data;
     }
 
     async function refreshSolvedChallenges() {
-        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { id: session.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { session: sessionID } });
         const JSON = await DATA.json();
         solvedChallenges = [];
         for (let entry of JSON.data) {
@@ -133,7 +133,7 @@
         deploymentStatus[challenge_id] = 1;
         const DATA = await requestWrapper(false, {
             type: 'deploy-challenge',
-            data: { teamID: session.user_team_id, challengeID: challenge_id, eventID: uuid }
+            data: { session: sessionID, challengeID: challenge_id, eventID: uuid }
         });
         if (DATA.ok) {
             const TEMP = await DATA.json();
@@ -187,7 +187,7 @@
                             <Accordion flush>
                                 <AccordionItem>
                                     <span slot="header">Challenge Description</span>
-                                    <p class="text-gray-500 dark:text-gray-400">{challenge.challenge_description}</p>
+                                    <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{challenge.challenge_description}</p>
                                 </AccordionItem>
                             </Accordion>
                         </div>

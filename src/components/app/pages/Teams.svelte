@@ -28,8 +28,9 @@
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import type { TeamsType } from '../../../lib/schema';
     import { fade } from 'svelte/transition';
+    import type { User } from 'lucia';
 
-    export let session: any = {};
+    export let session: User;
     export let sessionID: string = '';
 
     let loading = true;
@@ -67,7 +68,7 @@
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: session.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { session: sessionID } });
         thisTeam = (await DATA.json()).data;
         hasCreated = session.id === thisTeam.team_creator;
         inputs.teamName = thisTeam.team_name;
@@ -75,14 +76,14 @@
     }
 
     async function refreshTeamMembers() {
-        const DATA = await requestWrapper(false, { type: 'team-members', data: { id: session.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-members', data: { session: sessionID } });
         teamMembers = (await DATA.json()).data;
     }
 
     async function refreshLeavable() {
         const DATA = await requestWrapper(false, {
             type: 'check-leave',
-            data: { teamID: session.user_team_id, userID: session.id }
+            data: { session: sessionID }
         });
         canLeaveTeam = (await DATA.json()).data;
     }
@@ -91,8 +92,7 @@
         const DATA = await requestWrapper(false, {
             type: 'reset-team-token',
             data: {
-                session: sessionID,
-                teamID: thisTeam.id
+                session: sessionID
             }
         });
         if (DATA.ok) {
@@ -106,7 +106,6 @@
             type: 'create-team',
             data: {
                 session: sessionID,
-                creator: session.id,
                 name: inputs.teamName.slice(0, 50),
                 description: inputs.teamDesc.slice(0, 100),
                 country: inputs.teamCountry
@@ -139,7 +138,7 @@
     async function joinTeam() {
         const DATA = await requestWrapper(false, {
             type: 'join-team',
-            data: { session: sessionID, userID: session.id, token: inputs.teamToken.slice(0, 20) }
+            data: { session: sessionID, token: inputs.teamToken.slice(0, 20) }
         });
         if (DATA.ok) {
             menus.join = false;
@@ -150,7 +149,7 @@
     async function leaveTeam() {
         const DATA = await requestWrapper(false, {
             type: 'leave-team',
-            data: { session: sessionID, teamID: thisTeam.id }
+            data: { session: sessionID }
         });
         if (DATA.ok) {
             window.location.reload();
@@ -182,14 +181,13 @@
         />
     </div>
     <div class="mb-6">
-        <Label for="team-textarea" class="mb-2">Team Description</Label>
-        <Textarea
+        <Label for="team-desc" class="mb-2">Team Description</Label>
+        <Input
             class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
-            id="event-textarea"
-            name="team-textarea"
-            placeholder="..."
-            rows="4"
             bind:value={inputs.teamDesc}
+            name="team-desc"
+            type="text"
+            placeholder="..."
         />
     </div>
     <div class="mb-6">
@@ -307,7 +305,7 @@
                         {/if}
                         <p>Description: <b>{thisTeam.team_description}</b></p>
                         <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
-                        
+
                         {#if teamMembers.length < 4}
                             <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
                             <h1>Members: <b>{teamMembers.length}</b></h1>
@@ -373,7 +371,8 @@
                                 size="lg"
                                 class="mt-4"
                                 on:click={leaveTeam}
-                                disabled={teamMembers.length > 1 || !canLeaveTeam}
+                                disabled={(teamMembers.length > 1 && session.id === thisTeam.team_creator) ||
+                                    !canLeaveTeam}
                             >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />
                             </Button>

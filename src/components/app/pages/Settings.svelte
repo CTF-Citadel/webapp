@@ -41,7 +41,7 @@
     });
 
     async function refreshUserTeam() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: session.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-info', data: { id: sessionID } });
         const JSON = await DATA.json();
         team = JSON.data;
     }
@@ -101,7 +101,7 @@
     color="none"
     outsideclose
     bind:open={editAvatar}
-    title="Edit Event"
+    title="Edit Avatar"
 >
     <div class="mb-6">
         <Carousel images={AVATARS} let:Controls bind:index={avatarIndex}>

@@ -2,6 +2,7 @@
   @component
   ## Props
   @prop export let session: any = {};
+  @prop export let sessionID: string = '';
 -->
 
 <script lang="ts">
@@ -11,7 +12,7 @@
     import { onMount } from 'svelte';
     import type { EventsType, TeamEventsType } from '../../../lib/schema';
 
-    export let session: any = {};
+    export let sessionID: string = '';
 
     let loading: boolean = true;
     let events: { events: EventsType; team_events: TeamEventsType }[] = [];
@@ -22,7 +23,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'team-events', data: { id: session.user_team_id } });
+        const DATA = await requestWrapper(false, { type: 'team-events', data: { session: sessionID } });
         const JSON = await DATA.json();
         events = JSON.data;
     }
@@ -60,7 +61,7 @@
                 >
                     <div class="mb-6 text-center">
                         <h1 class="text-lg font-bold">{event.events.event_name}</h1>
-                        <p>{event.events.event_description}</p>
+                        <p class="whitespace-pre-wrap">{event.events.event_description}</p>
                         <p>{formatToDate(event.events.event_start)} - {formatToDate(event.events.event_end)}</p>
                     </div>
                     <div class="flex flex-row justify-center space-x-4">

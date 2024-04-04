@@ -72,14 +72,16 @@
     }
 
     async function updateEvent() {
+        let tempDateStart = new Date(editDateStart).getTime();
+        let tempDateEnd = new Date(editDateEnd).getTime();
         const DATA = await requestWrapper(true, {
             type: 'update-event',
             data: {
                 id: editUUID,
                 name: editData?.event_name,
                 description: editData?.event_description,
-                start: new Date(editDateStart).getTime(),
-                end: new Date(editDateEnd).getTime()
+                start: tempDateStart,
+                end: tempDateEnd
             }
         });
         if (DATA.ok) {
