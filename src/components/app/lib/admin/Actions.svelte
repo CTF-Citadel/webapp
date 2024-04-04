@@ -4,7 +4,7 @@
 -->
 
 <script lang="ts">
-    import { Button, Label, Select, Card } from 'flowbite-svelte';
+    import { Button, Label, Select, Card, Alert } from 'flowbite-svelte';
     import { requestWrapper } from '../../../../lib/helpers';
     import { createEventDispatcher } from 'svelte';
 
@@ -14,8 +14,10 @@
     // dispatcher
     const DISPATCH = createEventDispatcher();
 
+    let success: boolean = false;
     let selectedEvent: string = '';
     let batchUsers: { email: string; fullName: string }[] = [];
+    let notifyLength: number = 0;
 
     async function getBatchUsers(eventID: string) {
         const DATA = await requestWrapper(true, {
@@ -31,6 +33,8 @@
     }
 
     async function sendBatchCerts() {
+        success = false;
+        notifyLength = Number(batchUsers.length);
         const DATA = await requestWrapper(true, {
             type: 'send-certs',
             data: {
@@ -38,6 +42,8 @@
             }
         });
         if (DATA.ok) {
+            success = true;
+            batchUsers = [];
             DISPATCH('refresh');
         }
     }
@@ -69,6 +75,17 @@
                             {/each}
                         </Select>
                     </div>
+                    {#if success === false && batchUsers.length > 0}
+                        <p>Got {batchUsers.length} Users.</p>
+                    {/if}
+                    {#if success === true}
+                        <Alert class="m-4" color="green">
+                            <span>
+                                <span class="font-bold">Queued!</span><br />
+                                {notifyLength} Emails are being sent!
+                            </span>
+                        </Alert>
+                    {/if}
                     <div class="flex flex-row space-x-4">
                         <Button
                             on:click={async () => {
