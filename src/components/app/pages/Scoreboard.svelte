@@ -26,7 +26,7 @@
     export let uuid: string = '';
 
     let loading: boolean = true;
-    let events: EventsType[] = [];
+    let thisEvent: EventsType | null = null;
     let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
     let teamScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
     let userScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
@@ -39,12 +39,11 @@
     };
 
     onMount(async () => {
-        await refreshEvents().finally(async () => {
-            let eventData = events.find((event) => event.id === uuid);
-            if (eventData) {
-                await refreshEventScoring(eventData.id).finally(async () => {
-                    if (eventData) {
-                        prepareForPlot(eventData.event_start);
+        await refreshEvent().finally(async () => {
+            if (thisEvent !== null) {
+                await refreshEventScoring(thisEvent.id).finally(async () => {
+                    if (thisEvent !== null) {
+                        prepareForPlot(thisEvent.event_start);
                     }
                 });
             }
@@ -177,9 +176,9 @@
         }
     };
 
-    async function refreshEvents() {
-        const EVENTS = await requestWrapper(false, { type: 'events' });
-        events = (await EVENTS.json()).data;
+    async function refreshEvent() {
+        const EVENT = await requestWrapper(false, { type: 'single-event', data: { eventID: uuid } });
+        thisEvent = (await EVENT.json()).data;
     }
 
     async function refreshEventScoring(id: string) {

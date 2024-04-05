@@ -260,6 +260,15 @@ class Actions {
     }
 
     /**
+     * Fetches Event by id
+     * @returns Events or null
+     */
+    async getSingleEvents(eventID: string) {
+        const RES = (await DB_ADAPTER.select().from(events).where(eq(events.id, eventID))).at(0);
+        return RES !== undefined ? RES : null;
+    }
+
+    /**
      * Fetches all Assigned Events
      * @returns List of Events
      */
@@ -331,8 +340,9 @@ class Actions {
      * @returns List of Challenges
      */
     async getEventChallenges(sessionID: string, eventID: string) {
+        const VALID = await this.checkValidEventExist(eventID);
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null) return [];
+        if (user === null || VALID === false) return [];
         const RES_CHALLS = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID));
         const RES_SOLVED = await DB_ADAPTER.select({ id: team_challenges.challenge_id })
             .from(team_challenges)
@@ -563,8 +573,9 @@ class Actions {
      * @returns List of cut down info, zero length if no found
      */
     async getDeployedChallenge(sessionID: string, eventID: string) {
+        const VALID = await this.checkValidEventExist(eventID);
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null) return [];
+        if (user === null || VALID === false) return [];
         const RES = await DB_ADAPTER.select({
             challenge_id: team_challenges.challenge_id,
             challenge_host: team_challenges.challenge_host,
@@ -590,7 +601,7 @@ class Actions {
     async deployTeamChallenge(sessionID: string, challengeID: string, eventID: string): Promise<boolean> {
         const VALID = await this.checkValidEventExist(eventID);
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null && VALID !== false) return false;
+        if (user === null || VALID === false) return false;
         const GEN_FLAG = crypto.randomUUID();
         const TIMESTAMP = new Date().getTime();
         const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
