@@ -243,6 +243,9 @@
                                     placeholder="••••••••••"
                                 />
                             </div>
+                            {#if inputs.password.length > 0 && !validPassword(inputs.password)}
+                                <p class="text-red-500 text-sm mb-6">Requirements not met!</p>
+                            {/if}
                             <div class="mb-6">
                                 <Label for="pass-second" class="mb-2">Repeat Password</Label>
                                 <Input
@@ -253,6 +256,9 @@
                                     placeholder="••••••••••"
                                 />
                             </div>
+                            {#if inputs.passwordRepeat.length > 0 && inputs.password !== inputs.passwordRepeat}
+                                <p class="text-red-500 text-sm mb-6">Passwords do not match!</p>
+                            {/if}
                             <Button
                                 on:click={resetPassword}
                                 disabled={inputs.password === '' ||

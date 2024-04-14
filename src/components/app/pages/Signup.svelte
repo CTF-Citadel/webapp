@@ -1,11 +1,16 @@
 <!--
   @component
+  @prop export let restricted: boolean = false;
+  @prop export let restrictTo: string = '';
 -->
 
 <script lang="ts">
     import { validEmail, validPassword, validUsername } from '../../../lib/helpers';
     import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
+
+    export let restricted: boolean = false;
+    export let restrictTo: string = '';
 
     let authResponse: any;
     let inputs = {
@@ -68,7 +73,7 @@
                         <InfoCircle slot="icon" class="text-red-500 w-5 h-5" />
                         <span class="sr-only">Info</span>
                     </span>
-                    <p class="text-red-500">Ensure that these requirements are met:</p>
+                    <p class="text-red-500">Ensure these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
                         <li>At least 4 characters (up to 24)</li>
                         <li>Alphabetic characters, digits or underscore</li>
@@ -87,13 +92,16 @@
                     autocomplete="email"
                 />
             </Label>
-            {#if inputs.email.length > 0 && !validEmail(inputs.email)}
+            {#if inputs.email.length > 0 && !validEmail(inputs.email, restricted, restrictTo)}
                 <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
                     <span slot="icon">
                         <InfoCircle slot="icon" class="text-red-500 w-5 h-5" />
                         <span class="sr-only">Info</span>
                     </span>
-                    <p class="text-red-500">Ensure that you entered a valid Email</p>
+                    <p class="text-red-500">Ensure you enter a valid email</p>
+                    {#if restricted}
+                        <p class="text-red-500">Address Restriction is enabled</p>
+                    {/if}
                 </Alert>
             {/if}
             <Label class="space-y-2">
@@ -113,7 +121,7 @@
                         <InfoCircle slot="icon" class="text-red-500 w-5 h-5" />
                         <span class="sr-only">Info</span>
                     </span>
-                    <p class="text-red-500">Ensure that these requirements are met:</p>
+                    <p class="text-red-500">Ensure these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
                         <li>At least 8 characters (up to 128)</li>
                         <li>At least one digit</li>
@@ -124,7 +132,7 @@
                 </Alert>
             {/if}
             {#if authResponse && authResponse.error !== 'None'}
-                <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
+                <p class="text-red-500">{authResponse.error}</p>
             {/if}
             <Button
                 on:click={onSignup}

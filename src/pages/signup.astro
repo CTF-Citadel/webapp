@@ -4,6 +4,9 @@ import SignupPage from '../components/app/pages/Signup.svelte';
 import Header from '../components/app/lib/Header.svelte';
 import { lucia } from '../lib/lucia';
 
+const ENFORCE_EMAIL_DOMAIN = Boolean(process.env.ENFORCE_EMAIL_DOMAIN || false);
+const ENFORCE_DOMAIN = process.env.ENFORCE_DOMAIN || '';
+
 if (Astro.locals.user) {
     await lucia.invalidateSession(Astro.locals.session.id);
     await lucia.deleteExpiredSessions();
@@ -14,6 +17,6 @@ if (Astro.locals.user) {
 <Layout title="Sign Up">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
-        <SignupPage client:visible />
+        <SignupPage restricted={ENFORCE_EMAIL_DOMAIN} restrictTo={ENFORCE_DOMAIN} client:visible />
     </div>
 </Layout>

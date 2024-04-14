@@ -64,7 +64,7 @@
                         <InfoCircle slot="icon" class="text-red-500 w-5 h-5" />
                         <span class="sr-only">Info</span>
                     </span>
-                    <p class="text-red-500">Ensure that these requirements are met:</p>
+                    <p class="text-red-500">Ensure these requirements are met:</p>
                     <ul class="ms-4 list-disc text-red-500">
                         <li>At least 8 characters (up to 128)</li>
                         <li>At least one digit</li>
@@ -87,10 +87,10 @@
                 />
             </Label>
             {#if inputs.password_repeat.length > 0 && !checkInput()}
-                <p class="text-primary-700 dark:text-primary-500">Passwords do not match!</p>
+                <p class="text-red-500">Passwords do not match!</p>
             {/if}
             {#if authResponse && authResponse.error !== 'None'}
-                <p class="text-primary-700 dark:text-primary-500">{authResponse.error}</p>
+                <p class="text-red-500">{authResponse.error}</p>
             {/if}
             <Button
                 on:click={onSubmit}
