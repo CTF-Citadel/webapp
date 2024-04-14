@@ -171,7 +171,7 @@
 -->
 
 {#if tabStates.challenges || tabStates.events || (tabStates.teams && marked.size > 0)}
-    <SpeedDial defaultClass="absolute right-6 bottom-6 z-30">
+    <SpeedDial defaultClass="fixed right-6 bottom-6 z-30">
         {#if tabStates.challenges}
             <SpeedDialButton
                 name="New Challenge"
