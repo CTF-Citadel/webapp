@@ -8,6 +8,7 @@
 -->
 
 <script lang="ts">
+    import { onMount } from 'svelte';
     import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Input, Label, Textarea } from 'flowbite-svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
@@ -22,14 +23,9 @@
     // dispatcher
     const DISPATCH = createEventDispatcher();
 
-    let editDateStart = new Date().toISOString().split('T')[0];
-    let editDateEnd = new Date().toISOString().split('T')[0];
-
     $: editData = events.find((item) => item['id'] === editUUID);
-    $: if (editData) {
-        editDateStart = convertToInputDateTime(editData.start);
-        editDateEnd = convertToInputDateTime(editData.end);
-    }
+    $: editDateStart = convertToInputDateTime(events.find((item) => item['id'] === editUUID)?.start || 0);
+    $: editDateEnd = convertToInputDateTime(events.find((item) => item['id'] === editUUID)?.end || 0);
 
     let eventTemplate = {
         name: '',
@@ -39,6 +35,10 @@
         start: '',
         end: ''
     };
+    let changeDate = {
+        start: '',
+        end: ''
+    }
 
     function convertToInputDateTime(unix: number) {
         let date = new Date(unix);
@@ -72,16 +72,14 @@
     }
 
     async function updateEvent() {
-        let tempDateStart = new Date(editDateStart).getTime();
-        let tempDateEnd = new Date(editDateEnd).getTime();
         const DATA = await requestWrapper(true, {
             type: 'update-event',
             data: {
                 id: editUUID,
                 name: editData?.name,
                 description: editData?.description,
-                start: tempDateStart,
-                end: tempDateEnd
+                start: new Date(changeDate.start).getTime(),
+                end: new Date(changeDate.end).getTime()
             }
         });
         if (DATA.ok) {
@@ -142,6 +140,10 @@
                     type="datetime-local"
                     class="block w-full py-2 px-3 bg-neutral-100 dark:bg-neutral-900"
                     bind:value={editDateStart}
+                    on:input={() => {
+                        changeDate.start = JSON.parse(JSON.stringify(editDateStart));
+                        changeDate.end = JSON.parse(JSON.stringify(editDateEnd));
+                    }}
                 />
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <svg
@@ -169,6 +171,10 @@
                     type="datetime-local"
                     class="block w-full py-2 px-3 bg-neutral-100 dark:bg-neutral-900"
                     bind:value={editDateEnd}
+                    on:input={() => {
+                        changeDate.start = JSON.parse(JSON.stringify(editDateStart));
+                        changeDate.end = JSON.parse(JSON.stringify(editDateEnd));
+                    }}
                 />
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <svg
