@@ -106,8 +106,8 @@
         const JSON = await DATA.json();
         challenges = JSON.data;
         sortedChallenges = [];
-        challenges.forEach((element: any) => {
-            sortedChallenges.push({ value: element.id, name: element.challenge_name });
+        challenges.forEach((element) => {
+            sortedChallenges.push({ value: element.id, name: element.name });
         });
     }
 
@@ -128,8 +128,8 @@
         const JSON = await DATA.json();
         events = JSON.data;
         sortedEvents = [];
-        events.forEach((element: any) => {
-            sortedEvents.push({ value: element.id, name: element.event_name });
+        events.forEach((element) => {
+            sortedEvents.push({ value: element.id, name: element.name });
         });
     }
 

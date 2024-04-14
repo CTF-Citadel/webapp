@@ -7,6 +7,7 @@ import { lucia } from '../../lib/lucia';
 import { DUMMY_SESSION } from '../../lib/helpers';
 
 const { uuid } = Astro.params;
+const FLAG_PREFIX = process.env.FLAG_PREFIX || 'CTD';
 let session = DUMMY_SESSION;
 let sessionID = 'some-id';
 
@@ -32,12 +33,8 @@ if (EVENT === false) {
 ---
 
 <Layout title={EVENT}>
-    <Header
-        username={session.username}
-        interactive={true}
-        client:visible
-    />
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <Challenge uuid={uuid} sessionID={sessionID} client:visible />
+        <Challenge uuid={uuid} sessionID={sessionID} flagPrefix={FLAG_PREFIX} client:visible />
     </div>
 </Layout>

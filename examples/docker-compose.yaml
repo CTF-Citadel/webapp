@@ -61,11 +61,11 @@ services:
       F1RSTBL00D_PSK: 'CHANGEME'
       # platform specific
       INSTANCE_NAME: 'testCTF'
+      FLAG_PREFIX: 'CTD'
       EMAIL_SERVICE: 'hotmail'
       EMAIL_NAME: 'someone@example.com'
       EMAIL_PASS: 'CHANGEME'
       DATA_FOLDER: '/data'
-      # numbers but string, keep as is
       SCORING_K: 12
       DISABLE_EMAIL_VERIFY: 0
       ENFORCE_EMAIL_DOMAIN: 0

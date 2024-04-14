@@ -3,7 +3,7 @@ import { challenges, events, team_challenges, team_events, teams, users } from '
 import { and, eq, sql, gt, lt } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 import { lucia } from './lucia';
-import { generateRandomString, validAlphanumeric, validPassword, AVATARS } from './helpers';
+import { generateRandomString, validAlphanumeric, validPassword, validFlag, AVATARS } from './helpers';
 import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import type { ChallengesType } from './schema';
@@ -11,6 +11,9 @@ import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
 import F1rstbl00d from './integrations/f1rstbl00d';
 import CertMailer from './integrations/certmailer';
+
+// flag prefix from env
+const FLAG_PREFIX = process.env.FLAG_PREFIX || 'CTD';
 
 const INFRA = new Infra();
 const MONITOR = new M0n1t0r();
@@ -667,7 +670,6 @@ class Actions {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
-        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
             await DB_ADAPTER.select()
                 .from(team_challenges)
@@ -675,7 +677,8 @@ class Actions {
                     and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.challenge_id, challengeID))
                 )
         ).at(0);
-        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
+        if (RES !== undefined && validFlag(flag, FLAG_PREFIX) && RES.is_running === true) {
+            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if (RES.container_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.update(team_challenges)
@@ -748,13 +751,13 @@ class Actions {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
-        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
             await DB_ADAPTER.select()
                 .from(challenges)
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
-        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_static === true) {
+        if (RES !== undefined && validFlag(flag, FLAG_PREFIX) && RES.needs_static === true) {
+            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if (RES.static_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
@@ -814,13 +817,13 @@ class Actions {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
-        const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
         const RES = (
             await DB_ADAPTER.select()
                 .from(challenges)
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
-        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_pool === true) {
+        if (RES !== undefined && validFlag(flag, FLAG_PREFIX) && RES.needs_pool === true) {
+            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true &&  VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({

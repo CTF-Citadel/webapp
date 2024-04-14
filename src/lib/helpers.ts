@@ -26,6 +26,11 @@ export function validAlphanumeric(input: string, length: number, spaceless: bool
         : /^[a-zA-Z0-9_@$-()\[\]:\s]*$/.test(input) && input.length <= length;
 }
 
+export function validFlag(input: string, prefix: string): boolean {
+    const REGEX = new RegExp('^' + prefix + '{.*}$');
+    return REGEX.test(input);
+}
+
 export function validJoinToken(input: string): boolean {
     return /^[CTD\-A-Z0-9]{20,20}$/.test(input);
 }

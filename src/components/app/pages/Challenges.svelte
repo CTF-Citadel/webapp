@@ -3,11 +3,12 @@
   ## Props
   @prop export let sessionID: string = '';
   @prop export let uuid: string = '';
+  @prop export let flagPrefix: string = '';
 -->
 
 <script lang="ts">
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
-    import { requestWrapper } from '../../../lib/helpers';
+    import { requestWrapper, validFlag } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
@@ -17,6 +18,7 @@
 
     export let uuid: string = '';
     export let sessionID: string = '';
+    export let flagPrefix: string = '';
 
     let loading: boolean = true;
     let successFlag: { [key: string]: -1 | 0 | 1 } = {};
@@ -42,10 +44,6 @@
         await refreshSolveScores();
         loading = false;
     });
-
-    function checkFlagInput(input: string): boolean {
-        return /^TH{.*}$/.test(input);
-    }
 
     async function checkFlag(challenge_id: string, input: string, type: 'static' | 'dynamic' | 'pool') {
         successFlag[challenge_id] = -1;
@@ -276,14 +274,14 @@
                                 <Input
                                     class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                                     id="flag-submit"
-                                    placeholder="TH&lcub;&rcub;"
+                                    placeholder="{flagPrefix}&lcub;&rcub;"
                                     bind:value={challengeInputs[challenge.id]}
                                 />
                             </div>
                             <div>
                                 <Button
                                     disabled={challengeInputs[challenge.id] === '' ||
-                                        !checkFlagInput(challengeInputs[challenge.id]) ||
+                                        !validFlag(challengeInputs[challenge.id], flagPrefix) ||
                                         successFlag[challenge.id] === 0}
                                     on:click={() =>
                                         checkFlag(
