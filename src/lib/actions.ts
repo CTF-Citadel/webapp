@@ -28,7 +28,7 @@ class Actions {
     async checkValidEventExist(eventID: string) {
         const CURRENT_DATE = new Date().getTime();
         const RES = (
-            await DB_ADAPTER.select({ name: events.event_name, start: events.event_start, end: events.event_end }).from(events).where(eq(events.id, eventID))
+            await DB_ADAPTER.select({ name: events.name, start: events.start, end: events.end }).from(events).where(eq(events.id, eventID))
         ).at(0);
         if (RES !== undefined) {
             return CURRENT_DATE >= RES.start && CURRENT_DATE <= RES.end ? RES.name : false;
@@ -42,7 +42,7 @@ class Actions {
      */
     async checkEventExist(eventID: string) {
         const RES = (
-            await DB_ADAPTER.select({ name: events.event_name }).from(events).where(eq(events.id, eventID))
+            await DB_ADAPTER.select({ name: events.name }).from(events).where(eq(events.id, eventID))
         ).at(0);
         return RES === undefined ? false : RES.name;
     }
@@ -61,7 +61,7 @@ class Actions {
      * @returns Team Name if it exists, False if it doesn't
      */
     async checkTeamExist(teamID: string) {
-        const RES = (await DB_ADAPTER.select({ name: teams.team_name }).from(teams).where(eq(teams.id, teamID))).at(0);
+        const RES = (await DB_ADAPTER.select({ name: teams.name }).from(teams).where(eq(teams.id, teamID))).at(0);
         return RES === undefined ? false : RES.name;
     }
 
@@ -70,7 +70,7 @@ class Actions {
      * @returns The team's ID if exists, False if it doesn't
      */
     async checkTeamNameExist(teamName: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName));
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.name, teamName));
         return RES.length === 0 ? false : RES[0].id;
     }
 
@@ -79,9 +79,9 @@ class Actions {
      * @returns The team's ID if exists and valid, else false
      */
     async checkTeamToken(teamToken: string) {
-        const RES = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_join_token, teamToken))).at(0);
+        const RES = (await DB_ADAPTER.select().from(teams).where(eq(teams.join_token, teamToken))).at(0);
         if (RES !== undefined) {
-            const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, RES.id))).length;
+            const MEMBERS = (await DB_ADAPTER.select().from(users).where(eq(users.team_id, RES.id))).length;
             return MEMBERS < 4 ? RES.id : false;
         }
         return false;
@@ -92,7 +92,7 @@ class Actions {
      * @returns True if the user has, false if he hasn't
      */
     async checkHasCreatedTeam(userID: string) {
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.team_creator, userID));
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.creator_id, userID));
         return RES.length === 0 ? false : true;
     }
 
@@ -103,8 +103,8 @@ class Actions {
     async checkUserInTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(users).where(eq(users.id, userID));
         if (RES.length === 0) return false;
-        if (RES[0].user_team_id === '') return false;
-        return RES[0].user_team_id;
+        if (RES[0].team_id === '') return false;
+        return RES[0].team_id;
     }
 
     /**
@@ -127,9 +127,9 @@ class Actions {
             await DB_ADAPTER.select({
                 id: team_challenges.challenge_id,
                 event: team_challenges.event_id,
-                name: challenges.challenge_name,
-                category: challenges.challenge_category,
-                difficulty: challenges.challenge_difficulty,
+                name: challenges.name,
+                category: challenges.category,
+                difficulty: challenges.difficulty,
                 solver: users.username
             })
                 .from(team_challenges)
@@ -165,7 +165,7 @@ class Actions {
     async getTeamInfo(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return null;
-        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, user.user_team_id));
+        const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.id, user.team_id));
         return RES.length > 0 ? RES[0] : null;
     }
 
@@ -177,16 +177,16 @@ class Actions {
         const RES = (
             await DB_ADAPTER.select({
                 username: users.username,
-                avatar: users.user_avatar,
-                affiliation: users.user_affiliation,
-                role: users.user_role,
-                team_id: users.user_team_id,
-                team_name: teams.team_name,
-                team_country: teams.team_country_code
+                avatar: users.avatar,
+                affiliation: users.affiliation,
+                role: users.role,
+                team_id: users.team_id,
+                team_name: teams.name,
+                team_country: teams.country_code
             })
                 .from(users)
                 .where(eq(users.id, userID))
-                .innerJoin(teams, eq(users.user_team_id, teams.id))
+                .innerJoin(teams, eq(users.team_id, teams.id))
         ).at(0);
         return RES === undefined ? null : RES;
     }
@@ -198,9 +198,9 @@ class Actions {
     async getTeamProfile(teamID: string) {
         const TEAM = (
             await DB_ADAPTER.select({
-                name: teams.team_name,
-                description: teams.team_description,
-                country: teams.team_country_code
+                name: teams.name,
+                description: teams.description,
+                country: teams.country_code
             })
                 .from(teams)
                 .where(eq(teams.id, teamID))
@@ -208,10 +208,10 @@ class Actions {
         const MEMBERS = await DB_ADAPTER.select({
             id: users.id,
             username: users.username,
-            avatar: users.user_avatar
+            avatar: users.avatar
         })
             .from(users)
-            .where(eq(users.user_team_id, teamID));
+            .where(eq(users.team_id, teamID));
         if (MEMBERS.length > 0 && TEAM !== undefined) {
             return { ...TEAM, members: MEMBERS };
         }
@@ -225,9 +225,9 @@ class Actions {
     async getTeamLisitng() {
         const RES = await DB_ADAPTER.select({
             id: teams.id,
-            team_name: teams.team_name,
-            team_description: teams.team_description,
-            team_country_code: teams.team_country_code
+            team_name: teams.name,
+            team_description: teams.description,
+            team_country_code: teams.country_code
         }).from(teams);
         return RES.length > 0 ? RES : [];
     }
@@ -242,11 +242,11 @@ class Actions {
         const RES = await DB_ADAPTER.select({
             id: users.id,
             username: users.username,
-            user_avatar: users.user_avatar,
-            user_affiliation: users.user_affiliation
+            user_avatar: users.avatar,
+            user_affiliation: users.affiliation
         })
             .from(users)
-            .where(eq(users.user_team_id, user.user_team_id));
+            .where(eq(users.team_id, user.team_id));
         return RES.length > 0 ? RES : [];
     }
 
@@ -276,8 +276,8 @@ class Actions {
         const RES = await DB_ADAPTER.select({
             event_id: events.id,
             team_id: teams.id,
-            team_name: teams.team_name,
-            event_name: events.event_name
+            team_name: teams.name,
+            event_name: events.name
         })
             .from(team_events)
             .innerJoin(events, eq(team_events.event_id, events.id))
@@ -316,7 +316,7 @@ class Actions {
         const EVENTS = await DB_ADAPTER.select()
             .from(team_events)
             .innerJoin(events, eq(team_events.event_id, events.id))
-            .where(eq(team_events.team_id, user.user_team_id));
+            .where(eq(team_events.team_id, user.team_id));
         return EVENTS.length > 0 ? EVENTS : [];
     }
 
@@ -331,7 +331,7 @@ class Actions {
             id: team_challenges.challenge_id
         })
             .from(team_challenges)
-            .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.is_solved, true)));
+            .where(and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.is_solved, true)));
         return RES.length > 0 ? RES : [];
     }
 
@@ -346,7 +346,7 @@ class Actions {
         const RES_CHALLS = await DB_ADAPTER.select().from(challenges).where(eq(challenges.event_id, eventID));
         const RES_SOLVED = await DB_ADAPTER.select({ id: team_challenges.challenge_id })
             .from(team_challenges)
-            .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.is_solved, true)));
+            .where(and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.is_solved, true)));
         let resSanitized: ChallengesType[] = [];
         if (RES_CHALLS.length > 0) {
             for (let challenge of RES_CHALLS) {
@@ -371,14 +371,14 @@ class Actions {
     async getTeamPointsByEvent(eventID: string) {
         const TEAMS = await DB_ADAPTER.select({
             id: teams.id,
-            name: teams.team_name
+            name: teams.name
         })
             .from(team_events)
             .innerJoin(teams, eq(teams.id, team_events.team_id))
             .where(eq(team_events.event_id, eventID));
         const EVENT_START = (
             await DB_ADAPTER.select({
-                start: events.event_start
+                start: events.start
             })
                 .from(events)
                 .where(eq(events.id, eventID))
@@ -398,11 +398,11 @@ class Actions {
             name: users.username
         })
             .from(team_events)
-            .innerJoin(users, eq(users.user_team_id, team_events.team_id))
+            .innerJoin(users, eq(users.team_id, team_events.team_id))
             .where(eq(team_events.event_id, eventID));
         const EVENT_START = (
             await DB_ADAPTER.select({
-                start: events.event_start
+                start: events.start
             })
                 .from(events)
                 .where(eq(events.id, eventID))
@@ -434,16 +434,16 @@ class Actions {
         const SOLVES = await this.getChallengeSolvesByEvent(eventID);
         const DATA = await DB_ADAPTER.select({
             id: team_challenges.team_id,
-            name: teams.team_name,
+            name: teams.name,
             challenge_id: challenges.id,
             timestamp: team_challenges.solved_at,
-            points_gained: challenges.base_points
+            points_gained: challenges.points
         })
             .from(team_challenges)
             .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
             .innerJoin(teams, eq(team_challenges.team_id, teams.id))
             .where(and(eq(team_challenges.event_id, eventID), eq(team_challenges.is_solved, true)))
-            .groupBy(team_challenges.team_id, teams.team_name, challenges.id, team_challenges.solved_at);
+            .groupBy(team_challenges.team_id, teams.name, challenges.id, team_challenges.solved_at);
         if (DATA.length > 0 && SOLVES.length > 0) {
             return adjustDynamic(DATA, SOLVES);
         }
@@ -460,7 +460,7 @@ class Actions {
             name: users.username,
             challenge_id: challenges.id,
             timestamp: team_challenges.solved_at,
-            points_gained: challenges.base_points
+            points_gained: challenges.points
         })
             .from(team_challenges)
             .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
@@ -479,7 +479,7 @@ class Actions {
      */
     async getSingleTeamPointsByEvent(teamID: string, eventID: string) {
         const RES = await DB_ADAPTER.select({
-            points: sql<number>`cast(sum(${challenges.base_points}) as int)`
+            points: sql<number>`cast(sum(${challenges.points}) as int)`
         })
             .from(team_challenges)
             .innerJoin(challenges, eq(team_challenges.challenge_id, challenges.id))
@@ -521,9 +521,9 @@ class Actions {
         if (user && validAlphanumeric(firstName, 30) && validAlphanumeric(lastName, 30)) {
             await DB_ADAPTER.update(users)
                 .set({
-                    user_firstname: firstName,
-                    user_lastname: lastName,
-                    user_affiliation: affiliation
+                    firstname: firstName,
+                    lastname: lastName,
+                    affiliation: affiliation
                 })
                 .where(eq(users.id, user.id));
             return true;
@@ -553,18 +553,20 @@ class Actions {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
             event_id: toEvent,
-            challenge_name: name,
-            challenge_description: desc,
-            challenge_category: cat,
-            challenge_difficulty: diff,
-            needs_container: isContainer,
+            name: name,
+            description: desc,
+            category: cat,
+            difficulty: diff,
             container_file: containerFile,
-            static_file_url: fileURL,
-            base_points: points,
+            file_url: fileURL,
+            points: points,
             depends_on: dependOn,
-            flag_static: needsStatic,
             static_flag: staticFlag,
-            needs_flag_pool: needsFlagPool
+            needs_depend: dependOn === '' ? false : true,
+            needs_file: staticFlag === '' ? false : true,
+            needs_static: needsStatic,
+            needs_container: isContainer,
+            needs_pool: needsFlagPool
         });
     }
 
@@ -578,14 +580,14 @@ class Actions {
         if (user === null || VALID === false) return [];
         const RES = await DB_ADAPTER.select({
             challenge_id: team_challenges.challenge_id,
-            challenge_host: team_challenges.challenge_host,
-            challenge_port: team_challenges.challenge_port,
+            challenge_host: team_challenges.container_host,
+            challenge_port: team_challenges.container_port,
             is_running: team_challenges.is_running
         })
             .from(team_challenges)
             .where(
                 and(
-                    eq(team_challenges.team_id, user.user_team_id),
+                    eq(team_challenges.team_id, user.team_id),
                     eq(team_challenges.event_id, eventID),
                     eq(team_challenges.is_container, true),
                     eq(team_challenges.is_solved, false)
@@ -608,15 +610,15 @@ class Actions {
         if (RES !== undefined) {
             // note deployment
             await DB_ADAPTER.insert(team_challenges).values({
-                team_id: user.user_team_id,
+                team_id: user.team_id,
                 challenge_id: challengeID,
                 event_id: eventID,
                 solved_by: '',
                 solved_at: 0,
-                challenge_uuid: '',
-                challenge_flag: '',
-                challenge_host: '',
-                challenge_port: '',
+                container_id: '',
+                container_flag: '',
+                container_host: '',
+                container_port: '',
                 is_container: true,
                 is_running: false,
                 is_solved: false
@@ -626,25 +628,25 @@ class Actions {
                 if (data !== false) {
                     await DB_ADAPTER.update(team_challenges)
                         .set({
-                            challenge_uuid: data.id,
-                            challenge_flag: data.flag,
-                            challenge_host: data.host,
+                            container_id: data.id,
+                            container_flag: data.flag,
+                            container_host: data.host,
                             is_running: true
                         })
                         .where(
                             and(
-                                eq(team_challenges.team_id, user.user_team_id),
+                                eq(team_challenges.team_id, user.team_id),
                                 eq(team_challenges.event_id, eventID),
                                 eq(team_challenges.challenge_id, challengeID)
                             )
                         );
                     // notify anti cheat
-                    await MONITOR.initiation(data.flag, user.user_team_id, challengeID, TIMESTAMP);
+                    await MONITOR.initiation(data.flag, user.team_id, challengeID, TIMESTAMP);
                 } else {
                     // on fail, remove the entry
                     await DB_ADAPTER.delete(team_challenges).where(
                         and(
-                            eq(team_challenges.team_id, user.user_team_id),
+                            eq(team_challenges.team_id, user.team_id),
                             eq(team_challenges.event_id, eventID),
                             eq(team_challenges.challenge_id, challengeID)
                         )
@@ -670,12 +672,12 @@ class Actions {
             await DB_ADAPTER.select()
                 .from(team_challenges)
                 .where(
-                    and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.challenge_id, challengeID))
+                    and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.challenge_id, challengeID))
                 )
         ).at(0);
         if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.is_running === true) {
             const VALID = await this.checkValidEventExist(RES.event_id);
-            if (RES.challenge_flag === EXTRACTED_FLAG && VALID !== false) {
+            if (RES.container_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.update(team_challenges)
                     .set({
                         solved_by: user.id,
@@ -684,12 +686,12 @@ class Actions {
                     })
                     .where(
                         and(
-                            eq(team_challenges.team_id, user.user_team_id),
+                            eq(team_challenges.team_id, user.team_id),
                             eq(team_challenges.challenge_id, challengeID)
                         )
                     );
                 // shut down the container
-                INFRA.shutdown(RES.challenge_uuid).then(async (ok) => {
+                INFRA.shutdown(RES.container_id).then(async (ok) => {
                     if (ok === true) {
                         await DB_ADAPTER.update(team_challenges)
                             .set({
@@ -697,14 +699,14 @@ class Actions {
                             })
                             .where(
                                 and(
-                                    eq(team_challenges.team_id, user.user_team_id),
+                                    eq(team_challenges.team_id, user.team_id),
                                     eq(team_challenges.challenge_id, challengeID)
                                 )
                             );
                     }
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, false, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, false, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -724,7 +726,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, false, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, false, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -752,25 +754,25 @@ class Actions {
                 .from(challenges)
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
-        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.flag_static === true) {
+        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_static === true) {
             const VALID = await this.checkValidEventExist(RES.event_id);
             if (RES.static_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
-                    team_id: user.user_team_id,
+                    team_id: user.team_id,
                     challenge_id: challengeID,
                     event_id: eventID,
                     solved_by: user.id,
                     solved_at: TIMESTAMP,
-                    challenge_uuid: '',
-                    challenge_flag: EXTRACTED_FLAG,
-                    challenge_host: '',
-                    challenge_port: '',
+                    container_id: '',
+                    container_flag: EXTRACTED_FLAG,
+                    container_host: '',
+                    container_port: '',
                     is_container: false,
                     is_running: false,
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, true, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -790,7 +792,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -818,25 +820,25 @@ class Actions {
                 .from(challenges)
                 .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
         ).at(0);
-        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_flag_pool === true) {
+        if (RES !== undefined && /^TH{.*}$/.test(flag) && RES.needs_pool === true) {
             const VALID = await this.checkValidEventExist(RES.event_id);
             if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true &&  VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
-                    team_id: user.user_team_id,
+                    team_id: user.team_id,
                     challenge_id: challengeID,
                     event_id: eventID,
                     solved_by: user.id,
                     solved_at: TIMESTAMP,
-                    challenge_uuid: '',
-                    challenge_flag: EXTRACTED_FLAG,
-                    challenge_host: '',
-                    challenge_port: '',
+                    container_id: '',
+                    container_flag: EXTRACTED_FLAG,
+                    container_host: '',
+                    container_port: '',
                     is_container: false,
                     is_running: false,
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.user_team_id, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, true, TIMESTAMP);
                 // check notify reporter
                 if ((await this.checkInitialSolve(challengeID)) === true) {
                     const DATA = await this.getFirstbloodData(challengeID);
@@ -856,7 +858,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.user_team_id, challengeID, user.id, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -872,10 +874,10 @@ class Actions {
     async createEvent(eventName: string, eventDesc: string, eventStart: number, eventEnd: number) {
         await DB_ADAPTER.insert(events).values({
             id: crypto.randomUUID(),
-            event_name: eventName,
-            event_description: eventDesc,
-            event_start: eventStart,
-            event_end: eventEnd
+            name: eventName,
+            description: eventDesc,
+            start: eventStart,
+            end: eventEnd
         });
     }
 
@@ -900,7 +902,7 @@ class Actions {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const HAS_CREATED = await this.checkHasCreatedTeam(user.id);
-        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, teamName))).length;
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, teamName))).length;
         // only create if name is unique
         if (TEAMS_WITH_NAME === 0 && HAS_CREATED === false) {
             const GEN_ID = crypto.randomUUID();
@@ -908,11 +910,11 @@ class Actions {
             await DB_ADAPTER.insert(teams)
                 .values({
                     id: GEN_ID,
-                    team_creator: user.id,
-                    team_join_token: TEAM_TOKEN,
-                    team_name: teamName,
-                    team_description: teamDesc,
-                    team_country_code: teamCountry
+                    creator_id: user.id,
+                    join_token: TEAM_TOKEN,
+                    name: teamName,
+                    description: teamDesc,
+                    country_code: teamCountry
                 })
                 .then(async () => {
                     await this.joinTeam(sessionID, TEAM_TOKEN);
@@ -934,16 +936,16 @@ class Actions {
                 .innerJoin(events, eq(team_events.event_id, events.id))
                 .where(
                     and(
-                        eq(team_events.team_id, user.user_team_id),
-                        lt(events.event_start, TIMESTAMP),
-                        gt(events.event_end, TIMESTAMP)
+                        eq(team_events.team_id, user.team_id),
+                        lt(events.start, TIMESTAMP),
+                        gt(events.end, TIMESTAMP)
                     )
                 )
         ).length;
         const POINTS_ADDED = (
             await DB_ADAPTER.select()
                 .from(team_challenges)
-                .where(and(eq(team_challenges.team_id, user.user_team_id), eq(team_challenges.solved_by, user.id)))
+                .where(and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.solved_by, user.id)))
         ).length;
         return ONGOING_EVENTS === 0 && POINTS_ADDED === 0;
     }
@@ -959,7 +961,7 @@ class Actions {
         if (TOKEN !== false) {
             await DB_ADAPTER.update(users)
                 .set({
-                    user_team_id: TOKEN
+                    team_id: TOKEN
                 })
                 .where(eq(users.id, user.id));
         }
@@ -974,12 +976,12 @@ class Actions {
         if (user === null) return false;
         const TEAM = await this.getTeamInfo(sessionID);
         if (user && TEAM !== null) {
-            if (TEAM.team_creator === user.id) {
+            if (TEAM.creator_id === user.id) {
                 await DB_ADAPTER.update(teams)
                     .set({
-                        team_join_token: 'CTD-' + generateRandomString(16).toUpperCase()
+                        join_token: 'CTD-' + generateRandomString(16).toUpperCase()
                     })
-                    .where(eq(teams.id, user.user_team_id));
+                    .where(eq(teams.id, user.team_id));
             }
         }
     }
@@ -992,15 +994,15 @@ class Actions {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return;
         const TEAM = await this.getTeamInfo(sessionID);
-        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.team_name, name))).length;
-        if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.team_name === name)) {
-            if (TEAM.team_creator === user.id) {
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, name))).length;
+        if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.name === name)) {
+            if (TEAM.creator_id === user.id) {
                 await DB_ADAPTER.update(teams)
                     .set({
-                        team_name: name,
-                        team_description: description
+                        name: name,
+                        description: description
                     })
-                    .where(eq(teams.id, user.user_team_id));
+                    .where(eq(teams.id, user.team_id));
             }
         }
     }
@@ -1014,7 +1016,7 @@ class Actions {
         if (user && AVATARS.find((entry) => entry.title === avatar) !== undefined) {
             await DB_ADAPTER.update(users)
                 .set({
-                    user_avatar: avatar
+                    avatar: avatar
                 })
                 .where(eq(users.id, user.id));
         }
@@ -1031,15 +1033,15 @@ class Actions {
         const MEMBERS = await this.getTeamMembers(sessionID);
         if (user && TEAM !== null && MEMBERS.length > 0) {
             const IS_ABLE = await this.checkTeamLeavable(sessionID);
-            if ((TEAM.team_creator !== user.id && IS_ABLE === true) || (MEMBERS.length === 1 && IS_ABLE === true)) {
+            if ((TEAM.creator_id !== user.id && IS_ABLE === true) || (MEMBERS.length === 1 && IS_ABLE === true)) {
                 await DB_ADAPTER.update(users)
                     .set({
-                        user_team_id: ''
+                        team_id: ''
                     })
                     .where(eq(users.id, user.id));
                 // yeet the team if creator is the last one to leave
-                if (TEAM.team_creator === user.id && MEMBERS.length === 1) {
-                    await DB_ADAPTER.delete(teams).where(eq(teams.id, user.user_team_id));
+                if (TEAM.creator_id === user.id && MEMBERS.length === 1) {
+                    await DB_ADAPTER.delete(teams).where(eq(teams.id, user.team_id));
                 }
             }
         }
@@ -1052,10 +1054,10 @@ class Actions {
     async updateEvent(eventID: string, eventName: string, eventDesc: string, start: number, end: number) {
         await DB_ADAPTER.update(events)
             .set({
-                event_name: eventName,
-                event_description: eventDesc,
-                event_start: start,
-                event_end: end
+                name: eventName,
+                description: eventDesc,
+                start: start,
+                end: end
             })
             .where(eq(events.id, eventID));
     }
@@ -1076,11 +1078,11 @@ class Actions {
     ) {
         await DB_ADAPTER.update(challenges)
             .set({
-                challenge_name: name,
-                challenge_description: desc,
-                challenge_category: cat,
-                challenge_difficulty: diff,
-                base_points: points,
+                name: name,
+                description: desc,
+                category: cat,
+                difficulty: diff,
+                points: points,
                 event_id: event,
                 depends_on: depends
             })
@@ -1105,11 +1107,11 @@ class Actions {
             .set({
                 email: userEmail,
                 is_verified: isVerified,
-                user_role: role,
-                user_firstname: firstName,
-                user_lastname: lastName,
-                user_affiliation: affiliation,
-                user_team_id: team
+                role: role,
+                firstname: firstName,
+                lastname: lastName,
+                affiliation: affiliation,
+                team_id: team
             })
             .where(eq(users.id, userID));
     }
@@ -1121,8 +1123,8 @@ class Actions {
     async updateTeam(teamID: string, name: string, description: string) {
         await DB_ADAPTER.update(teams)
             .set({
-                team_name: name,
-                team_description: description
+                name: name,
+                description: description
             })
             .where(eq(teams.id, teamID));
     }
@@ -1143,11 +1145,11 @@ class Actions {
      */
     async deleteTeam(teamID: string) {
         await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
-        const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.user_team_id, teamID));
+        const REF_USERS = await DB_ADAPTER.select().from(users).where(eq(users.team_id, teamID));
         REF_USERS.forEach(async (user) => {
             await DB_ADAPTER.update(users)
                 .set({
-                    user_team_id: ''
+                    team_id: ''
                 })
                 .where(eq(users.id, user.id));
         });
@@ -1207,9 +1209,9 @@ class Actions {
     ) {
         await DB_ADAPTER.update(team_challenges)
             .set({
-                challenge_flag: containerFlag,
-                challenge_uuid: containerID,
-                challenge_host: containerHost
+                container_flag: containerFlag,
+                container_id: containerID,
+                container_host: containerHost
             })
             .where(
                 and(
@@ -1299,11 +1301,11 @@ class Actions {
     async getValidCertUsers(eventID: string) {
         const RES = await DB_ADAPTER.select({
             email: users.email,
-            first_name: users.user_firstname,
-            last_name: users.user_lastname
+            first_name: users.firstname,
+            last_name: users.lastname
         })
             .from(team_events)
-            .innerJoin(users, eq(team_events.team_id, users.user_team_id))
+            .innerJoin(users, eq(team_events.team_id, users.team_id))
             .where(and(eq(team_events.event_id, eventID), eq(users.is_verified, true)));
         if (RES.length > 0) {
             return RES.map((entry) => {

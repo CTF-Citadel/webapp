@@ -1,7 +1,6 @@
 <!--
   @component
   ## Props
-  @prop export let session: any = {};
   @prop export let sessionID: string = '';
 -->
 
@@ -60,26 +59,26 @@
                     class="m-2 bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl"
                 >
                     <div class="mb-6 text-center">
-                        <h1 class="text-lg font-bold">{event.events.event_name}</h1>
-                        <p class="whitespace-pre-wrap">{event.events.event_description}</p>
-                        <p>{formatToDate(event.events.event_start)} - {formatToDate(event.events.event_end)}</p>
+                        <h1 class="text-lg font-bold">{event.events.name}</h1>
+                        <p class="whitespace-pre-wrap">{event.events.description}</p>
+                        <p>{formatToDate(event.events.start)} - {formatToDate(event.events.end)}</p>
                     </div>
                     <div class="flex flex-row justify-center space-x-4">
                         <Button
                             class="p-0"
-                            disabled={validTimerange(event.events.event_start, event.events.event_end) !== 0}
+                            disabled={validTimerange(event.events.start, event.events.end) !== 0}
                         >
-                            {#if validTimerange(event.events.event_start, event.events.event_end) === 0}
+                            {#if validTimerange(event.events.start, event.events.end) === 0}
                                 <a class="p-3" href="/events/{event.events.id}">Challenges</a>
                             {:else}
                                 <p class="p-3">
-                                    {validTimerange(event.events.event_start, event.events.event_end) === 1
+                                    {validTimerange(event.events.start, event.events.end) === 1
                                         ? 'Upcoming'
                                         : 'Expired'}
                                 </p>
                             {/if}
                         </Button>
-                        <Button class="p-0" disabled={!hasStarted(event.events.event_start)}>
+                        <Button class="p-0" disabled={!hasStarted(event.events.start)}>
                             <a class="p-3" href="/scores/{event.events.id}">Scoreboard</a>
                         </Button>
                     </div>

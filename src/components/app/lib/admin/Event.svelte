@@ -27,8 +27,8 @@
 
     $: editData = events.find((item) => item['id'] === editUUID);
     $: if (editData) {
-        editDateStart = convertToInputDateTime(editData.event_start);
-        editDateEnd = convertToInputDateTime(editData.event_end);
+        editDateStart = convertToInputDateTime(editData.start);
+        editDateEnd = convertToInputDateTime(editData.end);
     }
 
     let eventTemplate = {
@@ -78,8 +78,8 @@
             type: 'update-event',
             data: {
                 id: editUUID,
-                name: editData?.event_name,
-                description: editData?.event_description,
+                name: editData?.name,
+                description: editData?.description,
                 start: tempDateStart,
                 end: tempDateEnd
             }
@@ -122,7 +122,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="event_name"
                 placeholder="name"
-                bind:value={editData.event_name}
+                bind:value={editData.name}
             />
         </div>
         <div>
@@ -132,7 +132,7 @@
                 id="event_textarea"
                 placeholder="..."
                 rows="4"
-                bind:value={editData.event_description}
+                bind:value={editData.description}
             />
         </div>
         <div class="mb-6">

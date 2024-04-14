@@ -6,10 +6,10 @@
     "start": "astro dev",
     "build": "astro build",
     "generate": "npx drizzle-kit generate:pg",
+    "migrate": "npx drizzle-kit push:pg",
     "preview": "astro preview",
     "astro": "astro",
-    "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs",
-    "dist-win": "set NODE_ENV=production&& set HOST=0.0.0.0&& set PORT=8085&& node .\\dist\\server\\entry.mjs"
+    "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^8.2.5",

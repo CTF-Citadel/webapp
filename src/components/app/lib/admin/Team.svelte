@@ -25,7 +25,7 @@
     async function updateTeam() {
         const DATA = await requestWrapper(true, {
             type: 'update-team',
-            data: { id: editUUID, name: editData?.team_name, description: editData?.team_description }
+            data: { id: editUUID, name: editData?.name, description: editData?.description }
         });
         if (DATA.ok) {
             edit = false;
@@ -63,7 +63,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="team_name"
-                bind:value={editData.team_name}
+                bind:value={editData.name}
             />
         </div>
         <div class="mb-6">
@@ -71,7 +71,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="team_desc"
-                bind:value={editData.team_description}
+                bind:value={editData.description}
             />
         </div>
         <svelte:fragment slot="footer">

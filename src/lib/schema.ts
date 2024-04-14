@@ -3,15 +3,15 @@ import { pgTable, text, timestamp, boolean, bigint, integer, primaryKey } from '
 
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
+    team_id: text('team_id').notNull(),
     username: text('username').unique().notNull(),
-    email: text('email').unique().notNull(),
     hashed_password: text('hashed_password').notNull(),
-    user_role: text('user_role').notNull(),
-    user_team_id: text('user_team_id').notNull(),
-    user_avatar: text('user_avatar').notNull(),
-    user_affiliation: text('user_affiliation').notNull(),
-    user_firstname: text('user_firstname').notNull(),
-    user_lastname: text('user_lastname').notNull(),
+    email: text('email').unique().notNull(),
+    role: text('role').notNull(),
+    avatar: text('avatar').notNull(),
+    affiliation: text('affiliation').notNull(),
+    firstname: text('firstname').notNull(),
+    lastname: text('lastname').notNull(),
     is_verified: boolean('is_verified').notNull(),
     is_blocked: boolean('is_blocked').notNull()
 });
@@ -46,12 +46,12 @@ export const verificationTokens = pgTable('email_verification_tokens', {
 
 export const events = pgTable('events', {
     id: text('id').primaryKey(),
-    event_name: text('event_name').notNull(),
-    event_description: text('event_description').notNull(),
-    event_start: bigint('event_start', {
+    name: text('name').notNull(),
+    description: text('description').notNull(),
+    start: bigint('start', {
         mode: 'number'
     }).notNull(),
-    event_end: bigint('event_end', {
+    end: bigint('end', {
         mode: 'number'
     }).notNull()
 });
@@ -61,29 +61,31 @@ export const challenges = pgTable('challenges', {
     event_id: text('event_id')
         .references(() => events.id)
         .notNull(),
-    challenge_name: text('challenge_name').unique().notNull(),
-    challenge_category: text('challenge_category').notNull(),
-    challenge_difficulty: text('challenge_difficulty').notNull(),
-    challenge_description: text('challenge_description').notNull(),
-    base_points: integer('base_points').notNull(),
+    name: text('name').unique().notNull(),
+    category: text('category').notNull(),
+    difficulty: text('difficulty').notNull(),
+    description: text('description').notNull(),
+    points: integer('points').notNull(),
     container_file: text('container_file').notNull(),
-    static_file_url: text('static_file_url').notNull(),
+    file_url: text('file_url').notNull(),
     static_flag: text('static_flag').notNull(),
     depends_on: text('depends_on').notNull(),
-    flag_static: boolean('flag_static').notNull(),
+    needs_file: boolean('needs_file').notNull(),
+    needs_depend: boolean('needs_depend').notNull(),
     needs_container: boolean('needs_container').notNull(),
-    needs_flag_pool: boolean('needs_flag_pool').notNull()
+    needs_static: boolean('needs_static').notNull(),
+    needs_pool: boolean('needs_pool').notNull()
 });
 
 export const teams = pgTable('teams', {
     id: text('id').primaryKey(),
-    team_creator: text('team_creator')
+    creator_id: text('creator_id')
         .references(() => users.id)
         .notNull(),
-    team_name: text('team_name').unique().notNull(),
-    team_join_token: text('team_join_token').notNull(),
-    team_country_code: text('team_country_code').notNull(),
-    team_description: text('team_description').notNull()
+    name: text('name').unique().notNull(),
+    join_token: text('join_token').notNull(),
+    country_code: text('country_code').notNull(),
+    description: text('description').notNull()
 });
 
 export const team_events = pgTable(
@@ -115,10 +117,10 @@ export const team_challenges = pgTable(
         event_id: text('event_id')
             .references(() => events.id)
             .notNull(),
-        challenge_uuid: text('challenge_uuid').notNull(),
-        challenge_flag: text('challenge_flag').notNull(),
-        challenge_host: text('challenge_host').notNull(),
-        challenge_port: text('challenge_port').notNull(),
+        container_id: text('container_id').notNull(),
+        container_flag: text('container_flag').notNull(),
+        container_host: text('container_host').notNull(),
+        container_port: text('container_port').notNull(),
         solved_by: text('solved_by').notNull(),
         solved_at: bigint('solved_at', {
             mode: 'number'

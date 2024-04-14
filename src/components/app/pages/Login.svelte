@@ -13,6 +13,7 @@
         password: ''
     };
     let showVerifySuccess: boolean = false;
+    let showBlocked: boolean = false;
 
     onMount(() => {
         let queryString = window.location.search;
@@ -20,6 +21,9 @@
 
         if (PARAMS.has('verified')) {
             Boolean(PARAMS.get('verified')) ? (showVerifySuccess = true) : (showVerifySuccess = false);
+        }
+        if (PARAMS.has('blocked')) {
+            Boolean(PARAMS.get('blocked')) ? (showBlocked = true) : (showBlocked = false);
         }
     });
 
@@ -55,6 +59,15 @@
                     <span class="sr-only">Info</span>
                 </span>
                 <p class="text-green-500">Verified! Please log in again.</p>
+            </Alert>
+        {/if}
+        {#if showBlocked}
+            <Alert class="!items-start bg-neutral-100 dark:bg-neutral-900">
+                <span slot="icon">
+                    <InfoCircle slot="icon" class="text-red-500 w-5 h-5" />
+                    <span class="sr-only">Info</span>
+                </span>
+                <p class="text-red-500">Your are currently blocked!</p>
             </Alert>
         {/if}
         <h3 class="text-xl font-medium text-gray-900 dark:text-white">Login</h3>

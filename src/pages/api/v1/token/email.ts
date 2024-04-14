@@ -10,6 +10,7 @@ export const POST: APIRoute = async (context) => {
 
     try {
         if (!context.locals.user) return context.redirect('/login');
+        if (context.locals.user.is_blocked) return context.redirect('/login?blocked=true')
         if (!context.locals.user.is_verified) {
             const token = await generateEmailverificationTokens(context.locals.user.id);
             sendVerificationLink(ORIGIN, context.locals.user.email, token);

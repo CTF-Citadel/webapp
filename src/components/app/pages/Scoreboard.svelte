@@ -43,7 +43,7 @@
             if (thisEvent !== null) {
                 await refreshEventScoring(thisEvent.id).finally(async () => {
                     if (thisEvent !== null) {
-                        prepareForPlot(thisEvent.event_start);
+                        prepareForPlot(thisEvent.start);
                     }
                 });
             }

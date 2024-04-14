@@ -19,12 +19,12 @@ export const lucia = new Lucia(LUCIA_ADAPTER, {
 		return {
 			username: attributes.username,
 			email: attributes.email,
-			user_role: attributes.user_role,
-			user_team_id: attributes.user_team_id,
-			user_avatar: attributes.user_avatar,
-    		user_affiliation: attributes.user_affiliation,
-    		user_firstname: attributes.user_firstname,
-    		user_lastname: attributes.user_lastname,
+			role: attributes.role,
+			team_id: attributes.team_id,
+			avatar: attributes.avatar,
+    		affiliation: attributes.affiliation,
+    		firstname: attributes.firstname,
+    		lastname: attributes.lastname,
 			is_blocked: attributes.is_blocked,
 			is_verified: attributes.is_verified
 		};
@@ -37,12 +37,12 @@ declare module "lucia" {
 		DatabaseUserAttributes: {
 			username: string;
 			email: string;
-			user_role: string;
-			user_team_id: string;
-			user_avatar: string;
-    		user_affiliation: string;
-    		user_firstname: string;
-    		user_lastname: string;
+			role: string;
+			team_id: string;
+			avatar: string;
+    		affiliation: string;
+    		firstname: string;
+    		lastname: string;
 			is_blocked: boolean;
 			is_verified: boolean;
 		};

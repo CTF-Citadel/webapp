@@ -3,7 +3,6 @@
   ## Props
   @prop export let sessionID: string = '';
   @prop export let uuid: string = '';
-  @prop export let session: any = '';
 -->
 
 <script lang="ts">
@@ -78,10 +77,10 @@
         categories = {};
         // Category Sorting
         data.forEach((item) => {
-            if (!categories[item.challenge_category]) {
-                categories[item.challenge_category] = [];
+            if (!categories[item.category]) {
+                categories[item.category] = [];
             }
-            categories[item.challenge_category].push(item);
+            categories[item.category].push(item);
         });
 
         // Difficulty Sorting
@@ -168,57 +167,57 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-2 place-items-center items-start">
                 {#each value as challenge}
                     <Card
-                        style="border-color: {challenge.challenge_difficulty === 'Easy'
+                        style="border-color: {challenge.difficulty === 'Easy'
                             ? '#28a745'
-                            : challenge.challenge_difficulty === 'Medium'
+                            : challenge.difficulty === 'Medium'
                               ? '#FF9800'
-                              : '#dc3545'}; filter: drop-shadow(0px 0px 6px {challenge.challenge_difficulty === 'Easy'
+                              : '#dc3545'}; filter: drop-shadow(0px 0px 6px {challenge.difficulty === 'Easy'
                             ? '#28a745'
-                            : challenge.challenge_difficulty === 'Medium'
+                            : challenge.difficulty === 'Medium'
                               ? '#FF9800'
                               : '#dc3545'});"
                         class="bg-[#0000001f] dark:bg-[#0000004f] border-2 border-neutral-200 dark:border-neutral-800 backdrop-blur-3xl my-2"
                     >
                         <div class="mb-2">
                             <Label for="challenge-name" class="mb-2">Challenge Name</Label>
-                            <p id="challenge-name">{challenge.challenge_name}</p>
+                            <p id="challenge-name">{challenge.name}</p>
                         </div>
                         <div class="mb-4">
                             <Accordion flush>
                                 <AccordionItem>
                                     <span slot="header">Challenge Description</span>
-                                    <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{challenge.challenge_description}</p>
+                                    <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{challenge.description}</p>
                                 </AccordionItem>
                             </Accordion>
                         </div>
                         <div class="mb-2">
                             <Label for="challenge-diff" class="mb-2">Challenge Information</Label>
-                            <p>Category: {challenge.challenge_category}</p>
+                            <p>Category: {challenge.category}</p>
                             <p>
                                 Difficulty:
                                 <span
-                                    style="color: {challenge.challenge_difficulty === 'Easy'
+                                    style="color: {challenge.difficulty === 'Easy'
                                         ? '#28a745'
-                                        : challenge.challenge_difficulty === 'Medium'
+                                        : challenge.difficulty === 'Medium'
                                           ? '#FF9800'
                                           : '#dc3545'};"
                                 >
-                                    {challenge.challenge_difficulty}
+                                    {challenge.difficulty}
                                 </span>
                             </p>
                         </div>
                         {#if !solvedChallenges.includes(challenge.id)}
-                            {#if challenge.static_file_url !== ''}
+                            {#if challenge.file_url !== ''}
                                 <div class="mb-6">
                                     <Label for="challenge-diff" class="mb-2">Challenge File</Label>
                                     <div
                                         class="p-2 bg-primary-500 rounded-lg w-fit flex flex-row space-x-2 align-middle justify-center"
                                     >
                                         <DownloadSolid size="md" color="#fff" />
-                                        <a class="text-white" href={challenge.static_file_url} download
-                                            >{challenge.static_file_url
+                                        <a class="text-white" href={challenge.file_url} download
+                                            >{challenge.file_url
                                                 .split('/')
-                                                [challenge.static_file_url.split('/').length - 1].split('?')[0]}</a
+                                                [challenge.file_url.split('/').length - 1].split('?')[0]}</a
                                         >
                                     </div>
                                 </div>
@@ -290,9 +289,9 @@
                                         checkFlag(
                                             challenge.id,
                                             challengeInputs[challenge.id],
-                                            challenge.flag_static
+                                            challenge.needs_static
                                                 ? 'static'
-                                                : challenge.needs_flag_pool
+                                                : challenge.needs_pool
                                                   ? 'pool'
                                                   : 'dynamic'
                                         )}>Submit</Button

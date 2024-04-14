@@ -35,9 +35,9 @@
                 challengeID: editUUID.split('/')[0],
                 teamID: editUUID.split('/')[1],
                 eventID: editUUID.split('/')[2],
-                containerID: editData?.team_challenges.challenge_uuid,
-                containerHost: editData?.team_challenges.challenge_host,
-                containerFlag: editData?.team_challenges.challenge_flag
+                containerID: editData?.team_challenges.container_id,
+                containerHost: editData?.team_challenges.container_host,
+                containerFlag: editData?.team_challenges.container_flag
             }
         });
         if (DATA.ok) {
@@ -82,7 +82,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="event_name"
                 placeholder="name"
-                bind:value={editData.team_challenges.challenge_uuid}
+                bind:value={editData.team_challenges.container_id}
             />
         </div>
         <div class="mb-6">
@@ -91,7 +91,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="event_name"
                 placeholder="name"
-                bind:value={editData.team_challenges.challenge_host}
+                bind:value={editData.team_challenges.container_host}
             />
         </div>
         <div class="mb-6">
@@ -100,7 +100,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="event_name"
                 placeholder="name"
-                bind:value={editData.team_challenges.challenge_flag}
+                bind:value={editData.team_challenges.container_flag}
             />
         </div>
         <svelte:fragment slot="footer">

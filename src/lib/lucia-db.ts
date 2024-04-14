@@ -33,12 +33,12 @@ export const safeCreateUser = async (userName: string, userEmail: string, userPa
             hashed_password: PASSWORD_HASH,
             email: userEmail,
             username: userName,
-            user_role: String(IS_INITIAL ? 'admin' : 'user'),
-            user_team_id: '',
-            user_avatar: 'wolf',
-            user_affiliation: '',
-            user_firstname: '',
-            user_lastname: '',
+            role: String(IS_INITIAL ? 'admin' : 'user'),
+            team_id: '',
+            avatar: 'wolf',
+            affiliation: '',
+            firstname: '',
+            lastname: '',
             is_verified: DISABLE_EMAIL_VERIFY,
             is_blocked: false
         });

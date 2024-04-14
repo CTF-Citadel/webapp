@@ -38,9 +38,6 @@
         { value: 'Medium', name: 'Medium' },
         { value: 'Hard', name: 'Hard' }
     ];
-
-    let challengeNeedsFile: boolean = false;
-    let challengeNeedsDepend: boolean = false;
     let challengeTemplate = {
         name: '',
         description: '',
@@ -54,7 +51,9 @@
         dependsOn: '',
         isContainer: false,
         flagStatic: false,
-        flagPool: false
+        flagPool: false,
+        hasFile: false,
+        hasDepend: false
     };
 
     async function createChallenge() {
@@ -73,12 +72,12 @@
             type: 'update-challenge',
             data: {
                 id: editUUID,
-                name: editData?.challenge_name,
-                description: editData?.challenge_description,
-                category: editData?.challenge_category,
-                difficulty: editData?.challenge_difficulty,
+                name: editData?.name,
+                description: editData?.description,
+                category: editData?.category,
+                difficulty: editData?.difficulty,
                 event: editData?.event_id,
-                points: editData?.base_points,
+                points: editData?.points,
                 depends: editData?.depends_on
             }
         });
@@ -122,7 +121,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="chal_name"
                 placeholder="name"
-                bind:value={editData.challenge_name}
+                bind:value={editData.name}
             />
         </div>
         <div class="mb-6">
@@ -132,14 +131,14 @@
                 id="chal_textarea"
                 placeholder="..."
                 rows="4"
-                bind:value={editData.challenge_description}
+                bind:value={editData.description}
             />
         </div>
         <div class="mb-6">
             <Label class="mb-2">Change Challenge Difficulty</Label>
             <Select
                 defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-                bind:value={editData.challenge_difficulty}
+                bind:value={editData.difficulty}
                 placeholder=""
             >
                 <option selected value="">None</option>
@@ -154,7 +153,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="chal_name"
                 placeholder="Linux/Web/OSINT/..."
-                bind:value={editData.challenge_category}
+                bind:value={editData.category}
             />
         </div>
         <div class="mb-6">
@@ -163,7 +162,7 @@
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="challenge-name"
                 type="number"
-                bind:value={editData.base_points}
+                bind:value={editData.points}
             />
         </div>
         <div>
@@ -197,10 +196,10 @@
                 <div>
                     <Button
                         on:click={updateChallenge}
-                        disabled={editData.challenge_difficulty === '' ||
-                            editData.challenge_category === '' ||
-                            editData.base_points === 0 ||
-                            editData.challenge_name === ''}>Update</Button
+                        disabled={editData.difficulty === '' ||
+                            editData.category === '' ||
+                            editData.points === 0 ||
+                            editData.name === ''}>Update</Button
                     >
                     <Button
                         on:click={() => {
@@ -323,9 +322,9 @@
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Additions</Label>
         <div class="mb-6">
-            <Toggle bind:checked={challengeNeedsFile}>Needs File</Toggle>
+            <Toggle bind:checked={challengeTemplate.hasFile}>Needs File</Toggle>
         </div>
-        {#if challengeNeedsFile}
+        {#if challengeTemplate.hasFile}
             <div class="mb-6" transition:slide>
                 <Label for="challenge-url" class="mb-2">File URL</Label>
                 <Input
@@ -337,9 +336,9 @@
             </div>
         {/if}
         <div class="mb-6">
-            <Toggle bind:checked={challengeNeedsDepend}>Depends On</Toggle>
+            <Toggle bind:checked={challengeTemplate.hasDepend}>Depends On</Toggle>
         </div>
-        {#if challengeNeedsDepend}
+        {#if challengeTemplate.hasDepend}
             {#if challenges.length > 0}
                 <div class="mb-6">
                     <Label class="mb-2">Parent Challenge</Label>
@@ -400,8 +399,8 @@
                         challengeTemplate.category === '' ||
                         challengeTemplate.points === 0 ||
                         (challengeTemplate.staticFlag === '' && challengeTemplate.flagStatic) ||
-                        (challengeTemplate.dependsOn === '' && challengeNeedsDepend) ||
-                        (challengeTemplate.fileURL === '' && challengeNeedsFile) ||
+                        (challengeTemplate.dependsOn === '' && challengeTemplate.hasDepend) ||
+                        (challengeTemplate.fileURL === '' && challengeTemplate.hasFile) ||
                         (challengeTemplate.path === '' &&
                             challengeTemplate.staticFlag === '' &&
                             challengeTemplate.flagPool === false) ||

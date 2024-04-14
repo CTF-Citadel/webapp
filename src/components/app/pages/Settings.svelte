@@ -2,7 +2,7 @@
   @component
   ## Props
   @prop export let sessionID: string = '';
-  @prop export let session: any = {};
+  @prop export let session: User = {};
   @prop export let ac: boolean = false;
 -->
 
@@ -33,10 +33,10 @@
 
     onMount(async () => {
         await refreshUserTeam();
-        inputs.firstName = session.user_firstname;
-        inputs.lastName = session.user_lastname;
-        inputs.affiliation = session.user_affiliation;
-        currentAvatar = session.user_avatar;
+        inputs.firstName = session.firstname;
+        inputs.lastName = session.lastname;
+        inputs.affiliation = session.affiliation;
+        currentAvatar = session.avatar;
         loading = false;
     });
 
@@ -160,11 +160,11 @@
                                 />
                             </span>
                             <h1 class="mt-2 text-xl font-medium">{session.username}</h1>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">{session.user_role}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{session.role}</span>
                             {#if team !== null}
                                 <h2 class="mt-4 font-medium">Currently playing for:</h2>
                                 <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
-                                    {team.team_name}<span class="ml-2 fi fi-{team.team_country_code.toLowerCase()}"
+                                    {team.name}<span class="ml-2 fi fi-{team.country_code.toLowerCase()}"
                                     ></span>
                                 </p>
                             {:else}
@@ -218,9 +218,9 @@
                                     !validAlphanumeric(inputs.firstName, 30, true) ||
                                     inputs.affiliation === '' ||
                                     !validAlphanumeric(inputs.affiliation, 30, true) ||
-                                    (inputs.firstName == session.user_firstname &&
-                                        inputs.lastName == session.user_lastname &&
-                                        inputs.affiliation == session.user_affiliation)}>Save</Button
+                                    (inputs.firstName == session.firstname &&
+                                        inputs.lastName == session.lastname &&
+                                        inputs.affiliation == session.affiliation)}>Save</Button
                             >
                         </div>
                     </div>
@@ -271,7 +271,7 @@
                 </Card>
             </div>
         </div>
-        {#if session.user_role === 'admin'}
+        {#if session.role === 'admin'}
             <h1 class="text-3xl text-center font-bold my-4 dark:text-neutral-100 text-neutral-900">
                 <span class="italic text-neutral-500 opacity-50">#</span>
                 SETTINGS

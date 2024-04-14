@@ -30,11 +30,11 @@
                 id: editUUID,
                 email: editData?.email,
                 verified: editData?.is_verified,
-                role: editData?.user_role,
-                firstname: editData?.user_firstname,
-                lastname: editData?.user_lastname,
-                affiliation: editData?.user_affiliation,
-                team: editData?.user_team_id,
+                role: editData?.role,
+                firstname: editData?.firstname,
+                lastname: editData?.lastname,
+                affiliation: editData?.affiliation,
+                team: editData?.team_id,
             }
         });
         if (DATA.ok) {
@@ -94,7 +94,7 @@
             <Label class="mb-2">Change User Role</Label>
             <Select
                 defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-                bind:value={editData.user_role}
+                bind:value={editData.role}
                 placeholder=""
             >
                 {#each USER_ROLES as { value, name }}
@@ -107,7 +107,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="first"
-                bind:value={editData.user_firstname}
+                bind:value={editData.firstname}
             />
         </div>
         <div class="mb-6">
@@ -115,7 +115,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
-                bind:value={editData.user_lastname}
+                bind:value={editData.lastname}
             />
         </div>
         <div class="mb-6">
@@ -123,7 +123,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
-                bind:value={editData.user_affiliation}
+                bind:value={editData.affiliation}
             />
         </div>
         <div class="mb-6">
@@ -131,7 +131,7 @@
             <Input
                 class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                 id="last"
-                bind:value={editData.user_team_id}
+                bind:value={editData.team_id}
             />
         </div>
         <div>

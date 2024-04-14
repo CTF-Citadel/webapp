@@ -321,13 +321,13 @@
                                             {entry.email}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.user_role}
+                                            {entry.role}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.is_verified}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.user_team_id}
+                                            {entry.team_id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.is_blocked}
@@ -389,19 +389,19 @@
                                                 {entry.id}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                                {entry.team_creator}
+                                                {entry.creator_id}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                                {entry.team_name}
+                                                {entry.name}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                                {entry.team_description}
+                                                {entry.description}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                                {entry.team_country_code}
+                                                {entry.country_code}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                                {entry.team_join_token}
+                                                {entry.join_token}
                                             </TableBodyCell>
                                             <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                                 <Button
@@ -446,16 +446,16 @@
                                             {entry.id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.event_name}
+                                            {entry.name}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.event_description}
+                                            {entry.description}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {new Date(entry.event_start).toLocaleString('eu')}
+                                            {new Date(entry.start).toLocaleString('eu')}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {new Date(entry.event_end).toLocaleString('eu')}
+                                            {new Date(entry.end).toLocaleString('eu')}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             <Button
@@ -549,16 +549,16 @@
                                             {entry.challenges.id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.challenges.challenge_name}
+                                            {entry.challenges.name}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.teams.team_name}
+                                            {entry.teams.name}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_challenges.challenge_uuid}
+                                            {entry.team_challenges.container_id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.team_challenges.challenge_host}
+                                            {entry.team_challenges.container_host}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             {entry.team_challenges.is_running}
@@ -607,13 +607,13 @@
                                             {entry.id}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.challenge_name}
+                                            {entry.name}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.challenge_description}
+                                            {entry.description}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
-                                            {entry.challenge_category}
+                                            {entry.category}
                                         </TableBodyCell>
                                         <TableBodyCell class="text-neutral-900 dark:text-neutral-100">
                                             <Button

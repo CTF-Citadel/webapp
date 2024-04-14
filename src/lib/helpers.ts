@@ -52,12 +52,12 @@ export const DUMMY_SESSION = {
     id: 'someUser',
     username: 'DEV',
     email: 'some-email',
-    user_role: 'admin',
-    user_team_id: '',
-    user_avatar: 'wolf',
-    user_affiliation: '',
-    user_firstname: '',
-    user_lastname: '',
+    role: 'admin',
+    team_id: '',
+    avatar: 'wolf',
+    affiliation: '',
+    firstname: '',
+    lastname: '',
     is_blocked: false,
     is_verified: true
 };

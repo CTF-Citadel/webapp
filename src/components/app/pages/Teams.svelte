@@ -1,7 +1,7 @@
 <!--
   @component
   ## Props
-  @prop export let session: any = {};
+  @prop export let session: User = {};
   @prop export let sessionID: string = '';
 -->
 
@@ -53,7 +53,7 @@
 
     onMount(async () => {
         await refreshTeams();
-        if (session.user_team_id !== '' && session.user_team_id !== 'someTeam') {
+        if (session.team_id !== '' && session.team_id !== 'someTeam') {
             hasTeam = true;
             await refreshTeamInfo();
             await refreshTeamMembers();
@@ -70,9 +70,9 @@
     async function refreshTeamInfo() {
         const DATA = await requestWrapper(false, { type: 'team-info', data: { session: sessionID } });
         thisTeam = (await DATA.json()).data;
-        hasCreated = session.id === thisTeam.team_creator;
-        inputs.teamName = thisTeam.team_name;
-        inputs.teamDesc = thisTeam.team_description;
+        hasCreated = session.id === thisTeam.creator_id;
+        inputs.teamName = thisTeam.name;
+        inputs.teamDesc = thisTeam.description;
     }
 
     async function refreshTeamMembers() {
@@ -298,15 +298,15 @@
                 {:else if Object.keys(thisTeam).length > 0}
                     <div transition:fade>
                         {#if hasCreated}
-                            <h1>You are leading: <b>{thisTeam.team_name}</b></h1>
+                            <h1>You are leading: <b>{thisTeam.name}</b></h1>
                         {:else}
-                            <h1>You are playing for: <b>{thisTeam.team_name}</b></h1>
+                            <h1>You are playing for: <b>{thisTeam.name}</b></h1>
                         {/if}
-                        <p>Description: <b>{thisTeam.team_description}</b></p>
-                        <p>Country: <span class="fi fi-{thisTeam.team_country_code.toLowerCase()}"></span></p>
+                        <p>Description: <b>{thisTeam.description}</b></p>
+                        <p>Country: <span class="fi fi-{thisTeam.country_code.toLowerCase()}"></span></p>
 
                         {#if teamMembers.length < 4}
-                            <h1>Your Team-Token is: <b>{thisTeam.team_join_token}</b></h1>
+                            <h1>Your Team-Token is: <b>{thisTeam.join_token}</b></h1>
                             <h1>Members: <b>{teamMembers.length}</b></h1>
                         {:else}
                             <h1>Members: <b>{teamMembers.length} (FULL)</b></h1>
@@ -322,7 +322,7 @@
                                         <tr class="text-center">
                                             <td class="border-r-2 p-2"
                                                 >{member.username}
-                                                {member.id === thisTeam.team_creator ? '(Owner)' : ''}</td
+                                                {member.id === thisTeam.creator_id ? '(Owner)' : ''}</td
                                             >
                                             <td class="p-2">{member.user_affiliation}</td>
                                         </tr>
@@ -358,8 +358,8 @@
                                         inputs.teamDesc === '' ||
                                         !validAlphanumeric(inputs.teamName, 50, true) ||
                                         !validAlphanumeric(inputs.teamDesc, 100) ||
-                                        (inputs.teamName == thisTeam.team_name &&
-                                            inputs.teamDesc == thisTeam.team_description)}
+                                        (inputs.teamName == thisTeam.name &&
+                                            inputs.teamDesc == thisTeam.description)}
                                     >Save Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" /></Button
                                 >
                                 <Button size="lg" class="mt-4" on:click={resetToken}>
@@ -370,7 +370,7 @@
                                 size="lg"
                                 class="mt-4"
                                 on:click={leaveTeam}
-                                disabled={(teamMembers.length > 1 && session.id === thisTeam.team_creator) ||
+                                disabled={(teamMembers.length > 1 && session.id === thisTeam.creator_id) ||
                                     !canLeaveTeam}
                             >
                                 Leave Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" />

@@ -7,7 +7,7 @@ import { lucia } from '../../lib/lucia';
 if (!Astro.locals.user) return Astro.redirect('/login');
 if (Astro.locals.user.is_blocked) {
     await lucia.invalidateUserSessions(Astro.locals.user.id);
-    return Astro.redirect('/login');
+    return Astro.redirect('/login?blocked=true');
 }
 if (Astro.locals.user.is_verified) {
     return Astro.redirect('/');

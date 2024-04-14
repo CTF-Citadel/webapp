@@ -126,7 +126,7 @@
                                 <span>
                                     <span class="font-bold"
                                         >{teams.find((entry) => entry.id === event.team_id) !== undefined
-                                            ? teams.find((entry) => entry.id === event.team_id)?.team_name
+                                            ? teams.find((entry) => entry.id === event.team_id)?.name
                                             : event.team_id}</span
                                     ><br />
                                     Marks: {event.marks.length}
@@ -136,7 +136,7 @@
                                         <div>
                                             {mark.reason} {teams.find((entry) => entry.id === mark.team) !==
                                             undefined
-                                                ? teams.find((entry) => entry.id === mark.team)?.team_name
+                                                ? teams.find((entry) => entry.id === mark.team)?.name
                                                 : mark.team}
                                         </div>
                                     {/each}
