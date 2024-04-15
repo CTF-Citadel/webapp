@@ -13,24 +13,24 @@
   },
   "dependencies": {
     "@astrojs/node": "^8.2.5",
-    "@astrojs/svelte": "^5.3.0",
+    "@astrojs/svelte": "^5.4.0",
     "@astrojs/tailwind": "^5.1.0",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
-    "astro": "^4.5.16",
+    "astro": "^4.6.1",
     "drizzle-kit": "^0.20.14",
-    "drizzle-orm": "^0.30.7",
+    "drizzle-orm": "^0.30.8",
     "flag-icons": "^7.2.1",
     "lucia": "^3.1.1",
     "nodemailer": "^6.9.13",
     "pdf-lib": "^1.17.1",
     "pg": "^8.11.5",
-    "svelte": "^4.2.12",
+    "svelte": "^4.2.14",
     "tailwindcss": "^3.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20.12.5",
+    "@types/node": "^20.12.7",
     "@types/nodemailer": "^6.4.14",
-    "@types/pg": "^8.11.4",
+    "@types/pg": "^8.11.5",
     "flowbite-svelte": "^0.44.24",
     "flowbite-svelte-icons": "^1.5.0"
   }
