@@ -1,28 +1,32 @@
-# from alpine latest
+# from bookworm latest
 FROM node:bookworm
 
 # Set working directory
 WORKDIR /app
 
+# make folders
+RUN mkdir -p /data
+RUN mkdir -p /config
+
 # Copy initial necessary files to container
-COPY package.json \
-package-lock.json \
-astro.config.mjs \
-svelte.config.js \
-tailwind.config.cjs \
-drizzle.config.ts \
-tsconfig.json ./
+COPY app/package.json \
+app/package-lock.json \
+app/astro.config.mjs \
+app/svelte.config.js \
+app/tailwind.config.cjs \
+app/drizzle.config.ts \
+app/tsconfig.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy all files from src/
-COPY src ./src
+COPY app/src ./src
 # Copy public folder
-COPY public ./public
-
-# make data folder
-RUN mkdir -p /data
+COPY app/public ./public
+# copy other files
+COPY misc/entrypoint.sh /
+COPY misc/default-config.toml /config
 
 # build drizzle schema
 RUN npm run generate
@@ -31,4 +35,4 @@ RUN npm run generate
 RUN npm run build
 
 # Start Astro
-CMD ["npm", "run", "dist"]
+CMD ["/entrypoint.sh"]

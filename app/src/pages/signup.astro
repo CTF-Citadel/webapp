@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SignupPage from '../components/app/pages/Signup.svelte';
+import Header from '../components/app/lib/Header.svelte';
+import { lucia } from '../lib/lucia';
+import { getConfig } from '../lib/config';
+
+const CONFIG = await getConfig();
+
+if (Astro.locals.user) {
+    await lucia.invalidateSession(Astro.locals.session.id);
+    await lucia.deleteExpiredSessions();
+    Astro.cookies.delete(lucia.sessionCookieName);
+}
+---
+
+<Layout title="Sign Up">
+    <Header client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
+        <SignupPage restricted={Boolean(CONFIG.email.enable_enforce_domain)} restrictTo={String(CONFIG.email.enforce_domain)} client:visible />
+    </div>
+</Layout>

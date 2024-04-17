@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Challenge from '../../components/app/pages/Challenges.svelte';
+import Header from '../../components/app/lib/Header.svelte';
+import DatabaseActions from '../../lib/actions';
+import { lucia } from '../../lib/lucia';
+import { DUMMY_SESSION } from '../../lib/helpers';
+import { getConfig } from '../../lib/config';
+
+const { uuid } = Astro.params;
+const CONFIG = await getConfig();
+
+let session = DUMMY_SESSION;
+let sessionID = 'some-id';
+
+if (!import.meta.env.DEV) {
+    if (!Astro.locals.user) return Astro.redirect('/login');
+    if (Astro.locals.user.is_blocked) {
+        await lucia.invalidateUserSessions(Astro.locals.user.id);
+        return Astro.redirect('/login?blocked=true');
+    }
+    if (!Astro.locals.user.is_verified) {
+        return Astro.redirect('/verify/email');
+    }
+    session = { ...Astro.locals.user };
+    sessionID = Astro.locals.session.id;
+}
+
+const ACTION = new DatabaseActions();
+const EVENT = await ACTION.checkValidEventExist(uuid || '');
+if (EVENT === false) {
+    // early exit to 404
+    return Astro.redirect('/404');
+}
+---
+
+<Layout title={EVENT}>
+    <Header username={session.username} interactive={true} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center">
+        <Challenge uuid={uuid} sessionID={sessionID} flagPrefix={String(CONFIG.webapp.prefix)} client:visible />
+    </div>
+</Layout>
