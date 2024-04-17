@@ -4,7 +4,7 @@ export NODE_ENV=production
 export HOST=0.0.0.0
 export PORT=8085
 
-echo """
+echo '''
               __
              /  \
             / /\ \
@@ -18,15 +18,15 @@ echo """
            \ \  / /
             \ \/ /
              \__/
-"""
+'''
 
 echo "[+] Migrating DB Schema ..."
 
-while ! $(npx drizzle-kit push:pg 1> /dev/null); do
-    echo "[-] Migration Error!"
-    sleep 5;
+while ! $(npx drizzle-kit push:pg 2>&1 /dev/null); do
+    echo "[-] Migration Error! Retrying in 3 seconds ..."
+    sleep 3;
 done
 
-echo "[+] Done! Starting Web Application ..."
+echo "[+] Success! Starting Web Application ..."
 
 node ./dist/server/entry.mjs
