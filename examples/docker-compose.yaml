@@ -47,6 +47,7 @@ services:
       DB_NAME: 'webapp'
       DB_USER: 'root'
       DB_PASS: 'CHANGEME'
+      CONFIG_DIR: '/config'
     restart: unless-stopped
     profiles:
       - full
