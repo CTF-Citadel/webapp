@@ -6,8 +6,9 @@
 
 <script lang="ts">
     import { Button, Label, Select, Card, Alert } from 'flowbite-svelte';
-    import { requestWrapper } from '../../../../lib/helpers';
     import { createEventDispatcher } from 'svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     // from parent
     export let sortedEvents: { value: string; name: string }[] = [];
@@ -15,6 +16,13 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin',
+            }),
+        ],
+    });
 
     let success: boolean = false;
     let selectedEvent: string = '';
@@ -22,14 +30,9 @@
     let notifyLength: number = 0;
 
     async function getBatchUsers(eventID: string) {
-        const DATA = await requestWrapper(true, {
-            type: 'get-cert-users',
-            data: {
-                eventID: eventID
-            }
-        });
-        if (DATA.ok) {
-            batchUsers = (await DATA.json()).data;
+        const DATA = await CLIENT.getEventMailEligible.query(eventID);
+        if (DATA.length > 0) {
+            batchUsers = DATA;
             DISPATCH('refresh');
         }
     }
@@ -37,13 +40,8 @@
     async function sendBatchCerts() {
         success = false;
         notifyLength = Number(batchUsers.length);
-        const DATA = await requestWrapper(true, {
-            type: 'send-certs',
-            data: {
-                list: batchUsers
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.queryBulkMail.query(batchUsers);
+        if (DATA === true) {
             success = true;
             batchUsers = [];
             DISPATCH('refresh');

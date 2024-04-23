@@ -5,7 +5,6 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../lib/helpers';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { AdminRouter } from '../../../lib/trpc/admin';
     import {
@@ -134,14 +133,11 @@
     }
 
     async function unassignEvent(eventID: string, teamID: string) {
-        const DATA = await requestWrapper(true, {
-            type: 'unassign-event',
-            data: {
-                event: eventID,
-                team: teamID
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteTeamEvent.mutate({
+            eventId: eventID,
+            teamId: teamID
+        })
+        if (DATA === true) {
             await refreshTeamEvents();
             return true;
         } else return false;
@@ -163,6 +159,10 @@
         }
         // reinstantiate workaround
         marked = marked;
+    }
+
+    function clear() {
+        marked.clear();
     }
 </script>
 
@@ -217,6 +217,8 @@
     on:refresh={async () => {
         await refreshTeamEvents();
         await refreshEvents();
+        tabStates.teams = false;
+        tabStates.assignments = true;
     }}
 ></SubAssignment>
 
@@ -294,7 +296,7 @@
                         <Actions bind:sortedEvents mailer={withCertMailer}></Actions>
                     </TabItem>
                 {/if}
-                <TabItem title="Users" bind:open={tabStates.users}>
+                <TabItem title="Users" bind:open={tabStates.users} on:click={clear}>
                     {#if users.length > 0}
                         <Table
                             color="custom"
@@ -356,7 +358,7 @@
                         </Alert>
                     {/if}
                 </TabItem>
-                <TabItem title="Teams" bind:open={tabStates.teams}>
+                <TabItem title="Teams" bind:open={tabStates.teams} on:click={clear}>
                     {#if teams.length > 0}
                         {#key marked.size}
                             <Table
@@ -427,7 +429,7 @@
                         </Alert>
                     {/if}
                 </TabItem>
-                <TabItem title="Events" bind:open={tabStates.events}>
+                <TabItem title="Events" bind:open={tabStates.events} on:click={clear}>
                     {#if events.length > 0}
                         <Table
                             color="custom"
@@ -480,7 +482,7 @@
                         </Alert>
                     {/if}
                 </TabItem>
-                <TabItem title="Assignments" bind:open={tabStates.assignments}>
+                <TabItem title="Assignments" bind:open={tabStates.assignments} on:click={clear}>
                     {#if teamEvents.length > 0}
                         <Table
                             color="custom"
@@ -528,7 +530,7 @@
                         </Alert>
                     {/if}
                 </TabItem>
-                <TabItem title="Submissions" bind:open={tabStates.submission}>
+                <TabItem title="Submissions" bind:open={tabStates.submission} on:click={clear}>
                     {#if teamChallenges.length > 0}
                         <Table
                             color="custom"
@@ -589,7 +591,7 @@
                         </Alert>
                     {/if}
                 </TabItem>
-                <TabItem title="Challenges" bind:open={tabStates.challenges}>
+                <TabItem title="Challenges" bind:open={tabStates.challenges} on:click={clear}>
                     {#if challenges.length > 0}
                         <Table
                             color="custom"
@@ -639,7 +641,7 @@
                     {/if}
                 </TabItem>
                 {#if withAC === true}
-                    <TabItem title="M0n1t0r" bind:open={tabStates.anticheat}>
+                    <TabItem title="M0n1t0r" bind:open={tabStates.anticheat} on:click={clear}>
                         <AntiCheat
                             bind:teams
                             on:refresh={async () => {

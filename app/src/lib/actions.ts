@@ -8,6 +8,7 @@ import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import { getConfig } from './config';
 import type { ChallengesType } from './schema';
+import type { ChallengeCreate, ChallengeUpdate, EventCreate, EventUpdate, SubmissionDelete, SubmissionUpdate, TeamEventCreate, TeamEventDelete, TeamUpdate, UserUpdate } from './types';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
 import F1rstbl00d from './integrations/f1rstbl00d';
@@ -538,37 +539,25 @@ class Actions {
      * @returns void
      */
     async createChallenge(
-        name: string,
-        desc: string,
-        cat: string,
-        diff: string,
-        isContainer: boolean,
-        containerFile: string,
-        fileURL: string,
-        toEvent: string,
-        points: number,
-        dependOn: string,
-        needsStatic: boolean,
-        staticFlag: string,
-        needsFlagPool: boolean
+        schema: ChallengeCreate
     ) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
-            event_id: toEvent,
-            name: name,
-            description: desc,
-            category: cat,
-            difficulty: diff,
-            container_file: containerFile,
-            file_url: fileURL,
-            points: points,
-            depends_on: dependOn,
-            static_flag: staticFlag,
-            needs_depend: dependOn === '' ? false : true,
-            needs_file: staticFlag === '' ? false : true,
-            needs_static: needsStatic,
-            needs_container: isContainer,
-            needs_pool: needsFlagPool
+            event_id: schema.assignTo,
+            name: schema.name,
+            description: schema.description,
+            category: schema.category,
+            difficulty: schema.difficulty,
+            container_file: schema.containerPath,
+            file_url: schema.fileUrl,
+            points: schema.points,
+            depends_on: schema.dependsOn,
+            static_flag: schema.staticFlag,
+            needs_depend: schema.isDependant,
+            needs_file: schema.fileUrl === '' ? false : true,
+            needs_static: schema.isStaticFlag,
+            needs_container: schema.isContainer,
+            needs_pool: schema.isFlagPool
         });
     }
 
@@ -873,13 +862,13 @@ class Actions {
      * Creates a new event
      * @returns void
      */
-    async createEvent(eventName: string, eventDesc: string, eventStart: number, eventEnd: number) {
+    async createEvent(schema: EventCreate) {
         await DB_ADAPTER.insert(events).values({
             id: crypto.randomUUID(),
-            name: eventName,
-            description: eventDesc,
-            start: eventStart,
-            end: eventEnd
+            name: schema.name,
+            description: schema.description,
+            start: schema.start,
+            end: schema.end
         });
     }
 
@@ -887,11 +876,11 @@ class Actions {
      * Assigns an event per ID to a list of Teams
      * @returns void
      */
-    async createTeamEvent(eventID: string, teamsList: string[]) {
-        for (let team of teamsList) {
+    async createTeamEvent(schema: TeamEventCreate) {
+        for (let team of schema.teamIdList) {
             await DB_ADAPTER.insert(team_events).values({
                 team_id: team,
-                event_id: eventID
+                event_id: schema.eventId
             });
         }
     }
@@ -1053,15 +1042,15 @@ class Actions {
      * Updates an Event's properties
      * @returns void
      */
-    async updateEvent(eventID: string, eventName: string, eventDesc: string, start: number, end: number) {
+    async updateEvent(schema: EventUpdate) {
         await DB_ADAPTER.update(events)
             .set({
-                name: eventName,
-                description: eventDesc,
-                start: start,
-                end: end
+                name: schema.name,
+                description: schema.description,
+                start: schema.start,
+                end: schema.end
             })
-            .where(eq(events.id, eventID));
+            .where(eq(events.id, schema.id));
     }
 
     /**
@@ -1069,26 +1058,19 @@ class Actions {
      * @returns void
      */
     async updateChallenge(
-        id: string,
-        name: string,
-        desc: string,
-        cat: string,
-        diff: string,
-        points: number,
-        event: string,
-        depends: string
+        schema: ChallengeUpdate
     ) {
         await DB_ADAPTER.update(challenges)
             .set({
-                name: name,
-                description: desc,
-                category: cat,
-                difficulty: diff,
-                points: points,
-                event_id: event,
-                depends_on: depends
+                name: schema.name,
+                description: schema.description,
+                category: schema.category,
+                difficulty: schema.difficulty,
+                points: schema.points,
+                event_id: schema.assignTo,
+                depends_on: schema.dependsOn
             })
-            .where(eq(challenges.id, id));
+            .where(eq(challenges.id, schema.id));
     }
 
     /**
@@ -1096,48 +1078,41 @@ class Actions {
      * @returns void
      */
     async updateUser(
-        userID: string,
-        userEmail: string,
-        isVerified: boolean,
-        role: string,
-        firstName: string,
-        lastName: string,
-        affiliation: string,
-        team: string
+        schema: UserUpdate
     ) {
         await DB_ADAPTER.update(users)
             .set({
-                email: userEmail,
-                is_verified: isVerified,
-                role: role,
-                firstname: firstName,
-                lastname: lastName,
-                affiliation: affiliation,
-                team_id: team
+                email: schema.email,
+                is_verified: schema.isVerified,
+                role: schema.role,
+                firstname: schema.firstName,
+                lastname: schema.lastName,
+                affiliation: schema.affiliation,
+                team_id: schema.teamId
             })
-            .where(eq(users.id, userID));
+            .where(eq(users.id, schema.id));
     }
 
     /**
      * Updates a Team per ID
      * @returns void
      */
-    async updateTeam(teamID: string, name: string, description: string) {
+    async updateTeam(schema: TeamUpdate) {
         await DB_ADAPTER.update(teams)
             .set({
-                name: name,
-                description: description
+                name: schema.name,
+                description: schema.description
             })
-            .where(eq(teams.id, teamID));
+            .where(eq(teams.id, schema.id));
     }
 
     /**
      * Deletes a Team Event per ID
      * @returns void
      */
-    async deleteTeamEvent(eventID: string, teamID: string) {
+    async deleteTeamEvent(schema: TeamEventDelete) {
         await DB_ADAPTER.delete(team_events).where(
-            and(eq(team_events.event_id, eventID), eq(team_events.team_id, teamID))
+            and(eq(team_events.event_id, schema.eventId), eq(team_events.team_id, schema.teamId))
         );
     }
 
@@ -1187,12 +1162,12 @@ class Actions {
      * Deletes a Team Challenge per ID
      * @returns void
      */
-    async deleteTeamChallenge(challengeID: string, teamID: string, eventID: string) {
+    async deleteTeamChallenge(schema: SubmissionDelete) {
         await DB_ADAPTER.delete(team_challenges).where(
             and(
-                eq(team_challenges.challenge_id, challengeID),
-                eq(team_challenges.event_id, eventID),
-                eq(team_challenges.team_id, teamID)
+                eq(team_challenges.challenge_id, schema.challengeId),
+                eq(team_challenges.event_id, schema.eventId),
+                eq(team_challenges.team_id, schema.teamId)
             )
         );
     }
@@ -1202,24 +1177,19 @@ class Actions {
      * @returns void
      */
     async updateTeamChallenge(
-        challengeID: string,
-        teamID: string,
-        eventID: string,
-        containerID: string,
-        containerHost: string,
-        containerFlag: string
+        schema: SubmissionUpdate
     ) {
         await DB_ADAPTER.update(team_challenges)
             .set({
-                container_flag: containerFlag,
-                container_id: containerID,
-                container_host: containerHost
+                container_flag: schema.containerFlag,
+                container_id: schema.containerId,
+                container_host: schema.containerHost
             })
             .where(
                 and(
-                    eq(team_challenges.challenge_id, challengeID),
-                    eq(team_challenges.event_id, eventID),
-                    eq(team_challenges.team_id, teamID)
+                    eq(team_challenges.challenge_id, schema.challengeId),
+                    eq(team_challenges.event_id, schema.eventId),
+                    eq(team_challenges.team_id, schema.teamId)
                 )
             );
     }

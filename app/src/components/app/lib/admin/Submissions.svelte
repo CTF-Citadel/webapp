@@ -7,12 +7,12 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Label, Input } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
-    import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import type { TeamChallengesType, ChallengesType, TeamsType } from '../../../../lib/schema';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let edit: boolean = false;
     export let teamChallenges: { team_challenges: TeamChallengesType; teams: TeamsType; challenges: ChallengesType }[] =
@@ -21,6 +21,13 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     $: editData = teamChallenges.find(
         (item) =>
@@ -29,33 +36,29 @@
     );
 
     async function updateSubmission() {
-        const DATA = await requestWrapper(true, {
-            type: 'update-team-challenge',
-            data: {
-                challengeID: editUUID.split('/')[0],
-                teamID: editUUID.split('/')[1],
-                eventID: editUUID.split('/')[2],
-                containerID: editData?.team_challenges.container_id,
+        if (editData !== undefined) {
+            const DATA = await CLIENT.updateSubmission.mutate({
+                challengeId: editUUID.split('/')[0],
+                teamId: editUUID.split('/')[1],
+                eventId: editUUID.split('/')[2],
+                containerId: editData?.team_challenges.container_id,
                 containerHost: editData?.team_challenges.container_host,
                 containerFlag: editData?.team_challenges.container_flag
+            })
+            if (DATA === true) {
+                edit = false;
+                DISPATCH('refresh');
             }
-        });
-        if (DATA.ok) {
-            edit = false;
-            DISPATCH('refresh');
         }
     }
 
     async function deleteSubmission() {
-        const DATA = await requestWrapper(true, {
-            type: 'delete-team-challenge',
-            data: {
-                challengeID: editUUID.split('/')[0],
-                teamID: editUUID.split('/')[1],
-                eventID: editUUID.split('/')[2]
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteSubmission.mutate({
+            challengeId: editUUID.split('/')[0],
+            teamId: editUUID.split('/')[1],
+            eventId: editUUID.split('/')[2]
+        })
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
         }

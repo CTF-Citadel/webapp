@@ -13,6 +13,8 @@
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import EyeSlash from 'flowbite-svelte-icons/EyeSlashSolid.svelte';
     import type { UsersType } from '../../../../lib/schema';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let users: UsersType[] = [];
     export let editUUID: string = '';
@@ -20,46 +22,46 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     $: editData = users.find((item) => item['id'] === editUUID);
 
     async function updateUser() {
-        const DATA = await requestWrapper(true, {
-            type: 'update-user',
-            data: {
+        if (editData !== undefined) {
+            const DATA = await CLIENT.updateUser.mutate({
                 id: editUUID,
-                email: editData?.email,
-                verified: editData?.is_verified,
-                role: editData?.role,
-                firstname: editData?.firstname,
-                lastname: editData?.lastname,
-                affiliation: editData?.affiliation,
-                team: editData?.team_id,
+                email: editData.email,
+                isVerified: editData.is_verified,
+                role: editData.role,
+                firstName: editData.firstname,
+                lastName: editData.lastname,
+                affiliation: editData.affiliation,
+                teamId: editData.team_id,
+            })
+            if (DATA === true) {
+                edit = false;
+                DISPATCH('refresh');
             }
-        });
-        if (DATA.ok) {
-            edit = false;
-            DISPATCH('refresh');
         }
     }
 
     async function deleteUser() {
-        const DATA = await requestWrapper(true, {
-            type: 'delete-user',
-            data: { id: editUUID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteUser.mutate(editUUID);
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
         }
     }
 
     async function blockUser() {
-        const DATA = await requestWrapper(true, {
-            type: 'block-user',
-            data: { id: editUUID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.toggleBlockUser.mutate(editUUID);
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
         }

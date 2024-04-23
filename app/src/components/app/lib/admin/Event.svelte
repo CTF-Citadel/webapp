@@ -8,12 +8,12 @@
 -->
 
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Input, Label, Textarea } from 'flowbite-svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import type { EventsType } from '../../../../lib/schema';
     import { createEventDispatcher } from 'svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let events: EventsType[] = [];
     export let editUUID: string = '';
@@ -22,6 +22,13 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     $: editData = events.find((item) => item['id'] === editUUID);
     $: editDateStart = convertToInputDateTime(events.find((item) => item['id'] === editUUID)?.start || 0);
@@ -57,43 +64,36 @@
 
     async function createEvent() {
         let tempStart = { ...datePicker };
-        const DATA = await requestWrapper(true, {
-            type: 'create-event',
-            data: {
-                ...eventTemplate,
-                start: new Date(tempStart.start).getTime(),
-                end: new Date(tempStart.end).getTime()
-            }
+        const DATA = await CLIENT.createEvent.mutate({
+            ...eventTemplate,
+            start: new Date(tempStart.start).getTime(),
+            end: new Date(tempStart.end).getTime()
         });
-        if (DATA.ok) {
+        if (DATA === true) {
             create = false;
             DISPATCH('refresh');
         }
     }
 
     async function updateEvent() {
-        const DATA = await requestWrapper(true, {
-            type: 'update-event',
-            data: {
+        if (editData !== undefined) {
+            const DATA = await CLIENT.updateEvent.mutate({
                 id: editUUID,
-                name: editData?.name,
-                description: editData?.description,
+                name: editData.name,
+                description: editData.description,
                 start: new Date(changeDate.start).getTime(),
                 end: new Date(changeDate.end).getTime()
+            })
+            if (DATA === true) {
+                edit = false;
+                DISPATCH('refresh');
             }
-        });
-        if (DATA.ok) {
-            edit = false;
-            DISPATCH('refresh');
         }
     }
 
     async function deleteEvent() {
-        const DATA = await requestWrapper(true, {
-            type: 'delete-event',
-            data: { id: editUUID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteEvent.mutate(editUUID);
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
         }

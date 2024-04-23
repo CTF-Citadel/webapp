@@ -6,15 +6,23 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import { Spinner, Input, Button, Label, Alert, Card } from 'flowbite-svelte';
-    import { requestWrapper } from '../../../../lib/helpers';
     import type { TeamsType } from '../../../../lib/schema';
     import { createEventDispatcher } from 'svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     // from parent
     export let teams: TeamsType[] = [];
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     let loading: boolean = true;
     let rawData: { team_id: string; suspicion_lvl: 1 | 2 | 3; marks: { flag_share_team: string; reason: string }[] }[] =
@@ -37,23 +45,16 @@
     });
 
     async function refreshAntiCheatEvents() {
-        const DATA = await requestWrapper(true, { type: 'get-ac-events' });
-        rawData = (await DATA.json()).data;
+        rawData = await CLIENT.getAntiCheatEvents.query();
     }
 
     async function refreshPoisoned() {
-        const DATA = await requestWrapper(true, { type: 'get-ac-poisoned' });
-        rawPoison = (await DATA.json()).data;
+        rawPoison = await CLIENT.getAntiCheatPoisons.query();
     }
 
     async function newPoisoned() {
-        const DATA = await requestWrapper(true, {
-            type: 'create-ac-poisoned',
-            data: {
-                flags: [newPoison]
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.createAntiCheatPoison.mutate([ newPoison ]);
+        if (DATA === true) {
             loading = true;
             await refreshPoisoned();
             DISPATCH('refresh');
@@ -134,8 +135,8 @@
                                                 return { reason: item.reason, team: item.flag_share_team || '' };
                                             }))] as mark}
                                         <div>
-                                            {mark.reason} {teams.find((entry) => entry.id === mark.team) !==
-                                            undefined
+                                            {mark.reason}
+                                            {teams.find((entry) => entry.id === mark.team) !== undefined
                                                 ? teams.find((entry) => entry.id === mark.team)?.name
                                                 : mark.team}
                                         </div>

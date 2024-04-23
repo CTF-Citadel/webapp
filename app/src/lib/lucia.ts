@@ -12,7 +12,7 @@ export const lucia = new Lucia(LUCIA_ADAPTER, {
 		expires: false,
 		attributes: {
 			secure: import.meta.env.PROD,
-			sameSite: "lax"
+			sameSite: "strict"
 		}
 	},
 	getUserAttributes: (attributes) => {

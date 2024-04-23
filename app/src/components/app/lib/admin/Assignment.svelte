@@ -8,11 +8,12 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Label, Select, Alert } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
     import type { EventsType } from '../../../../lib/schema';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let events: EventsType[] = [];
     export let sortedEvents: { value: string; name: string }[] = [];
@@ -21,18 +22,22 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     let selectedEvent = '';
 
     async function assignEvent(eventID: string) {
-        const DATA = await requestWrapper(true, {
-            type: 'assign-event',
-            data: {
-                id: eventID,
-                teams: Array.from(marked)
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.createTeamEvents.mutate({
+            eventId: eventID,
+            teamIdList: Array.from(marked)
+        })
+        if (DATA === true) {
             create = false;
             DISPATCH('refresh');
         }

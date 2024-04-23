@@ -7,11 +7,12 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Input, Label } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import type { TeamsType } from '../../../../lib/schema';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let teams: TeamsType[] = [];
     export let editUUID: string = '';
@@ -19,26 +20,33 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     $: editData = teams.find((item) => item['id'] === editUUID);
 
     async function updateTeam() {
-        const DATA = await requestWrapper(true, {
-            type: 'update-team',
-            data: { id: editUUID, name: editData?.name, description: editData?.description }
-        });
-        if (DATA.ok) {
-            edit = false;
-            DISPATCH('refresh');
+        if (editData !== undefined) {
+            const DATA = await CLIENT.updateTeam.mutate({
+                id: editUUID,
+                name: editData.name,
+                description: editData.description
+            })
+            if (DATA === true) {
+                edit = false;
+                DISPATCH('refresh');
+            }
         }
     }
 
     async function deleteTeam() {
-        const DATA = await requestWrapper(true, {
-            type: 'delete-team',
-            data: { id: editUUID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteTeam.mutate(editUUID);
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
         }

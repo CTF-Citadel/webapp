@@ -1,4 +1,4 @@
-import { getConfig } from "../config";
+import { getConfig } from '../config';
 
 const CONFIG = await getConfig();
 
@@ -34,7 +34,7 @@ class M0n1t0r {
             }
             return false;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -46,7 +46,11 @@ class M0n1t0r {
      * @returns Data List if success
      * @returns false if error
      */
-    async flagged(): Promise<-1 | string[] | false> {
+    async flagged(): Promise<
+        | -1
+        | { team_id: string; suspicion_lvl: 1 | 2 | 3; marks: { flag_share_team: string; reason: string }[] }[]
+        | false
+    > {
         if (!this.#ENABLED) return -1;
         try {
             let RESP = await fetch(`${this.#M0N1T0R_URL}/flagged`, {
@@ -54,12 +58,16 @@ class M0n1t0r {
                 headers: this.#M0N1T0R_HEADERS
             });
             if (RESP.ok === true) {
-                const DATA: string[] = await RESP.json();
+                const DATA: {
+                    team_id: string;
+                    suspicion_lvl: 1 | 2 | 3;
+                    marks: { flag_share_team: string; reason: string }[];
+                }[] = await RESP.json();
                 return DATA.length > 0 ? DATA : [];
             }
             return false;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -80,7 +88,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -106,7 +114,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -117,7 +125,14 @@ class M0n1t0r {
      * @returns -1 if disabled
      * @returns true if success, false if not
      */
-    async submission(flag: string, teamID: string, challengeID: string, userID: string, isStatic: boolean, timestamp: number): Promise<-1 | boolean> {
+    async submission(
+        flag: string,
+        teamID: string,
+        challengeID: string,
+        userID: string,
+        isStatic: boolean,
+        timestamp: number
+    ): Promise<-1 | boolean> {
         if (!this.#ENABLED) return -1;
         try {
             let RESP = await fetch(`${this.#M0N1T0R_URL}/submissions`, {
@@ -134,7 +149,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }
@@ -145,7 +160,13 @@ class M0n1t0r {
      * @returns -1 if disabled
      * @returns true if success, false if not
      */
-    async solve(flag: string, teamID: string, challengeID: string, isStatic: boolean, timestamp: number): Promise<-1 | boolean> {
+    async solve(
+        flag: string,
+        teamID: string,
+        challengeID: string,
+        isStatic: boolean,
+        timestamp: number
+    ): Promise<-1 | boolean> {
         if (!this.#ENABLED) return -1;
         try {
             let RESP = await fetch(`${this.#M0N1T0R_URL}/solved`, {
@@ -161,7 +182,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }

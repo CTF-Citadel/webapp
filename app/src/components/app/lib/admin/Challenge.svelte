@@ -11,13 +11,14 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../../lib/helpers';
     import { Button, Modal, Input, Label, Textarea, Select, Toggle, Alert } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import { slide } from 'svelte/transition';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';
     import InfoCircle from 'flowbite-svelte-icons/InfoCircleOutline.svelte';
     import type { EventsType, ChallengesType } from '../../../../lib/schema';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../../lib/trpc/admin';
 
     export let events: EventsType[] = [];
     export let challenges: ChallengesType[] = [];
@@ -29,6 +30,13 @@
 
     // dispatcher
     const DISPATCH = createEventDispatcher();
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin'
+            })
+        ]
+    });
 
     $: editData = challenges.find((item) => item.id === editUUID);
     $: dependants = challenges.filter((item) => item.depends_on !== '').map((match) => match.depends_on);
@@ -43,57 +51,52 @@
         description: '',
         difficulty: '',
         category: '',
-        path: '',
-        fileURL: '',
+        containerPath: '',
+        fileUrl: '',
         points: 0,
         staticFlag: '',
-        event: '',
+        assignTo: '',
         dependsOn: '',
         isContainer: false,
-        flagStatic: false,
-        flagPool: false,
-        hasFile: false,
-        hasDepend: false
+        isStaticFlag: false,
+        isFlagPool: false,
+        isWithFile: false,
+        isDependant: false
     };
 
     async function createChallenge() {
-        const DATA = await requestWrapper(true, {
-            type: 'create-challenge',
-            data: { ...challengeTemplate }
-        });
-        if (DATA.ok) {
+        let temp = { ...challengeTemplate }
+        temp.points = Number(temp.points);
+        const DATA = await CLIENT.createChallenge.mutate(temp)
+        if (DATA === true) {
             create = false;
             DISPATCH('refresh');
         }
     }
 
     async function updateChallenge() {
-        const DATA = await requestWrapper(true, {
-            type: 'update-challenge',
-            data: {
+        if (editData !== undefined) {
+            const DATA = await CLIENT.updateChallenge.mutate({
                 id: editUUID,
-                name: editData?.name,
-                description: editData?.description,
-                category: editData?.category,
-                difficulty: editData?.difficulty,
-                event: editData?.event_id,
-                points: editData?.points,
-                depends: editData?.depends_on
+                name: editData.name,
+                description: editData.description,
+                category: editData.category,
+                difficulty: editData.difficulty,
+                assignTo: editData.event_id,
+                points: Number(editData.points),
+                dependsOn: editData.depends_on
+            })
+            if (DATA === true) {
+                edit = false;
+                DISPATCH('refresh');
+                return true;
             }
-        });
-        if (DATA.ok) {
-            edit = false;
-            DISPATCH('refresh');
-            return true;
         }
     }
 
     async function deleteChallenge() {
-        const DATA = await requestWrapper(true, {
-            type: 'delete-challenge',
-            data: { id: editUUID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.deleteChallenge.mutate(editUUID);
+        if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
             return true;
@@ -281,7 +284,7 @@
     </div>
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Type</Label>
-        {#if challengeTemplate.flagPool === false && challengeTemplate.flagStatic === false}
+        {#if challengeTemplate.isFlagPool === false && challengeTemplate.isStaticFlag === false}
             <div class="mb-6" transition:slide>
                 <Toggle bind:checked={challengeTemplate.isContainer}>Needs Container</Toggle>
             </div>
@@ -293,16 +296,16 @@
                     class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     id="challenge-file"
                     placeholder="some"
-                    bind:value={challengeTemplate.path}
+                    bind:value={challengeTemplate.containerPath}
                 />
             </div>
         {/if}
-        {#if challengeTemplate.flagPool === false && challengeTemplate.isContainer === false}
+        {#if challengeTemplate.isFlagPool === false && challengeTemplate.isContainer === false}
             <div class="mb-6" transition:slide>
-                <Toggle bind:checked={challengeTemplate.flagStatic}>Needs Static Flag</Toggle>
+                <Toggle bind:checked={challengeTemplate.isStaticFlag}>Needs Static Flag</Toggle>
             </div>
         {/if}
-        {#if challengeTemplate.flagStatic}
+        {#if challengeTemplate.isStaticFlag}
             <div transition:slide>
                 <Label for="challenge-static" class="mb-2">Static Flag</Label>
                 <Input
@@ -313,32 +316,32 @@
                 />
             </div>
         {/if}
-        {#if challengeTemplate.flagStatic === false && challengeTemplate.isContainer === false}
+        {#if challengeTemplate.isStaticFlag === false && challengeTemplate.isContainer === false}
             <div transition:slide>
-                <Toggle bind:checked={challengeTemplate.flagPool}>Needs Pool Flag</Toggle>
+                <Toggle bind:checked={challengeTemplate.isFlagPool}>Needs Pool Flag</Toggle>
             </div>
         {/if}
     </div>
     <div class="mb-6">
         <Label for="challenge-textarea" class="mb-2">Additions</Label>
         <div class="mb-6">
-            <Toggle bind:checked={challengeTemplate.hasFile}>Needs File</Toggle>
+            <Toggle bind:checked={challengeTemplate.isWithFile}>Needs File</Toggle>
         </div>
-        {#if challengeTemplate.hasFile}
+        {#if challengeTemplate.isWithFile}
             <div class="mb-6" transition:slide>
                 <Label for="challenge-url" class="mb-2">File URL</Label>
                 <Input
                     class="bg-neutral-100 dark:bg-neutral-900 !text-neutral-900 dark:!text-neutral-100 !rounded-none !border-none focus:!outline-none focus:!border-none"
                     id="challenge-url"
                     placeholder="https://example.com/source.zip"
-                    bind:value={challengeTemplate.fileURL}
+                    bind:value={challengeTemplate.fileUrl}
                 />
             </div>
         {/if}
         <div class="mb-6">
-            <Toggle bind:checked={challengeTemplate.hasDepend}>Depends On</Toggle>
+            <Toggle bind:checked={challengeTemplate.isDependant}>Depends On</Toggle>
         </div>
-        {#if challengeTemplate.hasDepend}
+        {#if challengeTemplate.isDependant}
             {#if challenges.length > 0}
                 <div class="mb-6">
                     <Label class="mb-2">Parent Challenge</Label>
@@ -369,7 +372,7 @@
             <Label class="mb-2">Assign To Event</Label>
             <Select
                 defaultClass="text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-900"
-                bind:value={challengeTemplate.event}
+                bind:value={challengeTemplate.assignTo}
                 placeholder=""
             >
                 <option selected value="">None</option>
@@ -393,18 +396,18 @@
                 <Button
                     on:click={createChallenge}
                     disabled={challengeTemplate.difficulty === '' ||
-                        challengeTemplate.event === '' ||
+                        challengeTemplate.assignTo === '' ||
                         challengeTemplate.name === '' ||
                         challengeTemplate.description === '' ||
                         challengeTemplate.category === '' ||
                         challengeTemplate.points === 0 ||
-                        (challengeTemplate.staticFlag === '' && challengeTemplate.flagStatic) ||
-                        (challengeTemplate.dependsOn === '' && challengeTemplate.hasDepend) ||
-                        (challengeTemplate.fileURL === '' && challengeTemplate.hasFile) ||
-                        (challengeTemplate.path === '' &&
+                        (challengeTemplate.staticFlag === '' && challengeTemplate.isStaticFlag) ||
+                        (challengeTemplate.dependsOn === '' && challengeTemplate.isDependant) ||
+                        (challengeTemplate.fileUrl === '' && challengeTemplate.isWithFile) ||
+                        (challengeTemplate.containerPath === '' &&
                             challengeTemplate.staticFlag === '' &&
-                            challengeTemplate.flagPool === false) ||
-                        (challengeTemplate.path === '' && challengeTemplate.isContainer)}>Create</Button
+                            challengeTemplate.isFlagPool === false) ||
+                        (challengeTemplate.containerPath === '' && challengeTemplate.isContainer)}>Create</Button
                 >
                 <Button
                     on:click={() => {
