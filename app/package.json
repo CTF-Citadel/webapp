@@ -16,6 +16,8 @@
     "@astrojs/svelte": "^5.4.0",
     "@astrojs/tailwind": "^5.1.0",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
+    "@trpc/client": "^11.0.0-rc.351",
+    "@trpc/server": "^11.0.0-rc.351",
     "astro": "^4.6.3",
     "drizzle-kit": "^0.20.17",
     "drizzle-orm": "^0.30.9",

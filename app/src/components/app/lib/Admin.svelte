@@ -6,6 +6,8 @@
 
 <script lang="ts">
     import { requestWrapper } from '../../../lib/helpers';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { AdminRouter } from '../../../lib/trpc/admin';
     import {
         Table,
         TableBody,
@@ -32,7 +34,6 @@
         EventsType,
         TeamsType,
         ChallengesType,
-        TeamEventsType,
         TeamChallengesType
     } from '../../../lib/schema';
     // subcomponents
@@ -47,6 +48,14 @@
 
     export let withAC: boolean = false;
     export let withCertMailer: boolean = false;
+
+    const CLIENT = createTRPCClient<AdminRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/admin',
+            }),
+        ],
+    });
 
     let teams: TeamsType[] = [];
     let events: EventsType[] = [];
@@ -93,43 +102,31 @@
     });
 
     async function refreshUsers() {
-        const DATA = await requestWrapper(true, { type: 'users' });
-        const JSON = await DATA.json();
-        users = JSON.data;
+        users = await CLIENT.getAllUsers.query();
     }
 
     async function refreshTeams() {
-        const DATA = await requestWrapper(true, { type: 'teams' });
-        const JSON = await DATA.json();
-        teams = JSON.data;
+        teams = await CLIENT.getAllTeams.query();
+    }
+
+    async function refreshTeamEvents() {
+        teamEvents = await CLIENT.getAllTeamEvents.query();
+    }
+
+    async function refreshTeamChallenges() {
+        teamChallenges = await CLIENT.getAllTeamChallenges.query();
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper(true, { type: 'challenges' });
-        const JSON = await DATA.json();
-        challenges = JSON.data;
+        challenges = await CLIENT.getAllChallenges.query();
         sortedChallenges = [];
         challenges.forEach((element) => {
             sortedChallenges.push({ value: element.id, name: element.name });
         });
     }
 
-    async function refreshTeamEvents() {
-        const DATA = await requestWrapper(true, { type: 'team-events' });
-        const JSON = await DATA.json();
-        teamEvents = JSON.data;
-    }
-
-    async function refreshTeamChallenges() {
-        const DATA = await requestWrapper(true, { type: 'team-challenges' });
-        const JSON = await DATA.json();
-        teamChallenges = JSON.data;
-    }
-
     async function refreshEvents() {
-        const DATA = await requestWrapper(true, { type: 'events' });
-        const JSON = await DATA.json();
-        events = JSON.data;
+        events = await CLIENT.getAllEvents.query();
         sortedEvents = [];
         events.forEach((element) => {
             sortedEvents.push({ value: element.id, name: element.name });
