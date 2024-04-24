@@ -611,8 +611,20 @@ class Actions {
         if (user === null || VALID === false) return false;
         const GEN_FLAG = crypto.randomUUID();
         const TIMESTAMP = new Date().getTime();
+        const NOT_DEPLOYED =
+            (
+                await DB_ADAPTER.select()
+                    .from(team_challenges)
+                    .where(
+                        and(
+                            eq(team_challenges.challenge_id, schema.challengeId),
+                            eq(team_challenges.team_id, user.team_id),
+                            eq(team_challenges.event_id, schema.eventId)
+                        )
+                    )
+            ).length === 0;
         const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, schema.challengeId))).at(0);
-        if (RES !== undefined) {
+        if (RES !== undefined && NOT_DEPLOYED === true) {
             // note deployment
             await DB_ADAPTER.insert(team_challenges).values({
                 team_id: user.team_id,
