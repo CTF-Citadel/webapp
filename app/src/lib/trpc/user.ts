@@ -60,7 +60,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.changeUserData(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -68,7 +69,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateUserAvatar(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -76,7 +78,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.resetPassword(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -84,7 +87,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.createTeam(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -92,7 +96,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.joinTeam(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -100,7 +105,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.leaveTeam(opts.ctx.sessionId);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -108,7 +114,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateTeamData(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -116,7 +123,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.resetTeamToken(opts.ctx.sessionId);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -124,28 +132,32 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deployTeamChallenge(opts.ctx.sessionId, opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
     checkStaticFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkStaticChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
     checkPoolFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkPoolChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
     checkDynamicFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkDynamicChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     })

@@ -40,7 +40,7 @@
     async function sendBatchCerts() {
         success = false;
         notifyLength = Number(batchUsers.length);
-        const DATA = await CLIENT.queryBulkMail.query(batchUsers);
+        const DATA = await CLIENT.queryBulkMail.mutate(batchUsers);
         if (DATA === true) {
             success = true;
             batchUsers = [];

@@ -48,15 +48,21 @@ export const TRPC_ROUTER = TRPC.router({
     }),
     queryBulkMail: TRPC.procedure
         .input(z.array(z.object({ email: z.string(), fullName: z.string() })))
-        .query(async (opts) => {
-            await HANLDER.sendCertUserMails(opts.input);
-            return true;
+        .mutation(async (opts) => {
+            try {
+                await HANLDER.sendCertUserMails(opts.input);
+                return true;
+            } catch (e) {
+                console.error(e);
+                return false;
+            }
         }),
     createAntiCheatPoison: TRPC.procedure.input(z.array(z.string())).mutation(async (opts) => {
         try {
             await HANLDER.createAntiCheatPoison(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -64,7 +70,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.createChallenge(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -72,7 +79,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateChallenge(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -80,7 +88,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteChallenge(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -88,7 +97,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.createEvent(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -96,7 +106,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateEvent(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -104,7 +115,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteEvent(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -112,7 +124,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.createTeamEvent(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -120,7 +133,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteTeamEvent(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -128,7 +142,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateTeamChallenge(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -136,7 +151,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteTeamChallenge(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -144,7 +160,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateUser(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -152,7 +169,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.toggleBlockUser(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -160,7 +178,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteUser(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -168,7 +187,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.updateTeam(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     }),
@@ -176,7 +196,8 @@ export const TRPC_ROUTER = TRPC.router({
         try {
             await HANLDER.deleteTeam(opts.input);
             return true;
-        } catch {
+        } catch (e) {
+            console.error(e);
             return false;
         }
     })
