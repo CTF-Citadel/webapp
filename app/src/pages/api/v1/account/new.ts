@@ -3,7 +3,7 @@ import { generateEmailverificationTokens } from '../../../../lib/lucia-db';
 import { sendVerificationLink } from '../../../../lib/lucia-email';
 import { validEmail, validPassword, validUsername } from '../../../../lib/helpers';
 import { safeCreateUser } from '../../../../lib/lucia-db';
-import { getConfig } from "../../../../lib/config"
+import { getConfig } from '../../../../lib/config';
 
 const CONFIG = await getConfig();
 
@@ -17,7 +17,11 @@ export const POST: APIRoute = async (context) => {
     const email = DATA.email;
     const username = DATA.username;
     const password = DATA.password;
-    if (validEmail(email, Boolean(CONFIG.email.enable_enforce_domain), String(CONFIG.email.enforce_domain)) && validPassword(password) && validUsername(username)) {
+    if (
+        validEmail(email, Boolean(CONFIG.email.enable_enforce_domain), String(CONFIG.email.enforce_domain)) &&
+        validPassword(password) &&
+        validUsername(username)
+    ) {
         try {
             const { ID, COOKIE } = await safeCreateUser(username, email, password);
             context.cookies.set(COOKIE.name, COOKIE.value, COOKIE.attributes);
@@ -36,7 +40,7 @@ export const POST: APIRoute = async (context) => {
                 errorMessage = 'Email already registered';
             } else if (e.message === 'AUTH_EMAIL_ENFORCE') {
                 errorMessage = 'Email not allowed';
-            }else {
+            } else {
                 console.error(e);
                 errorMessage = 'Unknown Error';
             }

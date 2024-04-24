@@ -59,96 +59,96 @@ export const TRPC_ROUTER = TRPC.router({
     updateUserData: TRPC.procedure.input(USER_UPDATE_DATA).mutation(async (opts) => {
         try {
             await HANLDER.changeUserData(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     updateUserAvatar: TRPC.procedure.input(z.string()).mutation(async (opts) => {
         try {
             await HANLDER.updateUserAvatar(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     updateUserPassword: TRPC.procedure.input(z.string()).mutation(async (opts) => {
         try {
             await HANLDER.resetPassword(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     createTeam: TRPC.procedure.input(USER_CREATE_TEAM).mutation(async (opts) => {
         try {
             await HANLDER.createTeam(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     joinTeam: TRPC.procedure.input(z.string()).mutation(async (opts) => {
         try {
             await HANLDER.joinTeam(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     leaveTeam: TRPC.procedure.mutation(async (opts) => {
         try {
             await HANLDER.leaveTeam(opts.ctx.sessionId);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     updateTeam: TRPC.procedure.input(USER_UPDATE_TEAM).mutation(async (opts) => {
         try {
-            await HANLDER.updateTeamData(opts.ctx.sessionId, opts.input)
-            return true
+            await HANLDER.updateTeamData(opts.ctx.sessionId, opts.input);
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     updateTeamToken: TRPC.procedure.mutation(async (opts) => {
         try {
             await HANLDER.resetTeamToken(opts.ctx.sessionId);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     deployChallenge: TRPC.procedure.input(USER_DEPLOY_CHALLENGE).mutation(async (opts) => {
         try {
             await HANLDER.deployTeamChallenge(opts.ctx.sessionId, opts.input);
-            return true
+            return true;
         } catch {
-            return false
+            return false;
         }
     }),
     checkStaticFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkStaticChallengeFlag(opts.ctx.sessionId, opts.input);
         } catch {
-            return false
+            return false;
         }
     }),
     checkPoolFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkPoolChallengeFlag(opts.ctx.sessionId, opts.input);
         } catch {
-            return false
+            return false;
         }
     }),
     checkDynamicFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
         try {
             return await HANLDER.checkDynamicChallengeFlag(opts.ctx.sessionId, opts.input);
         } catch {
-            return false
+            return false;
         }
-    }),
+    })
 });
 
 export type UserRouter = typeof TRPC_ROUTER;

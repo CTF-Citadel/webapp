@@ -1,4 +1,4 @@
-import { getConfig } from "./config";
+import { getConfig } from './config';
 
 const CONFIG = await getConfig();
 
@@ -7,7 +7,16 @@ const CONFIG = await getConfig();
  * @returns Number
  */
 function dynDeductor(points: number, solves: number) {
-    return Math.floor(Math.max(points / 10, Number(points * Math.min(1, Number(CONFIG.webapp.dynamic_k) / (Number(CONFIG.webapp.dynamic_k) + solves - 1)) ** Number(CONFIG.webapp.dynamic_p))));
+    return Math.floor(
+        Math.max(
+            points / 10,
+            Number(
+                points *
+                    Math.min(1, Number(CONFIG.webapp.dynamic_k) / (Number(CONFIG.webapp.dynamic_k) + solves - 1)) **
+                        Number(CONFIG.webapp.dynamic_p)
+            )
+        )
+    );
 }
 
 /**
@@ -41,7 +50,7 @@ function getAvgTime(data: { id: string; name: string; timestamp: number; points_
             name: entry.name,
             avg_time: AVG,
             points_gained: entry.points_gained
-        })
+        });
     }
     return temp;
 }
@@ -79,17 +88,22 @@ export function getTotalByName(
     start: number
 ) {
     const TIME_ADJUSTED = getAvgTime(data, start);
-    const DATA = TIME_ADJUSTED.reduce<{ id: string; name: string; avg_time: number; total_points: number }[]>((acc, curr) => {
-        const { id, name, avg_time, points_gained } = curr;
-        const existingEntry = acc.find((entry) => entry.id === id && entry.name === name);
-        if (existingEntry) {
-            existingEntry.total_points += points_gained;
-        } else {
-            acc.push({ id, name, avg_time, total_points: points_gained });
-        }
-        return acc;
-    }, []);
-    return DATA.sort((a, b) => b.total_points !== a.total_points ? b.total_points - a.total_points : a.avg_time - b.avg_time );
+    const DATA = TIME_ADJUSTED.reduce<{ id: string; name: string; avg_time: number; total_points: number }[]>(
+        (acc, curr) => {
+            const { id, name, avg_time, points_gained } = curr;
+            const existingEntry = acc.find((entry) => entry.id === id && entry.name === name);
+            if (existingEntry) {
+                existingEntry.total_points += points_gained;
+            } else {
+                acc.push({ id, name, avg_time, total_points: points_gained });
+            }
+            return acc;
+        },
+        []
+    );
+    return DATA.sort((a, b) =>
+        b.total_points !== a.total_points ? b.total_points - a.total_points : a.avg_time - b.avg_time
+    );
 }
 
 /**

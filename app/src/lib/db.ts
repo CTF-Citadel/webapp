@@ -1,4 +1,4 @@
-import pg from "pg";
+import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 // read from env

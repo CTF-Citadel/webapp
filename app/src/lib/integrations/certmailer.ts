@@ -17,7 +17,9 @@ const ATTENDANCE_TEMPLATE: string = `<html>
                 </td>
             </tr>
         </table>
-        <p>Thank you for participating at the recent ${String(CONFIG.webapp.name)} event. Your can find your certificate of attendance attached to this email.</p>
+        <p>Thank you for participating at the recent ${String(
+            CONFIG.webapp.name
+        )} event. Your can find your certificate of attendance attached to this email.</p>
         <p>If you have any further questions regarding this email or the attachment sent, please contact a platform administrator.</p>
         <p>Sincerely, <br>The ${String(CONFIG.webapp.name)} Team</p>
     </body>
@@ -44,7 +46,7 @@ class CertMailer {
      * @returns save path if success
      */
     private async preparePDF(
-        data: { email: string; fullName: string; placement?: string;  },
+        data: { email: string; fullName: string; placement?: string },
         attendance: boolean = false
     ): Promise<{ PATH: string; FILENAME: string }> {
         const pdfBytes = await fs.readFile(`${this.#CERTPATH.replace(/\/$/, '')}/attendance.pdf`);
@@ -68,9 +70,7 @@ class CertMailer {
      * Send attendance certs to a list of user emails
      * @returns true if success, false if not
      */
-    async batchSendAttendance(
-        userList: { email: string; fullName: string }[]
-    ): Promise<boolean> {
+    async batchSendAttendance(userList: { email: string; fullName: string }[]): Promise<boolean> {
         for (let user of userList) {
             try {
                 // prep the PDF

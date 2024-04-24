@@ -24,12 +24,13 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="Admin">
-    <Header
-        username={session.username}
-        interactive={true}
-        client:visible
-    />
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <GeneralSettings session={session} ac={Boolean(CONFIG.m0n1t0r.enable)} certMailer={Boolean(CONFIG.email.enable_certificate_mailing)} client:visible />
+        <GeneralSettings
+            session={session}
+            ac={Boolean(CONFIG.m0n1t0r.enable)}
+            certMailer={Boolean(CONFIG.email.enable_certificate_mailing)}
+            client:visible
+        />
     </div>
 </Layout>

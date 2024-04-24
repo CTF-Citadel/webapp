@@ -1,6 +1,6 @@
-import type { APIRoute } from "astro";
+import type { APIRoute } from 'astro';
 import { sendPasswordResetLink } from '../../../../lib/lucia-email';
-import { generatePasswordresetTokens, isRegisteredEmail } from "../../../../lib/lucia-db";
+import { generatePasswordresetTokens, isRegisteredEmail } from '../../../../lib/lucia-db';
 
 export const POST: APIRoute = async (context) => {
     let emailSent = false;
@@ -23,7 +23,7 @@ export const POST: APIRoute = async (context) => {
             errorMessage = 'An error occurred';
         }
     } else {
-        errorMessage = 'Account does not exist!'
+        errorMessage = 'Account does not exist!';
     }
     return new Response(
         JSON.stringify({

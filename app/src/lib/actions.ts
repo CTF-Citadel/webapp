@@ -8,7 +8,23 @@ import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import { getConfig } from './config';
 import type { ChallengesType } from './schema';
-import type { ChallengeCreate, ChallengeUpdate, EventCreate, EventUpdate, SubmissionDelete, SubmissionUpdate, TeamEventCreate, TeamEventDelete, TeamUpdate, UserCheckFlag, UserCreateTeam, UserDeployChallenge, UserUpdate, UserUpdateData, UserUpdateTeam } from './types';
+import type {
+    ChallengeCreate,
+    ChallengeUpdate,
+    EventCreate,
+    EventUpdate,
+    SubmissionDelete,
+    SubmissionUpdate,
+    TeamEventCreate,
+    TeamEventDelete,
+    TeamUpdate,
+    UserCheckFlag,
+    UserCreateTeam,
+    UserDeployChallenge,
+    UserUpdate,
+    UserUpdateData,
+    UserUpdateTeam
+} from './types';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
 import F1rstbl00d from './integrations/f1rstbl00d';
@@ -31,7 +47,9 @@ class Actions {
     async checkValidEventExist(eventID: string) {
         const CURRENT_DATE = new Date().getTime();
         const RES = (
-            await DB_ADAPTER.select({ name: events.name, start: events.start, end: events.end }).from(events).where(eq(events.id, eventID))
+            await DB_ADAPTER.select({ name: events.name, start: events.start, end: events.end })
+                .from(events)
+                .where(eq(events.id, eventID))
         ).at(0);
         if (RES !== undefined) {
             return CURRENT_DATE >= RES.start && CURRENT_DATE <= RES.end ? RES.name : false;
@@ -44,9 +62,7 @@ class Actions {
      * @returns Event Name if it exists, False if it doesn't
      */
     async checkEventExist(eventID: string) {
-        const RES = (
-            await DB_ADAPTER.select({ name: events.name }).from(events).where(eq(events.id, eventID))
-        ).at(0);
+        const RES = (await DB_ADAPTER.select({ name: events.name }).from(events).where(eq(events.id, eventID))).at(0);
         return RES === undefined ? false : RES.name;
     }
 
@@ -538,9 +554,7 @@ class Actions {
      * Creates a new Challenge
      * @returns void
      */
-    async createChallenge(
-        schema: ChallengeCreate
-    ) {
+    async createChallenge(schema: ChallengeCreate) {
         await DB_ADAPTER.insert(challenges).values({
             id: crypto.randomUUID(),
             event_id: schema.assignTo,
@@ -730,10 +744,7 @@ class Actions {
      * Checks a static Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkStaticChallengeFlag(
-        sessionID: string,
-        schema: UserCheckFlag
-    ): Promise<boolean> {
+    async checkStaticChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
@@ -794,10 +805,7 @@ class Actions {
      * Checks a pool Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkPoolChallengeFlag(
-        sessionID: string,
-        schema: UserCheckFlag
-    ): Promise<boolean> {
+    async checkPoolChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
@@ -809,7 +817,7 @@ class Actions {
         if (RES !== undefined && validFlag(schema.flag, String(CONFIG.webapp.prefix)) && RES.needs_pool === true) {
             const EXTRACTED_FLAG = schema.flag.slice(schema.flag.indexOf('{') + 1, schema.flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
-            if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true &&  VALID !== false) {
+            if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true && VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: user.team_id,
                     challenge_id: schema.challengeId,
@@ -922,11 +930,7 @@ class Actions {
                 .from(team_events)
                 .innerJoin(events, eq(team_events.event_id, events.id))
                 .where(
-                    and(
-                        eq(team_events.team_id, user.team_id),
-                        lt(events.start, TIMESTAMP),
-                        gt(events.end, TIMESTAMP)
-                    )
+                    and(eq(team_events.team_id, user.team_id), lt(events.start, TIMESTAMP), gt(events.end, TIMESTAMP))
                 )
         ).length;
         const POINTS_ADDED = (
@@ -1053,9 +1057,7 @@ class Actions {
      * Updates a Challenge's properties
      * @returns void
      */
-    async updateChallenge(
-        schema: ChallengeUpdate
-    ) {
+    async updateChallenge(schema: ChallengeUpdate) {
         await DB_ADAPTER.update(challenges)
             .set({
                 name: schema.name,
@@ -1073,9 +1075,7 @@ class Actions {
      * Updates a Users properties
      * @returns void
      */
-    async updateUser(
-        schema: UserUpdate
-    ) {
+    async updateUser(schema: UserUpdate) {
         await DB_ADAPTER.update(users)
             .set({
                 email: schema.email,
@@ -1172,9 +1172,7 @@ class Actions {
      * Updates a Team Challenge per ID
      * @returns void
      */
-    async updateTeamChallenge(
-        schema: SubmissionUpdate
-    ) {
+    async updateTeamChallenge(schema: SubmissionUpdate) {
         await DB_ADAPTER.update(team_challenges)
             .set({
                 container_flag: schema.containerFlag,

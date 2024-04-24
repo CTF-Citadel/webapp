@@ -17,6 +17,10 @@ if (Astro.locals.user) {
 <Layout title="Sign Up">
     <Header client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center h-full">
-        <SignupPage restricted={Boolean(CONFIG.email.enable_enforce_domain)} restrictTo={String(CONFIG.email.enforce_domain)} client:visible />
+        <SignupPage
+            restricted={Boolean(CONFIG.email.enable_enforce_domain)}
+            restrictTo={String(CONFIG.email.enforce_domain)}
+            client:visible
+        />
     </div>
 </Layout>

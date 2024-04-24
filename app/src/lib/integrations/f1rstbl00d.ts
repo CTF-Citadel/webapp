@@ -1,4 +1,4 @@
-import { getConfig } from "../config";
+import { getConfig } from '../config';
 
 const CONFIG = await getConfig();
 
@@ -21,7 +21,15 @@ class F1rstbl00d {
      * @returns -1 if disabled
      * @returns true if success, false if not
      */
-    async solve(userName: string, eventID: string, challengeID: string, challengeName: string, challengeCategory: string, challengeDifficulty: string, timestamp: number): Promise<-1 | boolean> {
+    async solve(
+        userName: string,
+        eventID: string,
+        challengeID: string,
+        challengeName: string,
+        challengeCategory: string,
+        challengeDifficulty: string,
+        timestamp: number
+    ): Promise<-1 | boolean> {
         if (!this.#ENABLED) return -1;
         try {
             let RESP = await fetch(`${this.#F1RSTBL00D_URL}/firstbloods/add/`, {
@@ -38,7 +46,7 @@ class F1rstbl00d {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             return false;
         }
     }

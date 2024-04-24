@@ -21,11 +21,7 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="Events">
-    <Header
-        username={session.username}
-        interactive={true}
-        client:visible
-    />
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center items-center">
         <Event client:visible />
     </div>

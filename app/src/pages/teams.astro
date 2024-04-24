@@ -21,11 +21,7 @@ if (!import.meta.env.DEV) {
 ---
 
 <Layout title="Teams">
-    <Header
-        username={session.username}
-        interactive={true}
-        client:visible
-    />
+    <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 flex-grow justify-center">
         <TeamOverview session={session} client:visible />
     </div>

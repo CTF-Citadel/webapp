@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import { getConfig } from "./config";
+import nodemailer from 'nodemailer';
+import { getConfig } from './config';
 
 const CONFIG = await getConfig();
 let transporter = nodemailer.createTransport({
@@ -12,11 +12,12 @@ let transporter = nodemailer.createTransport({
 
 export const sendVerificationLink = async (origin: string, email: string, token: string) => {
     const URL = `${origin}/verify/${token}`;
-    transporter.sendMail({
-        from: String(CONFIG.email.username),
-        to: email,
-        subject: 'Email Verification',
-        html: `<html>
+    transporter.sendMail(
+        {
+            from: String(CONFIG.email.username),
+            to: email,
+            subject: 'Email Verification',
+            html: `<html>
         <head>
             <title>Verify Your Email Address</title>
         </head>
@@ -28,7 +29,9 @@ export const sendVerificationLink = async (origin: string, email: string, token:
                         </td>
                     </tr>
                 </table>
-                <p>Thank you for creating an account on ${String(CONFIG.webapp.name)}. To complete the registration process, please click the link below to verify your email address:</p>
+                <p>Thank you for creating an account on ${String(
+                    CONFIG.webapp.name
+                )}. To complete the registration process, please click the link below to verify your email address:</p>
                 <table width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                         <td align="center">
@@ -41,20 +44,23 @@ export const sendVerificationLink = async (origin: string, email: string, token:
                 <p>Sincerely, <br>The ${String(CONFIG.webapp.name)} Team</p>
             </body>
         </html>`
-    }, (e: any) => {
-        if (e !== null) {
-            console.error(e);
+        },
+        (e: any) => {
+            if (e !== null) {
+                console.error(e);
+            }
         }
-    });
+    );
 };
 
 export const sendPasswordResetLink = async (origin: string, email: string, token: string) => {
     const URL = `${origin}/reset/${token}`;
-    transporter.sendMail({
-        from: String(CONFIG.email.username),
-        to: email,
-        subject: 'Password Reset',
-        html: `<html>
+    transporter.sendMail(
+        {
+            from: String(CONFIG.email.username),
+            to: email,
+            subject: 'Password Reset',
+            html: `<html>
         <head>
             <title>Reset Your Password</title>
         </head>
@@ -66,7 +72,9 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
                         </td>
                     </tr>
                 </table>
-                <p>You are receiving this email because you have requested to reset your password for your account on ${String(CONFIG.webapp.name)}. To proceed with the password reset, please click the link below:</p>
+                <p>You are receiving this email because you have requested to reset your password for your account on ${String(
+                    CONFIG.webapp.name
+                )}. To proceed with the password reset, please click the link below:</p>
                 <table width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                         <td align="center">
@@ -78,9 +86,11 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
                 <p>Sincerely, <br>The ${String(CONFIG.webapp.name)} Admin Team</p>
             </body>
         </html>`
-    }, (e: any) => {
-        if (e !== null) {
-            console.error(e);
+        },
+        (e: any) => {
+            if (e !== null) {
+                console.error(e);
+            }
         }
-    });
+    );
 };
