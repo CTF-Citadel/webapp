@@ -25,6 +25,10 @@ export const ALL: APIRoute = async (context) => {
         endpoint: '/api/v2/user',
         req: context.request,
         router: TRPC_ROUTER,
-        createContext
+        createContext,
+        onError(opts) {
+            const { error } = opts;
+            console.error('Error:', error.message);
+        },
     });
 };

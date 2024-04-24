@@ -96,6 +96,14 @@ export const DELETE_SUBMISSION = z.object({
 });
 export type SubmissionDelete = z.infer<typeof DELETE_SUBMISSION>;
 
+export const QUERY_BULK_MAIL = z.array(
+    z.object({
+        email: z.string(),
+        fullName: z.string()
+    })
+);
+export type BulkMailQuery = z.infer<typeof QUERY_BULK_MAIL>;
+
 export const USER_CHECK_FLAG = z.object({
     challengeId: z.string().uuid(),
     eventId: z.string().uuid(),

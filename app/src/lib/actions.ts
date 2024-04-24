@@ -9,6 +9,7 @@ import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import { getConfig } from './config';
 import type { ChallengesType } from './schema';
 import type {
+    BulkMailQuery,
     ChallengeCreate,
     ChallengeUpdate,
     EventCreate,
@@ -108,7 +109,7 @@ class Actions {
 
     /**
      * Validate if a user has created a team
-     * @returns True if the user has, false if he hasn't
+     * @returns boolean
      */
     async checkHasCreatedTeam(userID: string) {
         const RES = await DB_ADAPTER.select().from(teams).where(eq(teams.creator_id, userID));
@@ -128,7 +129,7 @@ class Actions {
 
     /**
      * Validate if challenge is solved initially
-     * @returns True if its the first solve, false if not
+     * @returns boolean
      */
     async checkInitialSolve(challengeID: string) {
         const RES = await DB_ADAPTER.select()
@@ -515,7 +516,7 @@ class Actions {
 
     /**
      * Reset a users password
-     * @returns true if success, false if not
+     * @returns boolean
      */
     async resetPassword(sessionID: string, password: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -533,7 +534,7 @@ class Actions {
 
     /**
      * Changes a users first and lastname
-     * @returns true if success, false if not
+     * @returns boolean
      */
     async changeUserData(sessionID: string, schema: UserUpdateData) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -552,7 +553,7 @@ class Actions {
 
     /**
      * Creates a new Challenge
-     * @returns void
+     * @returns boolean
      */
     async createChallenge(schema: ChallengeCreate) {
         await DB_ADAPTER.insert(challenges).values({
@@ -573,6 +574,7 @@ class Actions {
             needs_container: schema.isContainer,
             needs_pool: schema.isFlagPool
         });
+        return true;
     }
 
     /**
@@ -603,7 +605,7 @@ class Actions {
 
     /**
      * Deploys a new Challenge
-     * @returns true if queued, false if not
+     * @returns boolean
      */
     async deployTeamChallenge(sessionID: string, schema: UserDeployChallenge): Promise<boolean> {
         const VALID = await this.checkValidEventExist(schema.eventId);
@@ -678,7 +680,7 @@ class Actions {
 
     /**
      * Checks a Flag for its validity
-     * @returns true if the flag matches, false if it doesnt
+     * @returns boolean
      */
     async checkDynamicChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -754,7 +756,7 @@ class Actions {
 
     /**
      * Checks a static Flag for its validity
-     * @returns true if the flag matches, false if it doesnt
+     * @returns boolean
      */
     async checkStaticChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -815,7 +817,7 @@ class Actions {
 
     /**
      * Checks a pool Flag for its validity
-     * @returns true if the flag matches, false if it doesnt
+     * @returns boolean
      */
     async checkPoolChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -876,7 +878,7 @@ class Actions {
 
     /**
      * Creates a new event
-     * @returns void
+     * @returns boolean
      */
     async createEvent(schema: EventCreate) {
         await DB_ADAPTER.insert(events).values({
@@ -886,11 +888,12 @@ class Actions {
             start: schema.start,
             end: schema.end
         });
+        return true;
     }
 
     /**
      * Assigns an event per ID to a list of Teams
-     * @returns void
+     * @returns boolean
      */
     async createTeamEvent(schema: TeamEventCreate) {
         for (let team of schema.teamIdList) {
@@ -899,11 +902,12 @@ class Actions {
                 event_id: schema.eventId
             });
         }
+        return true;
     }
 
     /**
      * Creates a new Team
-     * @returns void
+     * @returns boolean
      */
     async createTeam(sessionID: string, schema: UserCreateTeam) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -925,8 +929,10 @@ class Actions {
                 })
                 .then(async () => {
                     await this.joinTeam(sessionID, TEAM_TOKEN);
+                    return true;
                 });
         }
+        return false;
     }
 
     /**
@@ -955,7 +961,7 @@ class Actions {
 
     /**
      * Validates and adds a user to a team
-     * @returns void
+     * @returns boolean
      */
     async joinTeam(sessionID: string, token: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -967,12 +973,14 @@ class Actions {
                     team_id: TOKEN
                 })
                 .where(eq(users.id, user.id));
+            return true;
         }
+        return false;
     }
 
     /**
      * Resets a team's join token by ID
-     * @returns void
+     * @returns boolean
      */
     async resetTeamToken(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -985,17 +993,19 @@ class Actions {
                         join_token: 'CTD-' + generateRandomString(16).toUpperCase()
                     })
                     .where(eq(teams.id, user.team_id));
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Update a team's data token by ID
-     * @returns void
+     * @returns boolean
      */
     async updateTeamData(sessionID: string, schema: UserUpdateTeam) {
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null) return;
+        if (user === null) return false;
         const TEAM = await this.getTeamInfo(sessionID);
         const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, schema.name))).length;
         if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.name === schema.name)) {
@@ -1006,13 +1016,15 @@ class Actions {
                         description: schema.description
                     })
                     .where(eq(teams.id, user.team_id));
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Update a users avatar by ID
-     * @returns void
+     * @returns boolean
      */
     async updateUserAvatar(sessionID: string, avatar: string) {
         const { session, user } = await lucia.validateSession(sessionID);
@@ -1022,16 +1034,18 @@ class Actions {
                     avatar: avatar
                 })
                 .where(eq(users.id, user.id));
+            return true;
         }
+        return false;
     }
 
     /**
      * Validates and removes a user from his team
-     * @returns void
+     * @returns boolean
      */
     async leaveTeam(sessionID: string) {
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user === null) return;
+        if (user === null) return false;
         const TEAM = await this.getTeamInfo(sessionID);
         const MEMBERS = await this.getTeamMembers(sessionID);
         if (user && TEAM !== null && MEMBERS.length > 0) {
@@ -1046,13 +1060,15 @@ class Actions {
                 if (TEAM.creator_id === user.id && MEMBERS.length === 1) {
                     await DB_ADAPTER.delete(teams).where(eq(teams.id, user.team_id));
                 }
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Updates an Event's properties
-     * @returns void
+     * @returns boolean
      */
     async updateEvent(schema: EventUpdate) {
         await DB_ADAPTER.update(events)
@@ -1063,11 +1079,12 @@ class Actions {
                 end: schema.end
             })
             .where(eq(events.id, schema.id));
+        return true;
     }
 
     /**
      * Updates a Challenge's properties
-     * @returns void
+     * @returns boolean
      */
     async updateChallenge(schema: ChallengeUpdate) {
         await DB_ADAPTER.update(challenges)
@@ -1081,11 +1098,12 @@ class Actions {
                 depends_on: schema.dependsOn
             })
             .where(eq(challenges.id, schema.id));
+        return true;
     }
 
     /**
      * Updates a Users properties
-     * @returns void
+     * @returns boolean
      */
     async updateUser(schema: UserUpdate) {
         await DB_ADAPTER.update(users)
@@ -1099,11 +1117,12 @@ class Actions {
                 team_id: schema.teamId
             })
             .where(eq(users.id, schema.id));
+        return true;
     }
 
     /**
      * Updates a Team per ID
-     * @returns void
+     * @returns boolean
      */
     async updateTeam(schema: TeamUpdate) {
         await DB_ADAPTER.update(teams)
@@ -1112,21 +1131,23 @@ class Actions {
                 description: schema.description
             })
             .where(eq(teams.id, schema.id));
+        return true;
     }
 
     /**
      * Deletes a Team Event per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteTeamEvent(schema: TeamEventDelete) {
         await DB_ADAPTER.delete(team_events).where(
             and(eq(team_events.event_id, schema.eventId), eq(team_events.team_id, schema.teamId))
         );
+        return true;
     }
 
     /**
      * Deletes a Team per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteTeam(teamID: string) {
         await DB_ADAPTER.delete(teams).where(eq(teams.id, teamID));
@@ -1138,22 +1159,23 @@ class Actions {
                 })
                 .where(eq(users.id, user.id));
         });
+        return true;
     }
 
     /**
      * Deletes a User per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteUser(userID: string) {
-        // remove user data
         await lucia.invalidateUserSessions(userID);
         await DB_ADAPTER.delete(users).where(eq(users.id, userID));
         await lucia.deleteExpiredSessions();
+        return true;
     }
 
     /**
      * Deletes a Challenge per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteChallenge(challengeID: string) {
         const CHALLENGE = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
@@ -1163,12 +1185,14 @@ class Actions {
         // only allow deletion if challenge is not bound
         if (CHALLENGE !== undefined && ACTIVE_CHALLENGES === 0) {
             await DB_ADAPTER.delete(challenges).where(eq(challenges.id, CHALLENGE.id));
+            return true;
         }
+        return false;
     }
 
     /**
      * Deletes a Team Challenge per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteTeamChallenge(schema: SubmissionDelete) {
         await DB_ADAPTER.delete(team_challenges).where(
@@ -1178,11 +1202,12 @@ class Actions {
                 eq(team_challenges.team_id, schema.teamId)
             )
         );
+        return true;
     }
 
     /**
      * Updates a Team Challenge per ID
-     * @returns void
+     * @returns boolean
      */
     async updateTeamChallenge(schema: SubmissionUpdate) {
         await DB_ADAPTER.update(team_challenges)
@@ -1198,11 +1223,12 @@ class Actions {
                     eq(team_challenges.team_id, schema.teamId)
                 )
             );
+        return true;
     }
 
     /**
      * Toggles Blocking of a user per ID
-     * @returns void
+     * @returns boolean
      */
     async toggleBlockUser(userID: string) {
         const RES = (await DB_ADAPTER.select().from(users).where(eq(users.id, userID))).at(0);
@@ -1221,12 +1247,14 @@ class Actions {
                     })
                     .where(eq(users.id, RES.id));
             }
+            return true;
         }
+        return false;
     }
 
     /**
      * Deletes an event per ID
-     * @returns void
+     * @returns boolean
      */
     async deleteEvent(eventID: string) {
         const ACTIVE_CHALLENGES = (
@@ -1237,7 +1265,9 @@ class Actions {
         // allow deletion only if the event is bound to nothing
         if (ACTIVE_CHALLENGES === 0 && PASSIVE_CHALLENGES === 0) {
             await DB_ADAPTER.delete(events).where(eq(events.id, eventID));
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1266,15 +1296,16 @@ class Actions {
 
     /**
      * Get all Anti Cheat poisoned flags
-     * @returns void
+     * @returns boolean
      */
     async createAntiCheatPoison(list: string[]) {
-        await MONITOR.infect(list);
+        const RES = await MONITOR.infect(list);
+        return RES === -1 ? false : RES
     }
 
     /**
      * Get eligible users for cert email
-     * @returns void
+     * @returns List
      */
     async getValidCertUsers(eventID: string) {
         const RES = await DB_ADAPTER.select({
@@ -1298,14 +1329,15 @@ class Actions {
 
     /**
      * Send cert mail to users
-     * @returns void
+     * @returns boolean
      */
-    async sendCertUserMails(list: any[]) {
+    async sendCertUserMails(list: BulkMailQuery) {
         MAILER.batchSendAttendance(list).then((res) => {
             if (res === true) {
                 console.log(list.length + ' Emails Sent.');
             }
         });
+        return true;
     }
 }
 

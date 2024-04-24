@@ -57,109 +57,40 @@ export const TRPC_ROUTER = TRPC.router({
         return await HANLDER.getChallengeSolvesByEvent(opts.input);
     }),
     updateUserData: TRPC.procedure.input(USER_UPDATE_DATA).mutation(async (opts) => {
-        try {
-            await HANLDER.changeUserData(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.changeUserData(opts.ctx.sessionId, opts.input);
     }),
     updateUserAvatar: TRPC.procedure.input(z.string()).mutation(async (opts) => {
-        try {
-            await HANLDER.updateUserAvatar(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.updateUserAvatar(opts.ctx.sessionId, opts.input);
     }),
     updateUserPassword: TRPC.procedure.input(z.string()).mutation(async (opts) => {
-        try {
-            await HANLDER.resetPassword(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.resetPassword(opts.ctx.sessionId, opts.input);
     }),
     createTeam: TRPC.procedure.input(USER_CREATE_TEAM).mutation(async (opts) => {
-        try {
-            await HANLDER.createTeam(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.createTeam(opts.ctx.sessionId, opts.input);
     }),
     joinTeam: TRPC.procedure.input(z.string()).mutation(async (opts) => {
-        try {
-            await HANLDER.joinTeam(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.joinTeam(opts.ctx.sessionId, opts.input);
     }),
     leaveTeam: TRPC.procedure.mutation(async (opts) => {
-        try {
-            await HANLDER.leaveTeam(opts.ctx.sessionId);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.leaveTeam(opts.ctx.sessionId);
     }),
     updateTeam: TRPC.procedure.input(USER_UPDATE_TEAM).mutation(async (opts) => {
-        try {
-            await HANLDER.updateTeamData(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.updateTeamData(opts.ctx.sessionId, opts.input);
     }),
     updateTeamToken: TRPC.procedure.mutation(async (opts) => {
-        try {
-            await HANLDER.resetTeamToken(opts.ctx.sessionId);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.resetTeamToken(opts.ctx.sessionId);
     }),
     deployChallenge: TRPC.procedure.input(USER_DEPLOY_CHALLENGE).mutation(async (opts) => {
-        try {
-            await HANLDER.deployTeamChallenge(opts.ctx.sessionId, opts.input);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.deployTeamChallenge(opts.ctx.sessionId, opts.input);
     }),
     checkStaticFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
-        try {
-            return await HANLDER.checkStaticChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.checkStaticChallengeFlag(opts.ctx.sessionId, opts.input);
     }),
     checkPoolFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
-        try {
-            return await HANLDER.checkPoolChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.checkPoolChallengeFlag(opts.ctx.sessionId, opts.input);
     }),
     checkDynamicFlag: TRPC.procedure.input(USER_CHECK_FLAG).mutation(async (opts) => {
-        try {
-            return await HANLDER.checkDynamicChallengeFlag(opts.ctx.sessionId, opts.input);
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+        return await HANLDER.checkDynamicChallengeFlag(opts.ctx.sessionId, opts.input);
     })
 });
 
