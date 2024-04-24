@@ -7,7 +7,7 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper, USER_ROLES } from '../../../../lib/helpers';
+    import { USER_ROLES } from '../../../../lib/helpers';
     import { Button, Modal, Input, Label, Toggle, Select } from 'flowbite-svelte';
     import { createEventDispatcher } from 'svelte';
     import TrashBinOutline from 'flowbite-svelte-icons/TrashBinSolid.svelte';

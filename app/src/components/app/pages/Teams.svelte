@@ -2,7 +2,6 @@
   @component
   ## Props
   @prop export let session: User = {};
-  @prop export let sessionID: string = '';
 -->
 
 <script lang="ts">
@@ -23,21 +22,30 @@
         TableHead,
         TableHeadCell
     } from 'flowbite-svelte';
-    import { validAlphanumeric, validJoinToken, requestWrapper, COUNTRIES } from '../../../lib/helpers';
+    import { validAlphanumeric, validJoinToken, COUNTRIES } from '../../../lib/helpers';
     import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import type { TeamsType } from '../../../lib/schema';
     import { fade } from 'svelte/transition';
     import type { User } from 'lucia';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
     export let session: User;
-    export let sessionID: string = '';
+
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
 
     let loading = true;
     let hasTeam = false;
     let hasCreated = false;
     let canLeaveTeam = false;
-    let thisTeam: TeamsType;
+    let thisTeam: TeamsType | null;
     let teamMembers: { id: string; username: string; user_avatar: string; user_affiliation: string }[] = [];
     let teams: { id: string; team_name: string; team_description: string; team_country_code: string }[] = [];
     let inputs = {
@@ -63,55 +71,41 @@
     });
 
     async function refreshTeams() {
-        const DATA = await requestWrapper(false, { type: 'teams' });
-        teams = (await DATA.json()).data;
+        teams = await CLIENT.getTeams.query();
     }
 
     async function refreshTeamInfo() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { session: sessionID } });
-        thisTeam = (await DATA.json()).data;
-        hasCreated = session.id === thisTeam.creator_id;
-        inputs.teamName = thisTeam.name;
-        inputs.teamDesc = thisTeam.description;
+        thisTeam = await CLIENT.getTeamInfo.query();
+        if (thisTeam !== null) {
+            hasCreated = session.id === thisTeam.creator_id;
+            inputs.teamName = thisTeam.name;
+            inputs.teamDesc = thisTeam.description;
+        }
     }
 
     async function refreshTeamMembers() {
-        const DATA = await requestWrapper(false, { type: 'team-members', data: { session: sessionID } });
-        teamMembers = (await DATA.json()).data;
+        teamMembers = await CLIENT.getTeamMembers.query();
     }
 
     async function refreshLeavable() {
-        const DATA = await requestWrapper(false, {
-            type: 'check-leave',
-            data: { session: sessionID }
-        });
-        canLeaveTeam = (await DATA.json()).data;
+        canLeaveTeam = await CLIENT.getTeamLeaveStatus.query();
     }
 
     async function resetToken() {
-        const DATA = await requestWrapper(false, {
-            type: 'reset-team-token',
-            data: {
-                session: sessionID
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.updateTeamToken.mutate();
+        if (DATA === true) {
             menus.create = false;
             await refreshTeamInfo();
         }
     }
 
     async function createTeam() {
-        const DATA = await requestWrapper(false, {
-            type: 'create-team',
-            data: {
-                session: sessionID,
-                name: inputs.teamName.slice(0, 50),
-                description: inputs.teamDesc.slice(0, 100),
-                country: inputs.teamCountry
-            }
+        const DATA = await CLIENT.createTeam.mutate({
+            name: inputs.teamName.slice(0, 50),
+            description: inputs.teamDesc.slice(0, 100),
+            country: inputs.teamCountry
         });
-        if (DATA.ok) {
+        if (DATA === true) {
             menus.create = false;
             await refreshTeams();
             window.location.reload();
@@ -119,15 +113,11 @@
     }
 
     async function updateTeamData() {
-        const DATA = await requestWrapper(false, {
-            type: 'update-teamdata',
-            data: {
-                session: sessionID,
-                name: inputs.teamName.slice(0, 50),
-                description: inputs.teamDesc.slice(0, 100)
-            }
+        const DATA = await CLIENT.updateTeam.mutate({
+            name: inputs.teamName.slice(0, 50),
+            description: inputs.teamDesc.slice(0, 100)
         });
-        if (DATA.ok) {
+        if (DATA === true) {
             menus.create = false;
             await refreshTeams();
             window.location.reload();
@@ -135,22 +125,16 @@
     }
 
     async function joinTeam() {
-        const DATA = await requestWrapper(false, {
-            type: 'join-team',
-            data: { session: sessionID, token: inputs.teamToken.slice(0, 20) }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.joinTeam.mutate(inputs.teamToken.slice(0, 20));
+        if (DATA === true) {
             menus.join = false;
             window.location.reload();
         }
     }
 
     async function leaveTeam() {
-        const DATA = await requestWrapper(false, {
-            type: 'leave-team',
-            data: { session: sessionID }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.leaveTeam.mutate();
+        if (DATA === true) {
             window.location.reload();
         }
     }
@@ -295,7 +279,7 @@
                             Create
                         </Button>
                     </div>
-                {:else if Object.keys(thisTeam).length > 0}
+                {:else if thisTeam !== null && Object.keys(thisTeam).length > 0}
                     <div transition:fade>
                         {#if hasCreated}
                             <h1>You are leading: <b>{thisTeam.name}</b></h1>
@@ -358,8 +342,7 @@
                                         inputs.teamDesc === '' ||
                                         !validAlphanumeric(inputs.teamName, 50, true) ||
                                         !validAlphanumeric(inputs.teamDesc, 100) ||
-                                        (inputs.teamName == thisTeam.name &&
-                                            inputs.teamDesc == thisTeam.description)}
+                                        (inputs.teamName == thisTeam.name && inputs.teamDesc == thisTeam.description)}
                                     >Save Team <ArrowRightOutline class="w-3.5 h-3.5 ml-2 text-white" /></Button
                                 >
                                 <Button size="lg" class="mt-4" on:click={resetToken}>

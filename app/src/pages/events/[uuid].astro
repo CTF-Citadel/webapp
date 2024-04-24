@@ -11,7 +11,6 @@ const { uuid } = Astro.params;
 const CONFIG = await getConfig();
 
 let session = DUMMY_SESSION;
-let sessionID = 'some-id';
 
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
@@ -23,7 +22,6 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
     session = { ...Astro.locals.user };
-    sessionID = Astro.locals.session.id;
 }
 
 const ACTION = new DatabaseActions();
@@ -37,6 +35,6 @@ if (EVENT === false) {
 <Layout title={EVENT}>
     <Header username={session.username} interactive={true} client:visible />
     <div transition:animate="fade" class="flex flex-1 justify-center">
-        <Challenge uuid={uuid} sessionID={sessionID} flagPrefix={String(CONFIG.webapp.prefix)} client:visible />
+        <Challenge uuid={uuid} flagPrefix={String(CONFIG.webapp.prefix)} client:visible />
     </div>
 </Layout>

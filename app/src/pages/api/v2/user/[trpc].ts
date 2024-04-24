@@ -14,6 +14,11 @@ export const ALL: APIRoute = async (context) => {
         if (!context.locals.user.is_verified) {
             return context.redirect('/verify/email');
         }
+        if (context.request.headers.has("Session")) {
+            context.request.headers.set("Session", context.locals.session.id)
+        } else {
+            context.request.headers.append("Session", context.locals.session.id);
+        }
     }
 
     return fetchRequestHandler({

@@ -1,7 +1,6 @@
 <!--
   @component
   ## Props
-  @prop export let sessionID: string = '';
   @prop export let session: User = {};
   @prop export let ac: boolean = false;
   @prop export let certMailer: boolean = false;
@@ -10,15 +9,24 @@
 <script lang="ts">
     import Admin from '../lib/Admin.svelte';
     import { onMount } from 'svelte';
-    import { requestWrapper, validAlphanumeric, validPassword, AVATARS } from '../../../lib/helpers';
+    import { validAlphanumeric, validPassword, AVATARS } from '../../../lib/helpers';
     import { Card, Spinner, Avatar, Input, Label, Button, Modal, Carousel } from 'flowbite-svelte';
     import type { TeamsType } from '../../../lib/schema';
     import type { User } from 'lucia';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
-    export let sessionID: string = '';
     export let session: User;
     export let ac: boolean = false;
     export let certMailer: boolean = false;
+
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
 
     let team: TeamsType | null;
     let loading = true;
@@ -43,49 +51,31 @@
     });
 
     async function refreshUserTeam() {
-        const DATA = await requestWrapper(false, { type: 'team-info', data: { session: sessionID } });
-        const JSON = await DATA.json();
-        team = JSON.data;
+        team = await CLIENT.getTeamInfo.query();
     }
 
     async function updateUserData() {
-        const DATA = await requestWrapper(false, {
-            type: 'update-userdata',
-            data: {
-                session: sessionID,
-                first: inputs.firstName.slice(0, 30),
-                last: inputs.lastName.slice(0, 30),
-                affiliation: inputs.affiliation.slice(0, 30)
-            }
+        const DATA = await CLIENT.updateUserData.mutate({
+            firstName: inputs.firstName.slice(0, 30),
+            lastName: inputs.lastName.slice(0, 30),
+            affiliation: inputs.affiliation.slice(0, 30)
         });
-        if (DATA.ok) {
+        if (DATA === true) {
             window.location.reload();
         }
     }
 
     async function updateUserAvatar() {
-        const DATA = await requestWrapper(false, {
-            type: 'update-useravatar',
-            data: {
-                session: sessionID,
-                avatar: AVATARS[avatarIndex].title
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.updateUserAvatar.mutate(AVATARS[avatarIndex].title);
+        if (DATA === true) {
             editAvatar = false;
             window.location.reload();
         }
     }
 
     async function resetPassword() {
-        const DATA = await requestWrapper(false, {
-            type: 'reset-password',
-            data: {
-                session: sessionID,
-                password: inputs.password.slice(0, 96)
-            }
-        });
-        if (DATA.ok) {
+        const DATA = await CLIENT.updateUserPassword.mutate(inputs.password.slice(0, 96));
+        if (DATA === true) {
             window.location.reload();
         }
     }
@@ -166,8 +156,7 @@
                             {#if team !== null}
                                 <h2 class="mt-4 font-medium">Currently playing for:</h2>
                                 <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
-                                    {team.name}<span class="ml-2 fi fi-{team.country_code.toLowerCase()}"
-                                    ></span>
+                                    {team.name}<span class="ml-2 fi fi-{team.country_code.toLowerCase()}"></span>
                                 </p>
                             {:else}
                                 <h2 class="mt-4 font-medium">Currently not in a Team.</h2>

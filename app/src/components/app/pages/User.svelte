@@ -5,12 +5,21 @@
 -->
 
 <script lang="ts">
-    import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import { Card, Avatar, Spinner } from 'flowbite-svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
     // from parent
     export let uuid: string = '';
+
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
 
     let loading: boolean = true;
     let userInfo: {
@@ -24,14 +33,9 @@
     } | null;
 
     onMount(async () => {
-        await refreshUserProfile();
+        await CLIENT.getUserProfile.query(uuid);
         loading = false;
     });
-
-    async function refreshUserProfile() {
-        const DATA = await requestWrapper(false, { type: 'user-profile', data: { userID: uuid } });
-        userInfo = (await DATA.json()).data;
-    }
 </script>
 
 <div class="flex-1 max-w-screen-2xl px-4">

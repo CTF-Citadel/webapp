@@ -18,18 +18,27 @@
     } from 'flowbite-svelte';
     import Chart from 'flowbite-svelte/Chart.svelte';
     import type ApexCharts from 'apexcharts';
-    import { requestWrapper } from '../../../lib/helpers';
     import type { EventsType } from '../../../lib/schema';
     import { onMount } from 'svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
     // from parent
     export let uuid: string = '';
 
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
+
     let loading: boolean = true;
     let thisEvent: EventsType | null = null;
     let teamSolves: { id: string; name: string; timestamp: number; points_gained: number }[] = [];
-    let teamScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
-    let userScores: { id: string; name: string; avg_time: number; total_points: number }[] = [];
+    let teamPoints: { id: string; name: string; avg_time: number; total_points: number }[] = [];
+    let userPoints: { id: string; name: string; avg_time: number; total_points: number }[] = [];
     let seriesData: { x: number; y: number }[];
     let dataAggregator: { [key: string]: typeof seriesData } = {};
     let plotData: { name: string; data: typeof seriesData }[] = [];
@@ -177,17 +186,13 @@
     };
 
     async function refreshEvent() {
-        const EVENT = await requestWrapper(false, { type: 'single-event', data: { eventID: uuid } });
-        thisEvent = (await EVENT.json()).data;
+        thisEvent = await CLIENT.getEvent.query(uuid);
     }
 
     async function refreshEventScoring(id: string) {
-        const TEAM_SOLVES = await requestWrapper(false, { type: 'team-solves', data: { eventID: id } });
-        teamSolves = (await TEAM_SOLVES.json()).data;
-        const USER = await requestWrapper(false, { type: 'user-scores', data: { eventID: id } });
-        userScores = (await USER.json()).data;
-        const TEAM = await requestWrapper(false, { type: 'team-scores', data: { eventID: id } });
-        teamScores = (await TEAM.json()).data;
+        teamSolves = await CLIENT.getTeamSolves.query(id);
+        userPoints = await CLIENT.getUserPoints.query(id);
+        teamPoints = await CLIENT.getTeamPoints.query(id);
     }
 
     function msToHMS(unix: number) {
@@ -228,7 +233,7 @@
                             <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
-                            {#each teamScores as entry}
+                            {#each teamPoints as entry}
                                 <TableBodyRow
                                     color="custom"
                                     class="hover:bg-neutral-500"
@@ -262,7 +267,7 @@
                             <TableHeadCell>Average TTS</TableHeadCell>
                         </TableHead>
                         <TableBody>
-                            {#each userScores as entry}
+                            {#each userPoints as entry}
                                 <TableBodyRow
                                     color="custom"
                                     class="hover:bg-neutral-500"

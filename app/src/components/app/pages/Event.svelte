@@ -1,20 +1,25 @@
 <!--
   @component
-  ## Props
-  @prop export let sessionID: string = '';
 -->
 
 <script lang="ts">
     import { Card, Button, Spinner } from 'flowbite-svelte';
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
-    import { requestWrapper } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import type { EventsType, TeamEventsType } from '../../../lib/schema';
-
-    export let sessionID: string = '';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
     let loading: boolean = true;
     let events: { events: EventsType; team_events: TeamEventsType }[] = [];
+
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
 
     onMount(async () => {
         await refreshEvents();
@@ -22,9 +27,7 @@
     });
 
     async function refreshEvents() {
-        const DATA = await requestWrapper(false, { type: 'team-events', data: { session: sessionID } });
-        const JSON = await DATA.json();
-        events = JSON.data;
+        events = await CLIENT.getTeamEvents.query();
     }
 
     function hasStarted(from_unix: number): boolean {
@@ -64,10 +67,7 @@
                         <p>{formatToDate(event.events.start)} - {formatToDate(event.events.end)}</p>
                     </div>
                     <div class="flex flex-row justify-center space-x-4">
-                        <Button
-                            class="p-0"
-                            disabled={validTimerange(event.events.start, event.events.end) !== 0}
-                        >
+                        <Button class="p-0" disabled={validTimerange(event.events.start, event.events.end) !== 0}>
                             {#if validTimerange(event.events.start, event.events.end) === 0}
                                 <a class="p-3" href="/events/{event.events.id}">Challenges</a>
                             {:else}

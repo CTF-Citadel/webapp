@@ -6,7 +6,6 @@ import { lucia } from '../lib/lucia';
 import { DUMMY_SESSION } from '../lib/helpers';
 
 let session = DUMMY_SESSION;
-let sessionID = 'some-id';
 
 if (!import.meta.env.DEV) {
     if (!Astro.locals.user) return Astro.redirect('/login');
@@ -18,7 +17,6 @@ if (!import.meta.env.DEV) {
         return Astro.redirect('/verify/email');
     }
     session = { ...Astro.locals.user };
-    sessionID = Astro.locals.session.id;
 }
 ---
 
@@ -29,6 +27,6 @@ if (!import.meta.env.DEV) {
         client:visible
     />
     <div transition:animate="fade" class="flex flex-1 flex-grow justify-center">
-        <TeamOverview sessionID={sessionID} session={session} client:visible />
+        <TeamOverview session={session} client:visible />
     </div>
 </Layout>

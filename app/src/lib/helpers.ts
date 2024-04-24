@@ -1,13 +1,3 @@
-import type { WrapperFormat } from './backend';
-
-export async function requestWrapper(privileged: boolean, request: WrapperFormat): Promise<Response> {
-    const DEST = privileged ? '/admin' : '/user';
-    return await fetch(`/api/v1${DEST}`, {
-        method: 'POST',
-        body: JSON.stringify(request)
-    });
-}
-
 // generator
 export function generateRandomString(length: number) {
     return Array.from(crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2))), (b) =>

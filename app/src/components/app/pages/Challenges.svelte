@@ -1,24 +1,32 @@
 <!--
   @component
   ## Props
-  @prop export let sessionID: string = '';
   @prop export let uuid: string = '';
   @prop export let flagPrefix: string = '';
 -->
 
 <script lang="ts">
     import { Card, Button, Spinner, Label, Alert, Input } from 'flowbite-svelte';
-    import { requestWrapper, validFlag } from '../../../lib/helpers';
+    import { validFlag } from '../../../lib/helpers';
     import { onMount } from 'svelte';
     import { slide } from 'svelte/transition';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
     import type { ChallengesType } from '../../../lib/schema';
     import DownloadSolid from 'flowbite-svelte-icons/DownloadSolid.svelte';
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import type { UserRouter } from '../../../lib/trpc/user';
 
     export let uuid: string = '';
-    export let sessionID: string = '';
     export let flagPrefix: string = '';
+
+    const CLIENT = createTRPCClient<UserRouter>({
+        links: [
+            httpBatchLink({
+                url: '/api/v2/user'
+            })
+        ]
+    });
 
     let loading: boolean = true;
     let successFlag: { [key: string]: -1 | 0 | 1 } = {};
@@ -47,18 +55,27 @@
 
     async function checkFlag(challenge_id: string, input: string, type: 'static' | 'dynamic' | 'pool') {
         successFlag[challenge_id] = -1;
-        const TYPE = `check-flag-${type}`;
-        const DATA = await requestWrapper(false, {
-            type: TYPE,
-            data: {
-                session: sessionID,
-                eventID: uuid,
-                challengeID: challenge_id,
+        let data: boolean;
+        if (type === 'static') {
+            data = await CLIENT.checkStaticFlag.mutate({
+                eventId: uuid,
+                challengeId: challenge_id,
                 flag: input
-            }
-        });
-        const JSON = await DATA.json();
-        if (JSON.data.correct === true) {
+            });
+        } else if (type === 'pool') {
+            data = await CLIENT.checkPoolFlag.mutate({
+                eventId: uuid,
+                challengeId: challenge_id,
+                flag: input
+            });
+        } else {
+            data = await CLIENT.checkDynamicFlag.mutate({
+                eventId: uuid,
+                challengeId: challenge_id,
+                flag: input
+            });
+        }
+        if (data === true) {
             successFlag[challenge_id] = 0;
         } else successFlag[challenge_id] = 1;
         setTimeout(async () => {
@@ -93,52 +110,37 @@
     }
 
     async function refreshChallenges() {
-        const DATA = await requestWrapper(false, {
-            type: 'challenges',
-            data: { eventID: uuid, session: sessionID }
-        });
-        challenges = (await DATA.json()).data;
+        challenges = await CLIENT.getChallenges.query(uuid);
     }
 
     async function refreshDeployedChallenges() {
-        const DATA = await requestWrapper(false, {
-            type: 'get-deployed',
-            data: { eventID: uuid, session: sessionID }
-        });
-        deployments = (await DATA.json()).data;
+        deployments = await CLIENT.getDeployedChallenges.query(uuid);
     }
 
     async function refreshSolvedChallenges() {
-        const DATA = await requestWrapper(false, { type: 'solved-challenges', data: { session: sessionID } });
-        const JSON = await DATA.json();
+        const DATA = await CLIENT.getTeamSolved.query();
         solvedChallenges = [];
-        for (let entry of JSON.data) {
+        for (let entry of DATA) {
             solvedChallenges.push(entry.id);
         }
     }
 
     async function refreshSolveScores() {
-        const DATA = await requestWrapper(false, { type: 'challenge-solves', data: { eventID: uuid } });
-        const JSON: { id: string, solves: number }[] = (await DATA.json()).data;
+        const DATA = await CLIENT.getChallengeSolves.query(uuid);
         challengeSolves = {};
-        for (let entry of JSON) {
+        for (let entry of DATA) {
             challengeSolves[entry.id] = entry.solves;
         }
     }
 
     async function deployChallenge(challenge_id: string) {
         deploymentStatus[challenge_id] = 1;
-        const DATA = await requestWrapper(false, {
-            type: 'deploy-challenge',
-            data: { session: sessionID, challengeID: challenge_id, eventID: uuid }
+        const DATA = await CLIENT.deployChallenge.mutate({
+            challengeId: challenge_id,
+            eventId: uuid
         });
-        if (DATA.ok) {
-            const TEMP = await DATA.json();
-            if (TEMP.error === false && TEMP.data === true) {
-                deploymentStatus[challenge_id] = 3;
-            } else {
-                deploymentStatus[challenge_id] = 2;
-            }
+        if (DATA === true) {
+            deploymentStatus[challenge_id] = 3;
         } else {
             deploymentStatus[challenge_id] = 2;
         }
@@ -184,7 +186,9 @@
                             <Accordion flush>
                                 <AccordionItem>
                                     <span slot="header">Challenge Description</span>
-                                    <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{challenge.description}</p>
+                                    <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">
+                                        {challenge.description}
+                                    </p>
                                 </AccordionItem>
                             </Accordion>
                         </div>

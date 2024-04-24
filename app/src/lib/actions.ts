@@ -8,7 +8,7 @@ import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import { getConfig } from './config';
 import type { ChallengesType } from './schema';
-import type { ChallengeCreate, ChallengeUpdate, EventCreate, EventUpdate, SubmissionDelete, SubmissionUpdate, TeamEventCreate, TeamEventDelete, TeamUpdate, UserUpdate } from './types';
+import type { ChallengeCreate, ChallengeUpdate, EventCreate, EventUpdate, SubmissionDelete, SubmissionUpdate, TeamEventCreate, TeamEventDelete, TeamUpdate, UserCheckFlag, UserCreateTeam, UserDeployChallenge, UserUpdate, UserUpdateData, UserUpdateTeam } from './types';
 import Infra from './integrations/infra';
 import M0n1t0r from './integrations/m0n1t0r';
 import F1rstbl00d from './integrations/f1rstbl00d';
@@ -225,7 +225,7 @@ class Actions {
      * Fetches sanitized Teams
      * @returns List sanitized of Teams
      */
-    async getTeamLisitng() {
+    async getTeamListing() {
         const RES = await DB_ADAPTER.select({
             id: teams.id,
             team_name: teams.name,
@@ -519,14 +519,14 @@ class Actions {
      * Changes a users first and lastname
      * @returns true if success, false if not
      */
-    async changeUserData(sessionID: string, firstName: string, lastName: string, affiliation: string) {
+    async changeUserData(sessionID: string, schema: UserUpdateData) {
         const { session, user } = await lucia.validateSession(sessionID);
-        if (user && validAlphanumeric(firstName, 30) && validAlphanumeric(lastName, 30)) {
+        if (user && validAlphanumeric(schema.firstName, 30) && validAlphanumeric(schema.lastName, 30)) {
             await DB_ADAPTER.update(users)
                 .set({
-                    firstname: firstName,
-                    lastname: lastName,
-                    affiliation: affiliation
+                    firstname: schema.firstName,
+                    lastname: schema.lastName,
+                    affiliation: schema.affiliation
                 })
                 .where(eq(users.id, user.id));
             return true;
@@ -565,7 +565,7 @@ class Actions {
      * Get all currently deployed or initiated Challenges per Event and Team ID
      * @returns List of cut down info, zero length if no found
      */
-    async getDeployedChallenge(sessionID: string, eventID: string) {
+    async getDeployedChallenges(sessionID: string, eventID: string) {
         const VALID = await this.checkValidEventExist(eventID);
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null || VALID === false) return [];
@@ -591,19 +591,19 @@ class Actions {
      * Deploys a new Challenge
      * @returns true if queued, false if not
      */
-    async deployTeamChallenge(sessionID: string, challengeID: string, eventID: string): Promise<boolean> {
-        const VALID = await this.checkValidEventExist(eventID);
+    async deployTeamChallenge(sessionID: string, schema: UserDeployChallenge): Promise<boolean> {
+        const VALID = await this.checkValidEventExist(schema.eventId);
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null || VALID === false) return false;
         const GEN_FLAG = crypto.randomUUID();
         const TIMESTAMP = new Date().getTime();
-        const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, challengeID))).at(0);
+        const RES = (await DB_ADAPTER.select().from(challenges).where(eq(challenges.id, schema.challengeId))).at(0);
         if (RES !== undefined) {
             // note deployment
             await DB_ADAPTER.insert(team_challenges).values({
                 team_id: user.team_id,
-                challenge_id: challengeID,
-                event_id: eventID,
+                challenge_id: schema.challengeId,
+                event_id: schema.eventId,
                 solved_by: '',
                 solved_at: 0,
                 container_id: '',
@@ -627,19 +627,19 @@ class Actions {
                         .where(
                             and(
                                 eq(team_challenges.team_id, user.team_id),
-                                eq(team_challenges.event_id, eventID),
-                                eq(team_challenges.challenge_id, challengeID)
+                                eq(team_challenges.event_id, schema.eventId),
+                                eq(team_challenges.challenge_id, schema.challengeId)
                             )
                         );
                     // notify anti cheat
-                    await MONITOR.initiation(data.flag, user.team_id, challengeID, TIMESTAMP);
+                    await MONITOR.initiation(data.flag, user.team_id, schema.challengeId, TIMESTAMP);
                 } else {
                     // on fail, remove the entry
                     await DB_ADAPTER.delete(team_challenges).where(
                         and(
                             eq(team_challenges.team_id, user.team_id),
-                            eq(team_challenges.event_id, eventID),
-                            eq(team_challenges.challenge_id, challengeID)
+                            eq(team_challenges.event_id, schema.eventId),
+                            eq(team_challenges.challenge_id, schema.challengeId)
                         )
                     );
                 }
@@ -654,7 +654,7 @@ class Actions {
      * Checks a Flag for its validity
      * @returns true if the flag matches, false if it doesnt
      */
-    async checkDynamicChallengeFlag(sessionID: string, challengeID: string, flag: string): Promise<boolean> {
+    async checkDynamicChallengeFlag(sessionID: string, schema: UserCheckFlag): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const TIMESTAMP = new Date().getTime();
@@ -662,11 +662,11 @@ class Actions {
             await DB_ADAPTER.select()
                 .from(team_challenges)
                 .where(
-                    and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.challenge_id, challengeID))
+                    and(eq(team_challenges.team_id, user.team_id), eq(team_challenges.challenge_id, schema.challengeId))
                 )
         ).at(0);
-        if (RES !== undefined && validFlag(flag, String(CONFIG.webapp.prefix)) && RES.is_running === true) {
-            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
+        if (RES !== undefined && validFlag(schema.flag, String(CONFIG.webapp.prefix)) && RES.is_running === true) {
+            const EXTRACTED_FLAG = schema.flag.slice(schema.flag.indexOf('{') + 1, schema.flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if (RES.container_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.update(team_challenges)
@@ -678,7 +678,7 @@ class Actions {
                     .where(
                         and(
                             eq(team_challenges.team_id, user.team_id),
-                            eq(team_challenges.challenge_id, challengeID)
+                            eq(team_challenges.challenge_id, schema.challengeId)
                         )
                     );
                 // shut down the container
@@ -691,16 +691,16 @@ class Actions {
                             .where(
                                 and(
                                     eq(team_challenges.team_id, user.team_id),
-                                    eq(team_challenges.challenge_id, challengeID)
+                                    eq(team_challenges.challenge_id, schema.challengeId)
                                 )
                             );
                     }
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, false, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, schema.challengeId, false, TIMESTAMP);
                 // check notify reporter
-                if ((await this.checkInitialSolve(challengeID)) === true) {
-                    const DATA = await this.getFirstbloodData(challengeID);
+                if ((await this.checkInitialSolve(schema.challengeId)) === true) {
+                    const DATA = await this.getFirstbloodData(schema.challengeId);
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
@@ -717,7 +717,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, false, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, schema.challengeId, user.id, false, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -732,9 +732,7 @@ class Actions {
      */
     async checkStaticChallengeFlag(
         sessionID: string,
-        eventID: string,
-        challengeID: string,
-        flag: string
+        schema: UserCheckFlag
     ): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
@@ -742,16 +740,16 @@ class Actions {
         const RES = (
             await DB_ADAPTER.select()
                 .from(challenges)
-                .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
+                .where(and(eq(challenges.id, schema.challengeId), eq(challenges.event_id, schema.eventId)))
         ).at(0);
-        if (RES !== undefined && validFlag(flag, String(CONFIG.webapp.prefix)) && RES.needs_static === true) {
-            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
+        if (RES !== undefined && validFlag(schema.flag, String(CONFIG.webapp.prefix)) && RES.needs_static === true) {
+            const EXTRACTED_FLAG = schema.flag.slice(schema.flag.indexOf('{') + 1, schema.flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if (RES.static_flag === EXTRACTED_FLAG && VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: user.team_id,
-                    challenge_id: challengeID,
-                    event_id: eventID,
+                    challenge_id: schema.challengeId,
+                    event_id: schema.eventId,
                     solved_by: user.id,
                     solved_at: TIMESTAMP,
                     container_id: '',
@@ -763,10 +761,10 @@ class Actions {
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, schema.challengeId, true, TIMESTAMP);
                 // check notify reporter
-                if ((await this.checkInitialSolve(challengeID)) === true) {
-                    const DATA = await this.getFirstbloodData(challengeID);
+                if ((await this.checkInitialSolve(schema.challengeId)) === true) {
+                    const DATA = await this.getFirstbloodData(schema.challengeId);
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
@@ -783,7 +781,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, schema.challengeId, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -798,9 +796,7 @@ class Actions {
      */
     async checkPoolChallengeFlag(
         sessionID: string,
-        eventID: string,
-        challengeID: string,
-        flag: string
+        schema: UserCheckFlag
     ): Promise<boolean> {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
@@ -808,16 +804,16 @@ class Actions {
         const RES = (
             await DB_ADAPTER.select()
                 .from(challenges)
-                .where(and(eq(challenges.id, challengeID), eq(challenges.event_id, eventID)))
+                .where(and(eq(challenges.id, schema.challengeId), eq(challenges.event_id, schema.eventId)))
         ).at(0);
-        if (RES !== undefined && validFlag(flag, String(CONFIG.webapp.prefix)) && RES.needs_pool === true) {
-            const EXTRACTED_FLAG = flag.slice(flag.indexOf('{') + 1, flag.indexOf('}'));
+        if (RES !== undefined && validFlag(schema.flag, String(CONFIG.webapp.prefix)) && RES.needs_pool === true) {
+            const EXTRACTED_FLAG = schema.flag.slice(schema.flag.indexOf('{') + 1, schema.flag.indexOf('}'));
             const VALID = await this.checkValidEventExist(RES.event_id);
             if ((await checkLocalPoolMatch(EXTRACTED_FLAG)) === true &&  VALID !== false) {
                 await DB_ADAPTER.insert(team_challenges).values({
                     team_id: user.team_id,
-                    challenge_id: challengeID,
-                    event_id: eventID,
+                    challenge_id: schema.challengeId,
+                    event_id: schema.eventId,
                     solved_by: user.id,
                     solved_at: TIMESTAMP,
                     container_id: '',
@@ -829,10 +825,10 @@ class Actions {
                     is_solved: true
                 });
                 // notify anti cheat
-                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, challengeID, true, TIMESTAMP);
+                await MONITOR.solve(EXTRACTED_FLAG, user.team_id, schema.challengeId, true, TIMESTAMP);
                 // check notify reporter
-                if ((await this.checkInitialSolve(challengeID)) === true) {
-                    const DATA = await this.getFirstbloodData(challengeID);
+                if ((await this.checkInitialSolve(schema.challengeId)) === true) {
+                    const DATA = await this.getFirstbloodData(schema.challengeId);
                     if (DATA !== null) {
                         await FIRSTBLOOD.solve(
                             DATA.solver || '',
@@ -849,7 +845,7 @@ class Actions {
                 return true;
             } else {
                 // notify anti cheat
-                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, challengeID, user.id, true, TIMESTAMP);
+                await MONITOR.submission(EXTRACTED_FLAG, user.team_id, schema.challengeId, user.id, true, TIMESTAMP);
                 // flag is incorrect
                 return false;
             }
@@ -889,11 +885,11 @@ class Actions {
      * Creates a new Team
      * @returns void
      */
-    async createTeam(sessionID: string, teamName: string, teamDesc: string, teamCountry: string) {
+    async createTeam(sessionID: string, schema: UserCreateTeam) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return false;
         const HAS_CREATED = await this.checkHasCreatedTeam(user.id);
-        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, teamName))).length;
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, schema.name))).length;
         // only create if name is unique
         if (TEAMS_WITH_NAME === 0 && HAS_CREATED === false) {
             const GEN_ID = crypto.randomUUID();
@@ -903,9 +899,9 @@ class Actions {
                     id: GEN_ID,
                     creator_id: user.id,
                     join_token: TEAM_TOKEN,
-                    name: teamName,
-                    description: teamDesc,
-                    country_code: teamCountry
+                    name: schema.name,
+                    description: schema.description,
+                    country_code: schema.country
                 })
                 .then(async () => {
                     await this.joinTeam(sessionID, TEAM_TOKEN);
@@ -981,17 +977,17 @@ class Actions {
      * Update a team's data token by ID
      * @returns void
      */
-    async updateTeamData(sessionID: string, name: string, description: string) {
+    async updateTeamData(sessionID: string, schema: UserUpdateTeam) {
         const { session, user } = await lucia.validateSession(sessionID);
         if (user === null) return;
         const TEAM = await this.getTeamInfo(sessionID);
-        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, name))).length;
-        if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.name === name)) {
+        const TEAMS_WITH_NAME = (await DB_ADAPTER.select().from(teams).where(eq(teams.name, schema.name))).length;
+        if (user && TEAM !== null && (TEAMS_WITH_NAME === 0 || TEAM.name === schema.name)) {
             if (TEAM.creator_id === user.id) {
                 await DB_ADAPTER.update(teams)
                     .set({
-                        name: name,
-                        description: description
+                        name: schema.name,
+                        description: schema.description
                     })
                     .where(eq(teams.id, user.team_id));
             }
