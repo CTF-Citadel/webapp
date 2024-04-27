@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { getConfig } from './config';
+import { Logger } from './logger';
 
 const CONFIG = await getConfig();
 let transporter = nodemailer.createTransport({
@@ -46,7 +47,7 @@ export const sendVerificationLink = async (origin: string, email: string, token:
             </html>`
         });
     } catch (e) {
-        console.error(e);
+        Logger.error('Lucia-Mail: ' + e);
     }
 };
 
@@ -85,6 +86,6 @@ export const sendPasswordResetLink = async (origin: string, email: string, token
             </html>`
         });
     } catch (e) {
-        console.error(e);
+        Logger.error('Lucia-Mail: ' + e);
     }
 };

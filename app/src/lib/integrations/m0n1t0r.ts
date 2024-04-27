@@ -1,4 +1,5 @@
 import { getConfig } from '../config';
+import { Logger } from '../logger';
 
 const CONFIG = await getConfig();
 
@@ -34,7 +35,7 @@ class M0n1t0r {
             }
             return false;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }
@@ -67,7 +68,7 @@ class M0n1t0r {
             }
             return false;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }
@@ -88,7 +89,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }
@@ -114,7 +115,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }
@@ -149,7 +150,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }
@@ -182,7 +183,7 @@ class M0n1t0r {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('M0n1t0r: ' + e);
             return false;
         }
     }

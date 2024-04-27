@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { validEmail } from '../../../../lib/helpers';
 import { safeVerifyUser } from '../../../../lib/lucia-db';
+import { Logger } from '../../../../lib/logger';
 
 export const POST: APIRoute = async (context) => {
     let redirect = false;
@@ -19,7 +20,7 @@ export const POST: APIRoute = async (context) => {
             if (e.message === 'AUTH_INVALID') {
                 errorMessage = 'Wrong Username or Password';
             } else {
-                console.error(e);
+                Logger.error('Auth-Login: ' + e);
                 errorMessage = 'Unknown Error';
             }
         }

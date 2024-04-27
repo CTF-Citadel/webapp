@@ -1,4 +1,5 @@
 import { getConfig } from '../config';
+import { Logger } from '../logger';
 
 const CONFIG = await getConfig();
 
@@ -46,7 +47,7 @@ class F1rstbl00d {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('F1rstbl00d: ' + e);
             return false;
         }
     }

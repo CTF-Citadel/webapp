@@ -3,6 +3,7 @@ import type { APIRoute } from 'astro';
 import { createContext } from '../../../../lib/trpc/context';
 import { TRPC_ROUTER } from '../../../../lib/trpc/user';
 import { lucia } from '../../../../lib/lucia';
+import { Logger } from '../../../../lib/logger';
 
 export const ALL: APIRoute = async (context) => {
     if (!import.meta.env.DEV) {
@@ -28,7 +29,7 @@ export const ALL: APIRoute = async (context) => {
         createContext,
         onError(opts) {
             const { error } = opts;
-            console.error('Error:', error.message);
+            Logger.error('tRCP-User:', error.message);
         },
     });
 };

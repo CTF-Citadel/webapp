@@ -4,6 +4,7 @@ import { sendVerificationLink } from '../../../../lib/lucia-email';
 import { validEmail, validPassword, validUsername } from '../../../../lib/helpers';
 import { safeCreateUser } from '../../../../lib/lucia-db';
 import { getConfig } from '../../../../lib/config';
+import { Logger } from '../../../../lib/logger';
 
 const CONFIG = await getConfig();
 
@@ -41,7 +42,7 @@ export const POST: APIRoute = async (context) => {
             } else if (e.message === 'AUTH_EMAIL_ENFORCE') {
                 errorMessage = 'Email not allowed';
             } else {
-                console.error(e);
+                Logger.error('Auth-New: ' + e);
                 errorMessage = 'Unknown Error';
             }
         }

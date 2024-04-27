@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { sendVerificationLink } from '../../../../lib/lucia-email';
 import { generateEmailverificationTokens } from '../../../../lib/lucia-db';
+import { Logger } from '../../../../lib/logger';
 
 export const POST: APIRoute = async (context) => {
     let emailSent = false;
@@ -17,7 +18,7 @@ export const POST: APIRoute = async (context) => {
             emailSent = true;
         }
     } catch (e: any) {
-        console.error(e);
+        Logger.error('Token-Email: ' + e);
         errorMessage = 'An error occurred';
     }
     return new Response(

@@ -15,6 +15,7 @@
     "@astrojs/node": "^8.2.5",
     "@astrojs/svelte": "^5.4.0",
     "@astrojs/tailwind": "^5.1.0",
+    "@cross/log": "npm:@jsr/cross__log@^0.10.5",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
     "@trpc/client": "^11.0.0-rc.351",
     "@trpc/server": "^11.0.0-rc.351",

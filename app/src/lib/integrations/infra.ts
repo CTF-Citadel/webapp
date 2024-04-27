@@ -1,4 +1,5 @@
 import { getConfig } from '../config';
+import { Logger } from '../logger';
 
 const CONFIG = await getConfig();
 
@@ -44,7 +45,7 @@ class Infra {
             }
             return false;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('Infra: ' + e);
             return false;
         }
     }
@@ -63,7 +64,7 @@ class Infra {
             });
             return RESP.ok;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('Infra: ' + e);
             return false;
         }
     }
@@ -82,7 +83,7 @@ class Infra {
             });
             return RESP.ok === true ? 'healthy' : false;
         } catch (e: any) {
-            console.error(e);
+            Logger.error('Infra: ' + e);
             return false;
         }
     }

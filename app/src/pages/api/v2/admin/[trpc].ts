@@ -4,6 +4,7 @@ import { createContext } from '../../../../lib/trpc/context';
 import { TRPC_ROUTER } from '../../../../lib/trpc/admin';
 import { DUMMY_SESSION } from '../../../../lib/helpers';
 import { lucia } from '../../../../lib/lucia';
+import { Logger } from '../../../../lib/logger';
 
 export const ALL: APIRoute = async (context) => {
     let session = DUMMY_SESSION;
@@ -35,7 +36,7 @@ export const ALL: APIRoute = async (context) => {
             createContext,
             onError(opts) {
                 const { error } = opts;
-                console.error('Error:', error.message);
+                Logger.error('tRCP-Admin:', error.message);
             },
         });
     }

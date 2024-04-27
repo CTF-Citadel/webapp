@@ -3,6 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import { getConfig } from '../config';
+import { Logger } from '../logger';
 
 const CONFIG = await getConfig();
 const ATTENDANCE_TEMPLATE: string = `<html>
@@ -89,7 +90,7 @@ class CertMailer {
                     ]
                 });
             } catch (e: any) {
-                console.error(e);
+                Logger.error('Cert-Mail: ' + e);
                 continue;
             }
         }

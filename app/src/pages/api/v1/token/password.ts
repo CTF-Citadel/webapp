@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { sendPasswordResetLink } from '../../../../lib/lucia-email';
 import { generatePasswordresetTokens, isRegisteredEmail } from '../../../../lib/lucia-db';
+import { Logger } from '../../../../lib/logger';
 
 export const POST: APIRoute = async (context) => {
     let emailSent = false;
@@ -19,7 +20,7 @@ export const POST: APIRoute = async (context) => {
                 emailSent = true;
             }
         } catch (e: any) {
-            console.error(e);
+            Logger.error('Token-Password: ' + e);
             errorMessage = 'An error occurred';
         }
     } else {

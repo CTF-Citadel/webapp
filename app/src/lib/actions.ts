@@ -8,6 +8,7 @@ import { checkLocalPoolMatch } from './storage';
 import { adjustDynamic, getTotalByName, backFillTotal } from './scoring';
 import { getConfig } from './config';
 import type { ChallengesType } from './schema';
+import { Logger } from './logger';
 import type {
     BulkMailQuery,
     ChallengeCreate,
@@ -1334,7 +1335,7 @@ class Actions {
     async sendCertUserMails(list: BulkMailQuery) {
         MAILER.batchSendAttendance(list).then((res) => {
             if (res === true) {
-                console.log(list.length + ' Emails Sent.');
+                Logger.info(list.length + ' Emails Sent.')
             }
         });
         return true;
