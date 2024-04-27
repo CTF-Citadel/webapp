@@ -16,6 +16,7 @@
     import Moon from 'flowbite-svelte-icons/MoonOutline.svelte';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { UserRouter } from '../../../lib/trpc/user';
+    import { newNotify } from '../../../lib/notify';
 
     export let uuid: string = '';
     export let flagPrefix: string = '';
@@ -143,6 +144,7 @@
             deploymentStatus[challenge_id] = 3;
         } else {
             deploymentStatus[challenge_id] = 2;
+            newNotify('Deployment Failed', true);
         }
         setTimeout(async () => {
             await refreshChallenges().finally(() => {

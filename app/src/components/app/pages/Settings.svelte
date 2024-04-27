@@ -15,6 +15,7 @@
     import type { User } from 'lucia';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { UserRouter } from '../../../lib/trpc/user';
+    import { newNotify } from '../../../lib/notify';
 
     export let session: User;
     export let ac: boolean = false;
@@ -62,6 +63,8 @@
         });
         if (DATA === true) {
             window.location.reload();
+        } else {
+            newNotify('Editing Failed', true);
         }
     }
 
@@ -70,6 +73,8 @@
         if (DATA === true) {
             editAvatar = false;
             window.location.reload();
+        } else {
+            newNotify('Editing Failed', true);
         }
     }
 
@@ -77,6 +82,8 @@
         const DATA = await CLIENT.updateUserPassword.mutate(inputs.password.slice(0, 96));
         if (DATA === true) {
             window.location.reload();
+        } else {
+            newNotify('Resetting Failed', true);
         }
     }
 </script>
@@ -87,9 +94,9 @@
 
 <Modal
     size="sm"
-    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    dialogClass="fixed top-0 left-0 m-auto p-4 z-40 flex flex-1 justify-center w-full h-full"
     defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    backdropClass="fixed inset-0 z-30 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
     color="none"
     outsideclose
     bind:open={editAvatar}

@@ -10,6 +10,7 @@
     import { createEventDispatcher } from 'svelte';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { AdminRouter } from '../../../../lib/trpc/admin';
+    import { newNotify } from '../../../../lib/notify';
 
     // from parent
     export let teams: TeamsType[] = [];
@@ -59,6 +60,8 @@
             await refreshPoisoned();
             DISPATCH('refresh');
             loading = false;
+        } else {
+            newNotify('Creating Failed', true);
         }
     }
 </script>

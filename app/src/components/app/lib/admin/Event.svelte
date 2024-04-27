@@ -14,6 +14,7 @@
     import { createEventDispatcher } from 'svelte';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { AdminRouter } from '../../../../lib/trpc/admin';
+    import { newNotify } from '../../../../lib/notify';
 
     export let events: EventsType[] = [];
     export let editUUID: string = '';
@@ -72,6 +73,8 @@
         if (DATA === true) {
             create = false;
             DISPATCH('refresh');
+        } else {
+            newNotify('Creating Failed', true);
         }
     }
 
@@ -87,6 +90,8 @@
             if (DATA === true) {
                 edit = false;
                 DISPATCH('refresh');
+            } else {
+                newNotify('Editing Failed', true);
             }
         }
     }
@@ -96,6 +101,8 @@
         if (DATA === true) {
             edit = false;
             DISPATCH('refresh');
+        } else {
+            newNotify('Deletion Failed', true);
         }
     }
 </script>
@@ -106,9 +113,9 @@
 
 {#if editData !== undefined}
     <Modal
-        dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+        dialogClass="fixed top-0 left-0 m-auto p-4 z-40 flex flex-1 justify-center w-full h-full"
         defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-        backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+        backdropClass="fixed inset-0 z-30 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
         color="none"
         outsideclose
         bind:open={edit}
@@ -217,9 +224,9 @@
 -->
 
 <Modal
-    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    dialogClass="fixed top-0 left-0 m-auto p-4 z-40 flex flex-1 justify-center w-full h-full"
     defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    backdropClass="fixed inset-0 z-30 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
     color="none"
     outsideclose
     bind:open={create}

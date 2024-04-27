@@ -9,6 +9,7 @@
     import { createEventDispatcher } from 'svelte';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { AdminRouter } from '../../../../lib/trpc/admin';
+    import { newNotify } from '../../../../lib/notify';
 
     // from parent
     export let sortedEvents: { value: string; name: string }[] = [];
@@ -45,6 +46,8 @@
             success = true;
             batchUsers = [];
             DISPATCH('refresh');
+        } else {
+            newNotify('Queueing Failed', true);
         }
     }
 </script>

@@ -35,7 +35,7 @@
     }
 </script>
 
-<header class="sticky top-0 w-screen z-30 min-w-screen h-16">
+<header class="sticky top-0 w-screen z-20 min-w-screen h-16">
     <nav class="bg-neutral-100 dark:bg-neutral-900 lg:bg-[#0000001f] lg:dark:bg-[#0000004f] backdrop-blur-3xl border-b-4 border-neutral-600 dark:border-neutral-400 px-4 lg:px-6 py-2.5">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-2xl px-4">
             <a href="/" class="items-center flex">

@@ -13,7 +13,6 @@
         Label,
         Input,
         Spinner,
-        Textarea,
         Select,
         Table,
         TableBody,
@@ -30,6 +29,7 @@
     import type { User } from 'lucia';
     import { createTRPCClient, httpBatchLink } from '@trpc/client';
     import type { UserRouter } from '../../../lib/trpc/user';
+    import { newNotify } from '../../../lib/notify';
 
     export let session: User;
 
@@ -96,6 +96,8 @@
         if (DATA === true) {
             menus.create = false;
             await refreshTeamInfo();
+        } else {
+            newNotify('Resetting Failed', true);
         }
     }
 
@@ -109,6 +111,8 @@
             menus.create = false;
             await refreshTeams();
             window.location.reload();
+        } else {
+            newNotify('Creating Failed', true);
         }
     }
 
@@ -121,6 +125,8 @@
             menus.create = false;
             await refreshTeams();
             window.location.reload();
+        } else {
+            newNotify('Editing Failed', true);
         }
     }
 
@@ -129,6 +135,8 @@
         if (DATA === true) {
             menus.join = false;
             window.location.reload();
+        } else {
+            newNotify('Joining Failed', true);
         }
     }
 
@@ -136,6 +144,8 @@
         const DATA = await CLIENT.leaveTeam.mutate();
         if (DATA === true) {
             window.location.reload();
+        } else {
+            newNotify('Leaving Failed', true);
         }
     }
 </script>
@@ -145,9 +155,9 @@
 -->
 
 <Modal
-    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    dialogClass="fixed top-0 left-0 m-auto p-4 z-40 flex flex-1 justify-center w-full h-full"
     defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    backdropClass="fixed inset-0 z-30 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
     color="none"
     outsideclose
     title="Create Team"
@@ -209,9 +219,9 @@
 -->
 
 <Modal
-    dialogClass="absolute top-0 left-0 m-auto p-4 z-50 flex flex-1 justify-center w-full h-full"
+    dialogClass="fixed top-0 left-0 m-auto p-4 z-40 flex flex-1 justify-center w-full h-full"
     defaultClass="rounded-none overflow-scroll bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-    backdropClass="fixed inset-0 z-40 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
+    backdropClass="fixed inset-0 z-30 bg-neutral-900 bg-opacity-50 dark:bg-opacity-80"
     color="none"
     outsideclose
     title="Join Team"

@@ -35,6 +35,7 @@
         ChallengesType,
         TeamChallengesType
     } from '../../../lib/schema';
+    import { newNotify } from '../../../lib/notify';
     // subcomponents
     import SubAssignment from './admin/Assignment.svelte';
     import SubChallenge from './admin/Challenge.svelte';
@@ -140,7 +141,9 @@
         if (DATA === true) {
             await refreshTeamEvents();
             return true;
-        } else return false;
+        } else {
+            newNotify('Unassigning Failed', true);
+        }
     }
 
     function checkEvent(item: string) {
