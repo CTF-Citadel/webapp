@@ -1,0 +1,38 @@
+####
+## CTF-Citadel WebApp Default Configuration
+####
+
+[webapp]
+name = 'CTF-Citadel'
+prefix = 'CTD'
+dynamic_k = 24
+dynamic_p = 1.2
+data = '/data'
+discord = ''
+
+[email]
+service = 'hotmail'
+username = 'someone@example.com'
+password = 'CHANGEME'
+disable_verify = true
+enable_certificate_mailing = false
+enable_enforce_domain = false
+enforce_domain = ''
+
+[infra]
+enable = false
+host = ''
+port = 0
+psk = ''
+
+[m0n1t0r]
+enable = false
+host = ''
+port = 0
+psk = ''
+
+[f1rstbl00d]
+enable = false
+host = ''
+port = 0
+psk = ''

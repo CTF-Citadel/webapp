@@ -39,6 +39,7 @@ services:
     image: ghcr.io/ctf-citadel/webapp:latest
     hostname: webapp
     volumes:
+      - ./config.toml:/config/config.toml
       - ./webapp:/data
     environment:
       TZ: Europe/Vienna
@@ -46,31 +47,7 @@ services:
       DB_NAME: 'webapp'
       DB_USER: 'root'
       DB_PASS: 'CHANGEME'
-      # deployment endpoint
-      INFRA_HOST: 'remote.example.com'
-      INFRA_PORT: 443
-      INFRA_PSK: 'CHANGEME'
-      # anticheat endpoint
-      M0N1T0R_ENABLE: 0
-      M0N1T0R_HOST: 'm0n1t0r'
-      M0N1T0R_PORT: 9999
-      # reporter endpoint
-      F1RSTBL00D_ENABLE: 0
-      F1RSTBL00D_HOST: 'f1rstbl00d'
-      F1RSTBL00D_PORT: 80
-      F1RSTBL00D_PSK: 'CHANGEME'
-      # platform specific
-      INSTANCE_NAME: 'testCTF'
-      EMAIL_SERVICE: 'hotmail'
-      EMAIL_NAME: 'someone@example.com'
-      EMAIL_PASS: 'CHANGEME'
-      DATA_FOLDER: '/data'
-      # numbers but string, keep as is
-      SCORING_K: 12
-      DISABLE_EMAIL_VERIFY: 0
-      ENFORCE_EMAIL_DOMAIN: 0
-      ENFORCE_DOMAIN: 'example.com'
-      DISCORD_URL: ''
+      CONFIG_DIR: '/config'
     restart: unless-stopped
     profiles:
       - full

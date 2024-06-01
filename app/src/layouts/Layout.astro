@@ -1,0 +1,50 @@
+---
+import "flag-icons/css/flag-icons.min.css";
+import { ViewTransitions } from "astro:transitions";
+import Notify from "../components/app/lib/Notify.svelte";
+
+export interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="Astro description" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"
+        />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title} | CTD</title>
+		<ViewTransitions />
+    </head>
+    <body>
+        <Notify client:load />
+        <slot />
+    </body>
+</html>
+
+<style is:global>
+    * {
+        @apply box-border m-0 p-0 min-w-0;
+    }
+
+    body {
+        @apply dark:bg-gradient-dark
+        bg-gradient-light
+        dark:bg-neutral-900 
+        bg-neutral-200
+        flex
+		flex-col
+		min-h-screen
+        h-full
+		w-full;
+    }
+</style>

@@ -1,0 +1,57 @@
+####
+## CTF-Citadel WebApp Configuration
+####
+
+[webapp]
+# Name of the instance
+name = 'testCTF'
+# Flag prefix
+prefix = 'CTD'
+# Dynamic scoring values
+dynamic_k = 24
+dynamic_p = 1.2
+# Absolute path to the platform data storage
+data = '/data'
+# Official Discord server URL
+discord = ''
+
+[email]
+# Email service name
+service = 'hotmail'
+# Username and password for the email account
+username = 'someone@example.com'
+password = 'CHANGEME'
+# Disable email verification requirement on Signup
+disable_verify = false
+# Enable certificate mailing integration
+enable_certificate_mailing = false
+# Enforce a specific email domain
+enable_enforce_domain = false
+enforce_domain = ''
+
+[infra]
+enable = false
+# Hostname or IP of the inegration
+host = 'remote.example.com'
+# Access port of the inegration
+port = 443
+# PSK of the service
+psk = 'CHANGEME'
+
+[m0n1t0r]
+enable = false
+# Hostname or IP of the inegration
+host = 'm0n1t0r'
+# Access port of the inegration
+port = 9999
+# PSK of the service
+psk = 'CHANGEME'
+
+[f1rstbl00d]
+enable = false
+# Hostname or IP of the inegration
+host = 'f1rstbl00d'
+# Access port of the inegration
+port = 80
+# PSK of the service
+psk = 'CHANGEME'

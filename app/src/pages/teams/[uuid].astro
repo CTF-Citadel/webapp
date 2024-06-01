@@ -1,0 +1,37 @@
+---
+import DatabaseActions from '../../lib/actions';
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/app/lib/Header.svelte';
+import TeamPage from '../../components/app/pages/Team.svelte';
+import { lucia } from '../../lib/lucia';
+import { DUMMY_SESSION } from '../../lib/helpers';
+
+const { uuid } = Astro.params;
+let session = DUMMY_SESSION;
+
+if (!import.meta.env.DEV) {
+    if (!Astro.locals.user) return Astro.redirect('/login');
+    if (Astro.locals.user.is_blocked) {
+        await lucia.invalidateUserSessions(Astro.locals.user.id);
+        return Astro.redirect('/login?blocked=true');
+    }
+    if (!Astro.locals.user.is_verified) {
+        return Astro.redirect('/verify/email');
+    }
+    session = { ...Astro.locals.user };
+}
+
+const ACTION = new DatabaseActions();
+const TEAM = await ACTION.checkTeamExist(uuid || '');
+if (TEAM === false) {
+    // early exit to 404
+    return Astro.redirect('/404');
+}
+---
+
+<Layout title={TEAM}>
+    <Header username={session.username} interactive={true} client:visible />
+    <div transition:animate="fade" class="flex flex-1 justify-center">
+        <TeamPage uuid={uuid} client:visible />
+    </div>
+</Layout>
