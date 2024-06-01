@@ -1,5 +1,5 @@
-# from bookworm latest
-FROM node:bookworm
+# from slim 22 latest
+FROM node:22-slim
 
 # Set working directory
 WORKDIR /app
@@ -11,6 +11,7 @@ RUN mkdir -p /config
 # Copy initial necessary files to container
 COPY app/package.json \
 app/package-lock.json \
+app/.npmrc \
 app/astro.config.mjs \
 app/svelte.config.js \
 app/tailwind.config.cjs \
