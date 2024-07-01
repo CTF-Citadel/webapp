@@ -12,30 +12,30 @@
     "dist": "NODE_ENV=production HOST=0.0.0.0 PORT=8085 node ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "~8.2.5",
-    "@astrojs/svelte": "~5.4.0",
+    "@astrojs/node": "~8.3.2",
+    "@astrojs/svelte": "~5.6.0",
     "@astrojs/tailwind": "~5.1.0",
     "@cross/log": "npm:@jsr/cross__log@~0.10.5",
     "@lucia-auth/adapter-drizzle": "~1.0.7",
-    "@trpc/client": "^11.0.0-rc.390",
+    "@trpc/client": "^11.0.0-rc.433",
     "@trpc/server": "^11.0.0-rc.382",
-    "astro": "~4.9.1",
-    "drizzle-kit": "~0.22.1",
-    "drizzle-orm": "~0.31.0",
+    "astro": "~4.11.3",
+    "drizzle-kit": "~0.22.8",
+    "drizzle-orm": "~0.31.2",
     "flag-icons": "~7.2.2",
     "lucia": "~3.2.0",
-    "nodemailer": "~6.9.13",
+    "nodemailer": "~6.9.14",
     "pdf-lib": "~1.17.1",
-    "pg": "~8.11.5",
-    "svelte": "~4.2.17",
-    "tailwindcss": "~3.4.3",
+    "pg": "~8.12.0",
+    "svelte": "~4.2.18",
+    "tailwindcss": "~3.4.4",
     "toml": "~3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~20.14.0",
+    "@types/node": "~20.14.9",
     "@types/nodemailer": "~6.4.15",
     "@types/pg": "~8.11.6",
-    "flowbite-svelte": "~0.46.1",
+    "flowbite-svelte": "~0.46.13",
     "flowbite-svelte-icons": "~1.6.1"
   }
 }
